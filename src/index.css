@@ -1,0 +1,224 @@
+/* ==========================================================================
+   SJU ALUMNI PORTAL - ENTERPRISE DESIGN SYSTEM (v2.0)
+   Author: SJU Dev Team
+   Theme: Royal Blue & Gold
+========================================================================== 
+*/
+
+:root {
+  /* --- BRAND PALETTE --- */
+  --sju-blue: #003366;        /* Deep Royal Blue (Primary) */
+  --sju-blue-dark: #002244;   /* Midnight Blue (Hover) */
+  --sju-blue-light: #004080;  /* Lighter Blue (Accents) */
+  
+  --sju-gold: #FFCC00;        /* SJU Gold (Secondary) */
+  --sju-gold-hover: #e6b800;  /* Dark Gold (Hover) */
+  --sju-gold-light: #ffdb4d;  /* Light Gold (Highlights) */
+
+  /* --- NEUTRALS --- */
+  --bg-body: #f4f6f9;         /* Light Gray/Blue Tint */
+  --bg-white: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.95);
+  
+  --text-primary: #1a1a1a;
+  --text-secondary: #5a6b7c;
+  --text-muted: #8c98a4;
+  
+  --border-color: #e1e4e8;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0, 51, 102, 0.1);
+  --shadow-lg: 0 10px 30px rgba(0, 51, 102, 0.15);
+
+  /* --- SEMANTIC COLORS --- */
+  --success: #28a745;
+  --warning: #ffc107;
+  --danger: #dc3545;
+  --info: #17a2b8;
+}
+
+/* --- GLOBAL RESETS --- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-body);
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; transition: color 0.2s ease; }
+ul { list-style: none; padding: 0; margin: 0; }
+
+/* --- TYPOGRAPHY --- */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--sju-blue);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.display-1, .display-2, .display-3, .display-4 {
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.text-justify { text-align: justify; }
+.fw-extra-bold { font-weight: 800 !important; }
+
+/* --- BUTTONS (ENHANCED) --- */
+.btn {
+  border-radius: 50px; /* Modern Pill Shape */
+  padding: 10px 24px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.btn-sju-blue {
+  background-color: var(--sju-blue);
+  color: white;
+  border: 2px solid var(--sju-blue);
+}
+
+.btn-sju-blue:hover {
+  background-color: var(--sju-blue-dark);
+  border-color: var(--sju-blue-dark);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-gold {
+  background-color: var(--sju-gold);
+  color: #000;
+  border: 2px solid var(--sju-gold);
+  font-weight: 700;
+}
+
+.btn-gold:hover {
+  background-color: var(--sju-gold-hover);
+  border-color: var(--sju-gold-hover);
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 204, 0, 0.4);
+}
+
+.btn-outline-gold {
+  background: transparent;
+  color: #b38f00;
+  border: 2px solid var(--sju-gold);
+}
+
+.btn-outline-gold:hover {
+  background-color: var(--sju-gold);
+  color: #000;
+}
+
+/* --- CARDS & PANELS --- */
+.sju-card {
+  background: var(--bg-white);
+  border-radius: 16px;
+  border: none;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.sju-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--sju-blue), var(--sju-gold));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sju-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.sju-card:hover::before {
+  opacity: 1;
+}
+
+.card-header-sju {
+  background-color: white;
+  border-bottom: 1px solid var(--border-color);
+  padding: 1.5rem;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulseGold {
+  0% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 204, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0); }
+}
+
+.animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+.animate-slide-left { animation: slideInLeft 0.5s ease-out forwards; }
+.animate-pulse { animation: pulseGold 2s infinite; }
+
+/* --- UTILITIES --- */
+.text-sju-blue { color: var(--sju-blue) !important; }
+.text-sju-gold { color: var(--sju-gold) !important; }
+.bg-sju-blue { background-color: var(--sju-blue) !important; }
+.bg-sju-gold { background-color: var(--sju-gold) !important; }
+
+/* Custom Inputs */
+.form-control-lg {
+  padding: 15px 20px;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #ced4da;
+  background-color: #f9f9f9;
+  transition: all 0.3s;
+}
+
+.form-control-lg:focus {
+  background-color: #fff;
+  border-color: var(--sju-blue);
+  box-shadow: 0 0 0 4px rgba(0, 51, 102, 0.1);
+}
+
+/* Pagination */
+.page-link {
+  color: var(--sju-blue);
+  font-weight: 600;
+  border: none;
+  margin: 0 5px;
+  border-radius: 5px;
+}
+
+.page-item.active .page-link {
+  background-color: var(--sju-blue);
+  border-color: var(--sju-blue);
+}
+
+/* --- FOOTER --- */
+footer {
+  background-color: #1a1a1a;
+  color: #8c98a4;
+}
+footer h5 { color: white; margin-bottom: 1.5rem; }
+footer a { color: #8c98a4; }
+footer a:hover { color: var(--sju-gold); }

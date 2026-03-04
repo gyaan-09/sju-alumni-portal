@@ -1,0 +1,457 @@
+/* ==========================================================================
+   SJU ALUMNI PORTAL - ENTERPRISE APPLICATION STYLES (v5.0 - Windows Optimized)
+   ========================================================================== 
+   > Theme: Royal Blue (#003366) & Gold (#FFCC00)
+   > Platform: Optimized for Windows (Edge/Chrome) Rendering
+   > Features: Segoe UI Typography, Edge-compatible Scrollbars, Fluent Design
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. CORE VARIABLES & THEME CONFIGURATION
+   -------------------------------------------------------------------------- */
+:root {
+  /* Primary Brand Colors */
+  --sju-blue: #003366;
+  --sju-blue-rgb: 0, 51, 102;
+  --sju-blue-dark: #002244;
+  --sju-blue-light: #004080;
+  
+  /* Secondary Brand Colors */
+  --sju-gold: #FFCC00;
+  --sju-gold-rgb: 255, 204, 0;
+  --sju-gold-hover: #e6b800;
+  --sju-gold-light: #ffe066;
+
+  /* Neutrals - Calibrated for Windows ClearType */
+  --sju-white: #ffffff;
+  --sju-black: #1a1a1a;
+  --sju-gray-100: #f8f9fa;
+  --sju-gray-200: #e9ecef;
+  --sju-gray-300: #dee2e6;
+  --sju-gray-400: #ced4da;
+  --sju-gray-500: #adb5bd;
+  --sju-gray-600: #6c757d;
+  --sju-gray-700: #495057;
+  --sju-gray-800: #343a40;
+  --sju-gray-900: #212529;
+
+  /* Semantic Colors */
+  --sju-success: #28a745;
+  --sju-warning: #ffc107;
+  --sju-danger: #dc3545;
+  --sju-info: #17a2b8;
+
+  /* Typography - Segoe UI Priority */
+  --font-primary: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Segoe UI', sans-serif;
+
+  /* Spacing & Layout */
+  --spacer: 1rem;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-pill: 50px;
+
+  /* Shadows (Windows Fluent Design Inspired) */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0, 51, 102, 0.08);
+  --shadow-lg: 0 10px 30px rgba(0, 51, 102, 0.12);
+  --shadow-xl: 0 15px 40px rgba(0, 51, 102, 0.18);
+  
+  /* Transitions */
+  --transition-base: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-fast: all 0.15s ease-in-out;
+  --transition-smooth: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   2. GLOBAL RESETS & WINDOWS BASICS
+   -------------------------------------------------------------------------- */
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-primary);
+  color: var(--sju-gray-800);
+  background-color: var(--sju-gray-100);
+  /* Standard font rendering for Windows */
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Windows Selection Color */
+::selection {
+  background-color: var(--sju-gold);
+  color: var(--sju-blue);
+}
+
+/* Scrollbar Customization (Edge/Chrome on Windows) */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: var(--sju-gray-100);
+  border-left: 1px solid var(--sju-gray-200);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--sju-blue-light);
+  border-radius: 6px;
+  border: 3px solid var(--sju-gray-100); /* Creates padding effect */
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sju-blue);
+}
+
+/* --------------------------------------------------------------------------
+   3. ADVANCED CARD SYSTEM (.card-hover)
+   -------------------------------------------------------------------------- */
+.sju-card, 
+.card-hover {
+  background: var(--sju-white);
+  border: 1px solid rgba(0, 51, 102, 0.05);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  will-change: transform, box-shadow;
+}
+
+/* Hover Effect - Lift & Glow */
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 33, 71, 0.12) !important;
+  border-color: transparent;
+}
+
+/* Focus State for Windows Accessibility */
+.card-hover:focus-within {
+  transform: translateY(-5px);
+  box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.3);
+  outline: none;
+}
+
+/* Card Header Gradient Strip */
+.card-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--sju-blue) 0%, var(--sju-gold) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card-hover:hover::before {
+  opacity: 1;
+}
+
+/* Card Content Spacing */
+.card-body {
+  padding: 2rem;
+}
+
+/* --------------------------------------------------------------------------
+   4. BUTTON ECOSYSTEM (.btn-gold, .btn-outline-sju)
+   -------------------------------------------------------------------------- */
+
+/* Base Button Reset */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: var(--radius-pill);
+  transition: var(--transition-base);
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+/* Ripple Effect */
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+.btn:active::after {
+  width: 200%;
+  height: 200%;
+}
+
+/* -- GOLD BUTTON (Primary CTA) -- */
+.btn-gold {
+  background-color: var(--sju-gold);
+  color: var(--sju-blue-dark);
+  border-color: var(--sju-gold);
+  padding: 12px 30px;
+  box-shadow: 0 4px 10px rgba(255, 204, 0, 0.3);
+}
+
+.btn-gold:hover {
+  background-color: var(--sju-gold-hover);
+  border-color: var(--sju-gold-hover);
+  color: #000;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(255, 204, 0, 0.5);
+}
+
+.btn-gold:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* -- ROYAL BLUE BUTTON -- */
+.btn-sju-blue {
+  background-color: var(--sju-blue);
+  color: var(--sju-white);
+  border-color: var(--sju-blue);
+  padding: 12px 30px;
+}
+
+.btn-sju-blue:hover {
+  background-color: var(--sju-blue-dark);
+  border-color: var(--sju-blue-dark);
+  color: var(--sju-white);
+  box-shadow: 0 8px 20px rgba(0, 51, 102, 0.4);
+  transform: translateY(-2px);
+}
+
+/* -- OUTLINE BUTTON -- */
+.btn-outline-sju {
+  background-color: transparent;
+  color: var(--sju-blue);
+  border: 2px solid var(--sju-blue);
+  padding: 10px 28px;
+}
+
+.btn-outline-sju:hover {
+  background-color: var(--sju-blue);
+  color: var(--sju-white);
+  box-shadow: 0 4px 12px rgba(0, 51, 102, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Disabled State */
+.btn:disabled {
+  opacity: 0.65;
+  pointer-events: none;
+  filter: grayscale(100%);
+}
+
+/* --------------------------------------------------------------------------
+   5. NAVIGATION & HEADERS (.navbar-custom)
+   -------------------------------------------------------------------------- */
+.navbar-custom {
+  background: linear-gradient(135deg, var(--sju-blue) 0%, #001a38 100%);
+  padding: 1rem 0;
+  border-bottom: 4px solid var(--sju-gold);
+  box-shadow: var(--shadow-md);
+  transition: padding 0.3s ease;
+}
+
+.navbar-custom.scrolled {
+  padding: 0.5rem 0;
+  /* Windows Edge supports backdrop-filter */
+  background: rgba(0, 51, 102, 0.95);
+}
+
+.nav-link {
+  position: relative;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 500;
+  margin: 0 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--sju-gold) !important;
+}
+
+/* Animated Underline for Links */
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: var(--sju-gold);
+  transition: width 0.3s ease-in-out;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   6. FORM ELEMENTS (Windows Native Feel)
+   -------------------------------------------------------------------------- */
+.form-control-lg {
+  height: calc(1.5em + 1.5rem + 2px);
+  padding: 0.75rem 1.25rem;
+  font-size: 1.1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--sju-gray-300);
+  background-color: var(--sju-white);
+  transition: var(--transition-fast);
+}
+
+.form-control-lg:focus {
+  border-color: var(--sju-blue);
+  box-shadow: 0 0 0 0.2rem rgba(0, 51, 102, 0.15);
+  background-color: #fff;
+  outline: none;
+}
+
+.form-label {
+  font-weight: 700;
+  color: var(--sju-gray-700);
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   7. UTILITY CLASSES
+   -------------------------------------------------------------------------- */
+/* Text Colors */
+.text-sju-blue { color: var(--sju-blue) !important; }
+.text-sju-gold { color: var(--sju-gold) !important; }
+.text-gradient {
+  background: linear-gradient(45deg, var(--sju-blue), var(--sju-blue-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Backgrounds */
+.bg-sju-blue { background-color: var(--sju-blue) !important; }
+.bg-sju-gold { background-color: var(--sju-gold) !important; }
+.bg-glass {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Layout */
+.min-vh-50 { min-height: 50vh; }
+.min-vh-75 { min-height: 75vh; }
+.z-index-10 { z-index: 10; }
+.object-fit-cover { object-fit: cover; }
+
+/* --------------------------------------------------------------------------
+   8. ANIMATIONS (Supported by all modern Windows browsers)
+   -------------------------------------------------------------------------- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes pulseGold {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 204, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 204, 0, 0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animation Utilities */
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-pulse-gold {
+  animation: pulseGold 2s infinite;
+}
+
+.animate-slide-in {
+  animation: slideInRight 0.5s ease-out forwards;
+}
+
+/* Stagger Delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+
+/* --------------------------------------------------------------------------
+   9. RESPONSIVE MEDIA QUERIES
+   -------------------------------------------------------------------------- */
+@media (max-width: 992px) {
+  .navbar-custom {
+    padding: 0.8rem 1rem;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .btn-gold, .btn-sju-blue {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .display-4 {
+    font-size: 2.5rem;
+  }
+}
+
+/* Print Optimization */
+@media print {
+  .no-print { display: none !important; }
+  .sju-card { border: 1px solid #000; box-shadow: none; }
+  body { background: white; color: black; }
+}
