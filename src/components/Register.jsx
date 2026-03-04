@@ -1,472 +1,464 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+// FIREBASE INTEGRATION (Concept)
+// import { db, storage } from '../firebaseConfig'; 
+// import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+// import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 /**
- * =================================================================================================
- * SJU ALUMNI PORTAL - REGISTRATION SUITE (Real-Time Sync with Admin Portal)
- * =================================================================================================
+ * ============================================================================
+ * SJU ALUMNI PORTAL - PROFESSIONAL REGISTRATION SUITE
+ * Integrated with Firebase & Admin OS Routing
+ * ============================================================================
  */
 
-// --- 1. CONFIGURATION & CONSTANTS ---
-
-const CONFIG = {
-  // CRITICAL: This MUST match the Admin Panel's storage key to sync data in real-time
-  DB_KEY: 'sju_titanium_ent_v31_navygold', 
+const THEME = {
+  font: "'Lora', serif",
+  colors: {
+    primary: '#02112b',       // SJU Navy
+    gold: '#D4AF37',          // SJU Gold
+    bg: '#f8fafc',
+    surface: '#ffffff',
+    textMain: '#1e293b',
+    textLight: '#64748b',
+    error: '#dc2626',
+    border: '#cbd5e1',
+    sectionBg: '#f1f5f9'
+  }
 };
 
 const COUNTRIES = {
-  INDIA: { code: '+91', label: 'IN 🇮🇳 (+91)', limit: 10 },
-  USA:   { code: '+1',  label: 'US 🇺🇸 (+1)',  limit: 10 },
-  UAE:   { code: '+971', label: 'AE 🇦🇪 (+971)', limit: 9 },
-  UK:    { code: '+44', label: 'UK 🇬🇧 (+44)', limit: 10 }
+  INDIA: { code: '+91', label: 'IN (+91)', limit: 10 },
+  USA:   { code: '+1',  label: 'US (+1)',  limit: 10 },
+  UAE:   { code: '+971', label: 'AE (+971)', limit: 9 },
+  UK:    { code: '+44', label: 'UK (+44)', limit: 10 }
 };
 
-const REGEX = {
-  NAME: /^[a-zA-Z\s.]+$/, 
-  EMAIL: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-  AADHAR: /^\d{4}-\d{4}-\d{4}$/, 
-  DOB: /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/ 
-};
-
-// --- 2. PREMIUM THEME ENGINE (SJU NAVY & GOLD) ---
-
-const THEME = {
-  colors: {
-    primary: '#02112b',       // SJU Navy
-    primaryLight: '#071733',
-    gold: '#D4AF37',          // SJU Gold
-    bg: '#f4f7f6',            
-    surface: '#ffffff', 
-    textMain: '#1a1a1a',
-    textLight: '#6b7280',
-    error: '#EF4444',
-    success: '#10B981',
-    border: '#e5e7eb'
-  },
-  radius: { card: '24px', input: '12px' },
-  shadows: { 
-    card: '0 20px 40px rgba(2, 17, 43, 0.08)',
-    input: '0 4px 6px rgba(0,0,0,0.02)'
-  } 
-};
-
-// --- 3. TOAST NOTIFICATION COMPONENT ---
-const ToastContainer = ({ toasts }) => (
-  <div style={{ position: "fixed", top: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: 10 }}>
-    {toasts.map((t) => (
-      <div key={t.id} className="toast-enter" style={{
-        background: THEME.colors.surface,
-        borderLeft: `4px solid ${t.type === 'success' ? THEME.colors.success : THEME.colors.gold}`,
-        boxShadow: THEME.shadows.card, padding: "16px 20px", borderRadius: "8px",
-        display: "flex", alignItems: "center", gap: 12, minWidth: "320px"
-      }}>
-        <div style={{ fontSize: 20, color: t.type === 'success' ? THEME.colors.success : THEME.colors.gold }}>
-          {t.type === 'success' ? <i className="bi bi-check-circle-fill"></i> : <i className="bi bi-info-circle-fill"></i>}
-        </div>
-        <div style={{ flex: 1, color: THEME.colors.textMain, fontWeight: 500, fontSize: '0.95rem' }}>{t.msg}</div>
-      </div>
-    ))}
-  </div>
-);
-
-// --- 4. KERNEL LOGIC & DATA SYNC ---
-
+// --- KERNEL LOGIC & VALIDATION ---
 const Kernel = {
-  toTitleCase: (str) => str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()),
+  toTitleCase: (str) => {
+    return str.replace(
+      /\w\S*/g,
+      (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    );
+  },
+  
   maskDate: (val) => {
     const v = val.replace(/\D/g, '').slice(0, 8);
     if (v.length >= 5) return `${v.slice(0, 2)}-${v.slice(2, 4)}-${v.slice(4)}`;
     if (v.length >= 3) return `${v.slice(0, 2)}-${v.slice(2)}`;
     return v;
   },
+  
   maskAadhar: (val) => {
     const v = val.replace(/\D/g, '').slice(0, 12);
     if (v.length >= 9) return `${v.slice(0, 4)}-${v.slice(4, 8)}-${v.slice(8)}`;
     if (v.length >= 5) return `${v.slice(0, 4)}-${v.slice(4)}`;
     return v;
   },
-  validate: (name, value, context = {}) => {
-    let error = null;
-    switch (name) {
-      case 'fullName':
-        if (!value) error = 'Required field';
-        else if (!REGEX.NAME.test(value)) error = 'Only letters allowed';
-        break;
-      case 'dob':
-        if (!REGEX.DOB.test(value)) error = 'Format: DD-MM-YYYY';
-        break;
-      case 'email':
-        if (!REGEX.EMAIL.test(value)) error = 'Invalid email format';
-        break;
-      case 'phone':
-        if (value.length !== context.limit) error = `Must be ${context.limit} digits`;
-        break;
-      case 'aadhar':
-        if (!REGEX.AADHAR.test(value)) error = 'Must be 12 digits';
-        break;
-      default: break;
-    }
-    return error;
+
+  calculateAge: (dobString) => {
+    if (dobString.length !== 10) return null;
+    const [day, month, year] = dobString.split('-');
+    const birthDate = new Date(`${year}-${month}-${day}`);
+    if (isNaN(birthDate)) return null;
+    
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+    return age;
   },
 
-  // DATA MAPPER: Formats form data to strictly match the Admin Panel's expected schema
-  saveToLedger: (data) => {
-    try {
-        const currentLedger = JSON.parse(localStorage.getItem(CONFIG.DB_KEY) || '[]');
-        
-        const names = data.fullName.split(' ');
-        const firstName = names[0];
-        const lastName = names.slice(1).join(' ') || '';
-
-        const newEntry = {
-            id: `SJU-${Date.now().toString().slice(-6)}`,
-            firstName: firstName,
-            lastName: lastName,
-            fullName: data.fullName,
-            email: data.email,
-            dept: data.degree,
-            batch: data.yearPassing,
-            company: data.currentStatus === 'Job' ? data.companyName : (data.currentStatus === 'PG' ? data.pgCollege : 'Not Working'),
-            status: 'PENDING',
-            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.fullName)}&background=02112b&color=D4AF37&bold=true`,
-            securityChecks: {
-              riskScore: Math.floor(Math.random() * 15 + 5), // Simulated risk score
-              ip: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-              deviceMatch: true,
-            },
-            registeredAt: new Date().toISOString()
-        };
-
-        localStorage.setItem(CONFIG.DB_KEY, JSON.stringify([newEntry, ...currentLedger]));
-        return { success: true, id: newEntry.id };
-    } catch (e) {
-        console.error("Save Error:", e);
-        return { success: false };
-    }
-  }
+  validateEmail: (email) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
 };
 
-// --- 5. UI COMPONENTS ---
+// --- REUSABLE UI COMPONENTS ---
+const SectionHeader = ({ title, subtitle }) => (
+  <div style={{ marginBottom: '24px', paddingBottom: '12px', borderBottom: `2px solid ${THEME.colors.gold}` }}>
+    <h2 style={{ fontFamily: THEME.font, color: THEME.colors.primary, fontSize: '1.75rem', margin: '0 0 8px 0', fontWeight: '700' }}>
+      {title}
+    </h2>
+    {subtitle && <p style={{ margin: 0, color: THEME.colors.textLight, fontSize: '0.95rem' }}>{subtitle}</p>}
+  </div>
+);
 
-const Input = ({ label, value, onChange, error, placeholder, width = 6, type = "text", maxLength, maskFn, required = true }) => {
-  const [focused, setFocused] = useState(false);
-  const handleChange = (e) => {
-    let val = e.target.value;
-    if (maskFn) val = maskFn(val);
-    onChange(val);
-  };
-  return (
-    <div style={{ gridColumn: `span ${width}`, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <label style={{ fontSize: '0.85rem', fontWeight: '700', color: THEME.colors.primary, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-        {label} {required && <span style={{color: THEME.colors.error}}>*</span>}
-      </label>
-      <div style={{
-        display: 'flex', alignItems: 'center', height: '54px',
-        background: focused ? '#fff' : '#f9fafb',
-        border: `2px solid ${error ? THEME.colors.error : focused ? THEME.colors.primary : THEME.colors.border}`,
-        borderRadius: THEME.radius.input, transition: 'all 0.2s ease',
-        boxShadow: focused ? THEME.shadows.input : 'none'
-      }}>
-        <input
-          style={{ width: '100%', padding: '0 16px', fontSize: '1rem', border: 'none', background: 'transparent', outline: 'none', color: THEME.colors.textMain, fontWeight: '500' }}
-          type={type} value={value} onChange={handleChange}
-          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-          placeholder={placeholder} maxLength={maxLength}
-        />
-      </div>
-      {error && <div style={{ color: THEME.colors.error, fontSize: '0.8rem', fontWeight: '600' }}>{error}</div>}
-    </div>
-  );
+const InputGroup = ({ label, error, children, width = '100%' }) => (
+  <div style={{ width, display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+    <label style={{ fontFamily: THEME.font, fontSize: '0.9rem', fontWeight: '600', color: THEME.colors.primary }}>
+      {label} {error && <span style={{ color: THEME.colors.error, fontSize: '0.8rem', fontWeight: 'normal', marginLeft: '8px' }}>- {error}</span>}
+    </label>
+    {children}
+  </div>
+);
+
+const BaseInputStyle = {
+  width: '100%', padding: '12px 16px', fontSize: '1rem', fontFamily: THEME.font,
+  border: `1px solid ${THEME.colors.border}`, borderRadius: '4px',
+  color: THEME.colors.textMain, backgroundColor: THEME.colors.surface,
+  outline: 'none', transition: 'border-color 0.2s ease'
 };
 
-// --- 6. MAIN APPLICATION ---
-
+// --- MAIN REGISTRATION COMPONENT ---
 const Register = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successData, setSuccessData] = useState(null);
-  const [toasts, setToasts] = useState([]);
-
+  const [success, setSuccess] = useState(false);
+  
+  // State Models
   const [form, setForm] = useState({
-    fullName: '', fatherName: '', dob: '', gender: 'Male',
+    regNo: '', fullName: '', fatherName: '', motherName: '', dob: '', age: '', gender: '',
     email: '', countryCode: '+91', phone: '', aadhar: '',
-    regNo: '', degree: 'BCA', yearPassing: '', 
-    currentStatus: 'None', companyName: '', jobPosition: '', pgCourse: '', pgCollege: ''
+    batchYear: '', degree: '', currentStatus: 'None',
+    designation: '', company: '', pgCourse: '', pgCollege: '',
+    description: '', skills: '', achievements: '', linkedin: '',
+    reviews: '', stories: '', events: ''
   });
 
   const [files, setFiles] = useState({ profile: null, idProof: null });
   const [errors, setErrors] = useState({});
 
-  const addToast = (msg, type = 'info') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, msg, type }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
-  };
+  // Handlers
+  const handleUpdate = (field, value) => {
+    let finalValue = value;
+    
+    // Applying Constraints
+    if (['fullName', 'fatherName', 'motherName'].includes(field)) {
+      finalValue = Kernel.toTitleCase(value);
+    }
+    if (field === 'dob') {
+      finalValue = Kernel.maskDate(value);
+      const calculatedAge = Kernel.calculateAge(finalValue);
+      setForm(prev => ({ ...prev, age: calculatedAge !== null ? calculatedAge : '' }));
+    }
+    if (field === 'aadhar') finalValue = Kernel.maskAadhar(value);
+    if (field === 'phone') finalValue = value.replace(/\D/g, '');
 
-  const update = (field, val) => {
-    setForm(prev => ({ ...prev, [field]: val }));
+    setForm(prev => ({ ...prev, [field]: finalValue }));
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
   };
 
-  const handleNext = () => {
-    let newErrors = {};
-    let isValid = true;
-
-    if (step === 1) {
-      if (Kernel.validate('fullName', form.fullName)) newErrors.fullName = Kernel.validate('fullName', form.fullName);
-      if (Kernel.validate('dob', form.dob)) newErrors.dob = Kernel.validate('dob', form.dob);
-    }
-    if (step === 2) {
-      if (Kernel.validate('email', form.email)) newErrors.email = Kernel.validate('email', form.email);
-      const country = Object.values(COUNTRIES).find(c => c.code === form.countryCode);
-      if (Kernel.validate('phone', form.phone, { limit: country.limit })) newErrors.phone = Kernel.validate('phone', form.phone, { limit: country.limit });
-      if (Kernel.validate('aadhar', form.aadhar)) newErrors.aadhar = Kernel.validate('aadhar', form.aadhar);
-    }
-    if (step === 3) {
-      if (!form.regNo) newErrors.regNo = "Required";
-      if (!form.yearPassing) newErrors.yearPassing = "Required";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors); isValid = false;
-      addToast("Please fix the errors before proceeding.", "error");
-    }
-
-    if (isValid) { 
-      setStep(prev => prev + 1); 
-      window.scrollTo(0, 0); 
-    }
+  const handleFileChange = (field, file) => {
+    setFiles(prev => ({ ...prev, [field]: file }));
   };
 
-  const handleSubmit = () => {
-    if (!files.profile || !files.idProof) { 
-      addToast("Profile Photo and ID Proof are required.", "error"); 
-      return; 
+  const validateForm = () => {
+    let newErrors = {};
+    
+    if (!form.fullName) newErrors.fullName = "Required";
+    if (!form.fatherName) newErrors.fatherName = "Required";
+    if (!form.motherName) newErrors.motherName = "Required";
+    if (!form.regNo) newErrors.regNo = "Required";
+    
+    if (!Kernel.validateEmail(form.email)) newErrors.email = "Invalid email format (e.g., you@domain.com)";
+    
+    const country = Object.values(COUNTRIES).find(c => c.code === form.countryCode);
+    if (form.phone.length !== country.limit) newErrors.phone = `Must be exactly ${country.limit} digits`;
+    
+    if (form.aadhar.length !== 14) newErrors.aadhar = "Must be exactly 12 digits";
+    
+    if (form.dob.length !== 10) newErrors.dob = "Required format: DD-MM-YYYY";
+    if (form.age && (form.age <= 0 || form.age >= 100)) newErrors.age = "Age must be between 1 and 99";
+    
+    if (!form.gender) newErrors.gender = "Required";
+    if (!form.degree) newErrors.degree = "Required";
+    if (!form.batchYear) newErrors.batchYear = "Required";
+
+    if (!files.profile) newErrors.profile = "Profile photo is required";
+    if (!files.idProof) newErrors.idProof = "ID proof is required for verification";
+
+    setErrors(newErrors);
+    
+    if (Object.keys(newErrors).length > 0) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false;
     }
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
-    addToast("Encrypting and sending details to Admin...", "info");
 
-    setTimeout(() => {
-      const result = Kernel.saveToLedger(form);
-      if (result.success) {
-        setSuccessData(result.id);
-        setIsSubmitting(false);
-        addToast("Registration Submitted Successfully!", "success");
+    try {
+      /* // ==========================================
+      // FIREBASE INTEGRATION LOGIC (For Admin OS)
+      // ==========================================
+      
+      // 1. Upload Documents to Storage
+      let profileUrl = '';
+      let idProofUrl = '';
+
+      if (files.profile) {
+        const profileRef = ref(storage, `alumni_profiles/${form.regNo}_${files.profile.name}`);
+        await uploadBytes(profileRef, files.profile);
+        profileUrl = await getDownloadURL(profileRef);
       }
-    }, 2500); // Simulate network delay
+
+      if (files.idProof) {
+        const idRef = ref(storage, `alumni_id_proofs/${form.regNo}_${files.idProof.name}`);
+        await uploadBytes(idRef, files.idProof);
+        idProofUrl = await getDownloadURL(idRef);
+      }
+
+      // 2. Compile Data Payload
+      const dbPayload = {
+        ...form,
+        profilePhotoUrl: profileUrl,
+        idProofUrl: idProofUrl,
+        status: 'PENDING_VERIFICATION', // Flags it for your Admin OS to review
+        registeredAt: serverTimestamp(),
+      };
+
+      // 3. Save to Firestore
+      await addDoc(collection(db, "pending_alumni"), dbPayload);
+      */
+
+      // Simulated network request
+      await new Promise(res => setTimeout(res, 2500));
+      setSuccess(true);
+      window.scrollTo(0, 0);
+
+    } catch (error) {
+      console.error("Error submitting registration:", error);
+      alert("Registration failed. Please check your network or try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // --- SUCCESS SCREEN ---
-  if (successData) {
+  if (success) {
     return (
-      <div style={{ minHeight: '100vh', background: THEME.colors.primary, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', fontFamily: "'Inter', sans-serif" }}>
-        <ToastContainer toasts={toasts} />
-        <div className="card-enter" style={{ background: THEME.colors.surface, maxWidth: '600px', width: '100%', borderRadius: THEME.radius.card, padding: '50px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
-          <div style={{ width: '80px', height: '80px', background: THEME.colors.gold, borderRadius: '50%', color: THEME.colors.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', margin: '0 auto 24px auto', animation: 'pulse 2s infinite' }}>
-            <i className="bi bi-shield-lock-fill"></i>
+      <div style={{ minHeight: '100vh', background: THEME.colors.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', fontFamily: THEME.font }}>
+        <div style={{ background: THEME.colors.surface, padding: '60px 40px', maxWidth: '700px', width: '100%', borderTop: `8px solid ${THEME.colors.gold}`, boxShadow: '0 10px 40px rgba(0,0,0,0.05)' }}>
+          <h1 style={{ color: THEME.colors.primary, fontSize: '2.5rem', marginBottom: '24px', textAlign: 'center' }}>Application Received</h1>
+          <p style={{ color: THEME.colors.textMain, fontSize: '1.2rem', lineHeight: '1.8', textAlign: 'center', marginBottom: '40px' }}>
+            Your details have been securely transmitted to the St. Joseph's University Administration. 
+            <br/><br/>
+            <strong>The admin will verify your ID proof and academic records. Upon approval, your unique username and password will be sent shortly to your registered email address.</strong>
+          </p>
+          <div style={{ textAlign: 'center' }}>
+            <button onClick={() => navigate('/')} style={{ padding: '16px 40px', background: THEME.colors.primary, color: THEME.colors.surface, fontFamily: THEME.font, fontSize: '1.1rem', border: 'none', cursor: 'pointer', transition: 'background 0.3s' }}>
+              Return to Home
+            </button>
           </div>
-          <h2 style={{ color: THEME.colors.primary, fontSize: '2rem', fontWeight: '800', margin: '0 0 16px 0' }}>Registration Successful</h2>
-          <p style={{ color: THEME.colors.textLight, fontSize: '1.1rem', marginBottom: '32px' }}>Tracking ID: <strong>{successData}</strong></p>
-          
-          <div style={{ background: '#f8fafc', padding: '24px', borderRadius: '16px', border: `1px solid ${THEME.colors.border}`, textAlign: 'left', marginBottom: '32px' }}>
-            <h4 style={{ margin: '0 0 12px 0', color: THEME.colors.primary, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <i className="bi bi-clock-history"></i> What happens next?
-            </h4>
-            <p style={{ margin: 0, color: THEME.colors.textMain, lineHeight: '1.6', fontSize: '0.95rem' }}>
-              Your application has been securely routed to the <strong>Admin Verification Queue</strong>. 
-              Please wait until the university administration verifies your academic records and uploaded ID proof. 
-              <br/><br/>
-              Upon successful verification, an automated email containing your <strong>Login Credentials</strong> will be sent to <b>{form.email}</b>.
-            </p>
-          </div>
-
-          <button style={{ background: THEME.colors.primary, color: 'white', padding: '16px 32px', borderRadius: '50px', border: 'none', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer', width: '100%' }} onClick={() => navigate('/login')}>
-            Return to Login Portal
-          </button>
         </div>
-
-        <style>{`
-          @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(212, 175, 55, 0); } 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); } }
-          .card-enter { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-          @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-        `}</style>
       </div>
     );
   }
 
   // --- REGISTRATION FORM ---
   return (
-    <div style={{ minHeight: '100vh', background: THEME.colors.bg, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px 20px', fontFamily: "'Inter', sans-serif" }}>
-      <ToastContainer toasts={toasts} />
-      
-      <div className="card-enter" style={{ width: '100%', maxWidth: '900px', background: THEME.colors.surface, borderRadius: THEME.radius.card, boxShadow: THEME.shadows.card, overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: THEME.colors.bg, fontFamily: THEME.font, padding: '60px 20px' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto', background: THEME.colors.surface, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: `1px solid ${THEME.colors.border}` }}>
         
-        {/* Header */}
-        <div style={{ background: THEME.colors.primary, padding: '40px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <h1 style={{ fontSize: '2rem', fontWeight: '800', margin: 0, color: THEME.colors.surface }}>Alumni Registration</h1>
-            <p style={{ color: THEME.colors.gold, fontSize: '0.9rem', fontWeight: '600', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '8px' }}>St. Joseph's University Verification System</p>
+        {/* Header Block */}
+        <div style={{ background: THEME.colors.primary, padding: '50px', textAlign: 'center', borderBottom: `4px solid ${THEME.colors.gold}` }}>
+          <h1 style={{ color: THEME.colors.surface, fontSize: '2.8rem', margin: '0 0 10px 0', letterSpacing: '1px' }}>Alumni Registration Portal</h1>
+          <p style={{ color: THEME.colors.gold, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase', letterSpacing: '2px' }}>St. Joseph's University</p>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ padding: '50px' }}>
+          
+          {/* 1. ACADEMIC IDENTIFICATION */}
+          <SectionHeader title="1. Academic Identification" subtitle="Official university records" />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <InputGroup label="University Register Number" error={errors.regNo}>
+              <input style={BaseInputStyle} value={form.regNo} onChange={e => handleUpdate('regNo', e.target.value.toUpperCase())} placeholder="e.g., 20SJU1234" />
+            </InputGroup>
+            <InputGroup label="Degree Studied" error={errors.degree}>
+              <select style={BaseInputStyle} value={form.degree} onChange={e => handleUpdate('degree', e.target.value)}>
+                <option value="">Select Degree...</option>
+                <option value="B.Sc">B.Sc</option>
+                <option value="BCA">BCA</option>
+                <option value="B.Com">B.Com</option>
+                <option value="BA">BA</option>
+                <option value="M.Sc">M.Sc</option>
+              </select>
+            </InputGroup>
+            <InputGroup label="Year of Passing" error={errors.batchYear}>
+              <select style={BaseInputStyle} value={form.batchYear} onChange={e => handleUpdate('batchYear', e.target.value)}>
+                <option value="">Select Year...</option>
+                {Array.from({length: 30}, (_, i) => new Date().getFullYear() - i).map(y => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </InputGroup>
           </div>
-        </div>
 
-        {/* Progress Bar */}
-        <div style={{ display: 'flex', height: '6px', background: '#e2e8f0' }}>
-          <div style={{ width: `${(step / 4) * 100}%`, background: THEME.colors.gold, transition: 'width 0.5s ease' }}></div>
-        </div>
-
-        {/* Form Body */}
-        <div style={{ padding: '40px 50px' }}>
-          
-          {/* STEP 1 */}
-          {step === 1 && (
-            <div className="fade-enter">
-              <h3 style={{ color: THEME.colors.primary, marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}><i className="bi bi-person-lines-fill"></i> Personal Details</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
-                <Input label="Full Name (As per records)" width={12} value={form.fullName} error={errors.fullName} onChange={(v) => update('fullName', Kernel.toTitleCase(v))} placeholder="John Doe" />
-                <Input label="Date of Birth" width={6} value={form.dob} error={errors.dob} onChange={(v) => update('dob', v)} maskFn={Kernel.maskDate} placeholder="DD-MM-YYYY" maxLength={10} />
-                <div style={{ gridColumn: 'span 6', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: THEME.colors.primary, textTransform: 'uppercase' }}>Gender *</label>
-                  <select style={{ height: '54px', padding: '0 16px', borderRadius: THEME.radius.input, border: `2px solid ${THEME.colors.border}`, background: '#f9fafb', fontSize: '1rem', outline: 'none' }} value={form.gender} onChange={(e) => update('gender', e.target.value)}>
-                    <option>Male</option><option>Female</option><option>Other</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2 */}
-          {step === 2 && (
-            <div className="fade-enter">
-              <h3 style={{ color: THEME.colors.primary, marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}><i className="bi bi-envelope-at-fill"></i> Contact Details</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
-                <Input label="Primary Email (For Login Credentials)" width={12} value={form.email} error={errors.email} onChange={(v) => update('email', v)} placeholder="you@domain.com" />
-                <div style={{ gridColumn: 'span 6', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: THEME.colors.primary, textTransform: 'uppercase' }}>Phone Number *</label>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <select style={{ width: '100px', height: '54px', padding: '0 10px', borderRadius: THEME.radius.input, border: `2px solid ${THEME.colors.border}`, background: '#f9fafb', outline: 'none' }} value={form.countryCode} onChange={(e) => update('countryCode', e.target.value)}>
-                      {Object.values(COUNTRIES).map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
-                    </select>
-                    <div style={{ flex: 1 }}><Input label="" width={12} value={form.phone} error={errors.phone} required={false} onChange={(v) => update('phone', v.replace(/\D/g,''))} placeholder="Digits Only" maxLength={12} /></div>
-                  </div>
-                </div>
-                <Input label="Aadhar / SSN Number" width={6} value={form.aadhar} error={errors.aadhar} onChange={(v) => update('aadhar', v)} maskFn={Kernel.maskAadhar} placeholder="XXXX-XXXX-XXXX" maxLength={14} />
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3 */}
-          {step === 3 && (
-            <div className="fade-enter">
-              <h3 style={{ color: THEME.colors.primary, marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}><i className="bi bi-mortarboard-fill"></i> Academic Records</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
-                <div style={{ gridColumn: 'span 6', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: THEME.colors.primary, textTransform: 'uppercase' }}>Degree Graduated *</label>
-                  <select style={{ height: '54px', padding: '0 16px', borderRadius: THEME.radius.input, border: `2px solid ${THEME.colors.border}`, background: '#f9fafb', fontSize: '1rem', outline: 'none' }} value={form.degree} onChange={(e) => update('degree', e.target.value)}>
-                    <option>B.Sc Computer Science</option><option>BCA</option><option>B.Com</option><option>MBA</option>
-                  </select>
-                </div>
-                <Input label="University Register No." width={6} value={form.regNo} error={errors.regNo} onChange={(v) => update('regNo', v.toUpperCase())} />
-                
-                <div style={{ gridColumn: 'span 6', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: THEME.colors.primary, textTransform: 'uppercase' }}>Year of Passing *</label>
-                  <select style={{ height: '54px', padding: '0 16px', borderRadius: THEME.radius.input, border: `2px solid ${errors.yearPassing ? THEME.colors.error : THEME.colors.border}`, background: '#f9fafb', fontSize: '1rem', outline: 'none' }} value={form.yearPassing} onChange={(e) => update('yearPassing', e.target.value)}>
-                    <option value="">Select Year</option>
-                    {Array.from({length: 15}, (_, i) => new Date().getFullYear() - i).map(y => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                  {errors.yearPassing && <div style={{ color: THEME.colors.error, fontSize: '0.8rem', fontWeight: '600' }}>{errors.yearPassing}</div>}
-                </div>
-                <div style={{ gridColumn: 'span 6' }}></div> {/* Spacer */}
-
-                <div style={{ gridColumn: 'span 12', padding: '20px', background: '#f0f4f8', borderRadius: '12px', marginTop: '10px' }}>
-                  <label style={{ fontSize: '0.9rem', fontWeight: '700', color: THEME.colors.primary, textTransform: 'uppercase' }}>Current Employment Status</label>
-                  <div style={{ display: 'flex', gap: '30px', marginTop: '16px' }}>
-                    {['None', 'Job', 'PG'].map(s => (
-                      <label key={s} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: form.currentStatus === s ? 'bold' : 'normal', color: THEME.colors.primary }}>
-                        <input type="radio" checked={form.currentStatus === s} onChange={() => update('currentStatus', s)} style={{ accentColor: THEME.colors.primary, width: '18px', height: '18px' }} />
-                        {s === 'None' ? 'Not Working' : (s === 'Job' ? 'Employed' : 'Higher Studies')}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {form.currentStatus === 'Job' && (
-                  <>
-                    <Input label="Company Name" width={6} value={form.companyName} onChange={(v) => update('companyName', v)} />
-                    <Input label="Job Position" width={6} value={form.jobPosition} onChange={(v) => update('jobPosition', v)} />
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 4 */}
-          {step === 4 && (
-            <div className="fade-enter">
-              <h3 style={{ color: THEME.colors.primary, marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}><i className="bi bi-cloud-arrow-up-fill"></i> Document Verification</h3>
-              <p style={{ color: THEME.colors.textLight, fontSize: '0.9rem', marginBottom: '24px' }}>Please upload clear images. These are strictly required for administrative verification.</p>
+          {/* 2. PERSONAL BIODATA */}
+          <div style={{ marginTop: '40px' }}>
+            <SectionHeader title="2. Personal Biodata" subtitle="As per your official ID documents" />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <InputGroup label="Full Name" error={errors.fullName} width="grid-column: span 2">
+                <input style={BaseInputStyle} value={form.fullName} onChange={e => handleUpdate('fullName', e.target.value)} placeholder="e.g., Ram Kumar" />
+              </InputGroup>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
-                {/* Profile Photo Upload */}
-                <div style={{ gridColumn: 'span 6' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: THEME.colors.primary, textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Profile Photo *</label>
-                  <div onClick={() => document.getElementById('up1').click()} style={{ border: `2px dashed ${files.profile ? THEME.colors.success : THEME.colors.border}`, borderRadius: '16px', padding: '40px 20px', textAlign: 'center', background: files.profile ? '#f0fdf4' : '#f9fafb', cursor: 'pointer', transition: 'all 0.2s' }}>
-                    {files.profile ? 
-                      <><i className="bi bi-check-circle-fill" style={{ fontSize: '2.5rem', color: THEME.colors.success }}></i><div style={{ color: THEME.colors.success, fontWeight: '600', marginTop: '10px' }}>{files.profile.name}</div></> : 
-                      <><i className="bi bi-camera-fill" style={{ fontSize: '2.5rem', color: THEME.colors.textLight }}></i><div style={{ color: THEME.colors.textLight, fontWeight: '500', marginTop: '10px' }}>Click to upload JPG/PNG</div></>
-                    }
-                    <input id="up1" type="file" accept="image/*" style={{ display: 'none' }} onChange={e => setFiles({...files, profile: e.target.files[0]})} />
-                  </div>
-                </div>
+              <InputGroup label="Date of Birth" error={errors.dob}>
+                <input style={BaseInputStyle} value={form.dob} onChange={e => handleUpdate('dob', e.target.value)} placeholder="DD-MM-YYYY" maxLength={10} />
+              </InputGroup>
+              <InputGroup label="Age (Auto-calculated)" error={errors.age}>
+                <input style={{...BaseInputStyle, background: THEME.colors.sectionBg}} value={form.age} readOnly placeholder="0" />
+              </InputGroup>
+              
+              <InputGroup label="Gender" error={errors.gender}>
+                <select style={BaseInputStyle} value={form.gender} onChange={e => handleUpdate('gender', e.target.value)}>
+                  <option value="">Select...</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </InputGroup>
+              <InputGroup label="Aadhar Card Number" error={errors.aadhar}>
+                <input style={BaseInputStyle} value={form.aadhar} onChange={e => handleUpdate('aadhar', e.target.value)} placeholder="XXXX-XXXX-XXXX" maxLength={14} />
+              </InputGroup>
 
-                {/* ID Proof Upload */}
-                <div style={{ gridColumn: 'span 6' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: THEME.colors.primary, textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Govt / Student ID *</label>
-                  <div onClick={() => document.getElementById('up2').click()} style={{ border: `2px dashed ${files.idProof ? THEME.colors.success : THEME.colors.border}`, borderRadius: '16px', padding: '40px 20px', textAlign: 'center', background: files.idProof ? '#f0fdf4' : '#f9fafb', cursor: 'pointer', transition: 'all 0.2s' }}>
-                    {files.idProof ? 
-                      <><i className="bi bi-check-circle-fill" style={{ fontSize: '2.5rem', color: THEME.colors.success }}></i><div style={{ color: THEME.colors.success, fontWeight: '600', marginTop: '10px' }}>{files.idProof.name}</div></> : 
-                      <><i className="bi bi-file-earmark-person-fill" style={{ fontSize: '2.5rem', color: THEME.colors.textLight }}></i><div style={{ color: THEME.colors.textLight, fontWeight: '500', marginTop: '10px' }}>Click to upload PDF/JPG</div></>
-                    }
-                    <input id="up2" type="file" accept=".pdf,image/*" style={{ display: 'none' }} onChange={e => setFiles({...files, idProof: e.target.files[0]})} />
-                  </div>
+              <InputGroup label="Father's Name" error={errors.fatherName}>
+                <input style={BaseInputStyle} value={form.fatherName} onChange={e => handleUpdate('fatherName', e.target.value)} />
+              </InputGroup>
+              <InputGroup label="Mother's Name" error={errors.motherName}>
+                <input style={BaseInputStyle} value={form.motherName} onChange={e => handleUpdate('motherName', e.target.value)} />
+              </InputGroup>
+            </div>
+          </div>
+
+          {/* 3. CONTACT INFORMATION */}
+          <div style={{ marginTop: '40px' }}>
+            <SectionHeader title="3. Contact Details" subtitle="Required for login credentials" />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <InputGroup label="Primary Email Id" error={errors.email}>
+                <input type="email" style={BaseInputStyle} value={form.email} onChange={e => handleUpdate('email', e.target.value)} placeholder="you@domain.com" />
+              </InputGroup>
+              
+              <InputGroup label="Phone Number" error={errors.phone}>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <select style={{...BaseInputStyle, width: '120px'}} value={form.countryCode} onChange={e => handleUpdate('countryCode', e.target.value)}>
+                    {Object.values(COUNTRIES).map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
+                  </select>
+                  <input style={{...BaseInputStyle, flex: 1}} value={form.phone} onChange={e => handleUpdate('phone', e.target.value)} placeholder="Digits Only" />
                 </div>
+              </InputGroup>
+            </div>
+          </div>
+
+          {/* 4. PROFESSIONAL STATUS */}
+          <div style={{ marginTop: '40px' }}>
+            <SectionHeader title="4. Current Status" subtitle="Your current career or academic phase" />
+            <div style={{ display: 'flex', gap: '30px', marginBottom: '24px' }}>
+              {['None', 'Job', 'PG'].map(status => (
+                <label key={status} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '1.1rem', color: THEME.colors.textMain }}>
+                  <input type="radio" checked={form.currentStatus === status} onChange={() => handleUpdate('currentStatus', status)} style={{ width: '20px', height: '20px', accentColor: THEME.colors.primary }} />
+                  {status === 'None' ? 'Not Currently Employed/Studying' : (status === 'Job' ? 'Working in a Company' : 'Pursuing Higher Studies (PG)')}
+                </label>
+              ))}
+            </div>
+
+            {form.currentStatus === 'Job' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', background: THEME.colors.sectionBg, padding: '24px', borderRadius: '4px' }}>
+                <InputGroup label="Company Name">
+                  <input style={BaseInputStyle} value={form.company} onChange={e => handleUpdate('company', e.target.value)} />
+                </InputGroup>
+                <InputGroup label="Designation / Position">
+                  <input style={BaseInputStyle} value={form.designation} onChange={e => handleUpdate('designation', e.target.value)} />
+                </InputGroup>
+              </div>
+            )}
+
+            {form.currentStatus === 'PG' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', background: THEME.colors.sectionBg, padding: '24px', borderRadius: '4px' }}>
+                <InputGroup label="PG Course Name">
+                  <input style={BaseInputStyle} value={form.pgCourse} onChange={e => handleUpdate('pgCourse', e.target.value)} />
+                </InputGroup>
+                <InputGroup label="PG College/University Name">
+                  <input style={BaseInputStyle} value={form.pgCollege} onChange={e => handleUpdate('pgCollege', e.target.value)} />
+                </InputGroup>
+              </div>
+            )}
+          </div>
+
+          {/* 5. PROFILE & ACHIEVEMENTS */}
+          <div style={{ marginTop: '40px' }}>
+            <SectionHeader title="5. Profile & Community" subtitle="Share your journey with the SJU network" />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+              <InputGroup label="Short Description of Yourself">
+                <textarea style={{...BaseInputStyle, minHeight: '100px', resize: 'vertical'}} value={form.description} onChange={e => handleUpdate('description', e.target.value)} placeholder="Tell us a bit about yourself..." />
+              </InputGroup>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <InputGroup label="List of Skills">
+                  <textarea style={{...BaseInputStyle, minHeight: '80px'}} value={form.skills} onChange={e => handleUpdate('skills', e.target.value)} placeholder="E.g., Organic Synthesis, React.js, Public Speaking..." />
+                </InputGroup>
+                <InputGroup label="Special Achievements">
+                  <textarea style={{...BaseInputStyle, minHeight: '80px'}} value={form.achievements} onChange={e => handleUpdate('achievements', e.target.value)} placeholder="Awards, Publications, Leadership roles..." />
+                </InputGroup>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <InputGroup label="LinkedIn Profile URL">
+                  <input style={BaseInputStyle} value={form.linkedin} onChange={e => handleUpdate('linkedin', e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
+                </InputGroup>
+                <InputGroup label="Stories / Events Participated">
+                  <input style={BaseInputStyle} value={form.events} onChange={e => handleUpdate('events', e.target.value)} placeholder="Briefly mention SJU events you were part of" />
+                </InputGroup>
+              </div>
+              
+              <InputGroup label="Reviews / Testimonials about SJU">
+                <textarea style={{...BaseInputStyle, minHeight: '80px'}} value={form.reviews} onChange={e => handleUpdate('reviews', e.target.value)} placeholder="Share a quick review of your time at the university..." />
+              </InputGroup>
+            </div>
+          </div>
+
+          {/* 6. VERIFICATION DOCUMENTS */}
+          <div style={{ marginTop: '40px' }}>
+            <SectionHeader title="6. Verification Documents" subtitle="Required by admin to authorize your account" />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+              <div style={{ border: `2px dashed ${errors.profile ? THEME.colors.error : THEME.colors.border}`, padding: '40px 20px', textAlign: 'center', background: THEME.colors.sectionBg }}>
+                <label style={{ cursor: 'pointer', display: 'block' }}>
+                  <div style={{ fontWeight: 'bold', color: THEME.colors.primary, marginBottom: '10px' }}>Upload Profile Photo</div>
+                  <div style={{ color: THEME.colors.textLight, fontSize: '0.9rem', marginBottom: '16px' }}>This will be visible to other students in the portal.</div>
+                  <input type="file" accept="image/*" onChange={e => handleFileChange('profile', e.target.files[0])} style={{ display: 'none' }} />
+                  <div style={{ display: 'inline-block', padding: '10px 24px', background: THEME.colors.surface, border: `1px solid ${THEME.colors.border}`, color: THEME.colors.primary, fontWeight: '600' }}>
+                    {files.profile ? files.profile.name : 'Choose Image'}
+                  </div>
+                </label>
+                {errors.profile && <div style={{ color: THEME.colors.error, fontSize: '0.85rem', marginTop: '10px' }}>{errors.profile}</div>}
+              </div>
+
+              <div style={{ border: `2px dashed ${errors.idProof ? THEME.colors.error : THEME.colors.border}`, padding: '40px 20px', textAlign: 'center', background: THEME.colors.sectionBg }}>
+                <label style={{ cursor: 'pointer', display: 'block' }}>
+                  <div style={{ fontWeight: 'bold', color: THEME.colors.primary, marginBottom: '10px' }}>Upload ID Card / Proof</div>
+                  <div style={{ color: THEME.colors.textLight, fontSize: '0.9rem', marginBottom: '16px' }}>Required for Admin verification (If PG, upload PG College ID).</div>
+                  <input type="file" accept="image/*,.pdf" onChange={e => handleFileChange('idProof', e.target.files[0])} style={{ display: 'none' }} />
+                  <div style={{ display: 'inline-block', padding: '10px 24px', background: THEME.colors.surface, border: `1px solid ${THEME.colors.border}`, color: THEME.colors.primary, fontWeight: '600' }}>
+                    {files.idProof ? files.idProof.name : 'Choose File'}
+                  </div>
+                </label>
+                {errors.idProof && <div style={{ color: THEME.colors.error, fontSize: '0.85rem', marginTop: '10px' }}>{errors.idProof}</div>}
               </div>
             </div>
-          )}
+          </div>
 
-        </div>
+          {/* SUBMIT BUTTON */}
+          <div style={{ marginTop: '50px', borderTop: `1px solid ${THEME.colors.border}`, paddingTop: '30px', display: 'flex', justifyContent: 'flex-end' }}>
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              style={{ 
+                padding: '18px 48px', background: isSubmitting ? THEME.colors.textLight : THEME.colors.primary, 
+                color: THEME.colors.surface, fontSize: '1.2rem', fontFamily: THEME.font, fontWeight: '700', 
+                border: 'none', cursor: isSubmitting ? 'not-allowed' : 'pointer', letterSpacing: '1px',
+                boxShadow: '0 4px 12px rgba(2, 17, 43, 0.2)'
+              }}
+            >
+              {isSubmitting ? 'Submitting to Admin Queue...' : 'Sign Up / Create Account'}
+            </button>
+          </div>
 
-        {/* Footer Navigation */}
-        <div style={{ padding: '24px 50px', borderTop: `1px solid ${THEME.colors.border}`, background: '#f9fafb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {step > 1 ? (
-            <button onClick={() => setStep(s => s - 1)} style={{ padding: '12px 24px', background: 'transparent', border: `1px solid ${THEME.colors.border}`, borderRadius: '50px', fontWeight: '600', color: THEME.colors.textLight, cursor: 'pointer' }}>
-              Back
-            </button>
-          ) : (
-            <button onClick={() => navigate('/login')} style={{ padding: '12px 24px', background: 'transparent', border: `1px solid transparent`, borderRadius: '50px', fontWeight: '600', color: THEME.colors.textLight, cursor: 'pointer' }}>
-              Cancel
-            </button>
-          )}
-          
-          {step < 4 ? (
-            <button onClick={handleNext} style={{ padding: '14px 32px', background: THEME.colors.primary, color: THEME.colors.gold, border: 'none', borderRadius: '50px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(2, 17, 43, 0.2)' }}>
-              Next Step <i className="bi bi-arrow-right"></i>
-            </button>
-          ) : (
-            <button onClick={handleSubmit} disabled={isSubmitting} style={{ padding: '14px 32px', background: isSubmitting ? THEME.colors.textLight : THEME.colors.gold, color: THEME.colors.primary, border: 'none', borderRadius: '50px', fontWeight: 'bold', fontSize: '1rem', cursor: isSubmitting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: isSubmitting ? 'none' : '0 4px 12px rgba(212, 175, 55, 0.3)' }}>
-              {isSubmitting ? 'Encrypting...' : 'Submit Registration'} <i className="bi bi-shield-check"></i>
-            </button>
-          )}
-        </div>
+        </form>
       </div>
-
-      <style>{`
-        .fade-enter { animation: fade 0.4s ease-out forwards; }
-        .toast-enter { animation: slideLeft 0.3s ease-out forwards; }
-        @keyframes fade { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes slideLeft { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
-      `}</style>
     </div>
   );
 };

@@ -3,143 +3,165 @@ import { useNavigate, Link } from 'react-router-dom';
 
 /**
  * ==================================================================================
- * SJU ENTERPRISE ACCESS GATEWAY - ULTRA EDITION (v20.0)
+ * SJU ENTERPRISE ACCESS GATEWAY - OMEGA PRESTIGE EDITION (v22.0)
  * ==================================================================================
- * * * ARCHITECTURE:
+ * ARCHITECTURE & ENHANCEMENTS:
+ * - Typography: Global enforcement of 'Lora' serif font for academic elegance.
  * - Dual-Engine Authentication: Local Bridge + REST API Fallback.
- * - Security: Pre-flight Integrity Check, Session Encryption (Simulated), Role-Based Gating.
- * - UX: Glassmorphism, Floating Labels, Dynamic News Feed, Biometric Simulation.
- * * * * COLOR PALETTE (Strict Adherence):
- * - Primary: Royal Blue (#003366)
- * - Accent: Josephite Gold (#FFCC00)
- * - Text: High Contrast White (#FFFFFF) & Slate (#64748b)
- * - Error: Signal Red (#ef4444)
- * - Success: Emerald (#10b981)
+ * - Dynamic Background: Animated ambient orb mesh gradients + Glassmorphism.
+ * - Micro-interactions: Advanced floating labels, input focus ripples, tab morphing.
+ * - Live Ticker: Continuous CSS marquee scrolling for campus updates.
+ * - Security UX: Caps-lock detection, real-time input validation, haptic-style delays.
+ * - Modules: Biometric Simulation, Secure Recovery Wizard, Pre-flight Integrity Check.
+ * ==================================================================================
  */
 
 // --- 1. CONFIGURATION & CONSTANTS ---
 const SYSTEM_CONFIG = {
   INSTITUTION_NAME: "St. Joseph's University",
-  PORTAL_NAME: "Alumni Connect",
-  VERSION: "v19.0.4-Enterprise",
+  PORTAL_NAME: "Alumni Connect Gateway",
+  VERSION: "v22.0.0-Omega",
   SUPPORT_EMAIL: "tech.support@sju.edu",
-  API_URL: "http://localhost:8081/api/auth/login"
+  API_URL: "http://localhost:8081/api/auth/login",
+  SIMULATED_DELAY: 1500
 };
 
 const ALUMNI_HIGHLIGHTS = [
-  { id: 1, text: "🎉 120+ Josephites placed in Fortune 500 companies this quarter." },
-  { id: 2, text: "📢 Annual Alumni Meet 'Milan 2026' scheduled for Dec 15th." },
-  { id: 3, text: "🚀 New Mentorship Program connects you with industry leaders." },
-  { id: 4, text: "🎓 Transcript requests are now fully digitized." }
+  "🎉 120+ Josephites placed in Fortune 500 companies this quarter.",
+  "📢 Annual Alumni Meet 'Milan 2026' scheduled for Dec 15th.",
+  "🚀 New Mentorship Program connects you with industry leaders.",
+  "🎓 Transcript requests are now fully digitized and instant.",
+  "🏆 SJU wins the National Inter-University Science Innovation Award.",
+  "🌍 Global Alumni Chapter expansion opens in Singapore and Dubai."
 ];
 
 // --- 2. GLOBAL STYLES & THEME ENGINE ---
 const theme = {
   colors: {
     primary: '#003366',
-    secondary: '#002244',
+    secondary: '#001a33',
     accent: '#FFCC00',
+    accentHover: '#e6b800',
     textLight: '#ffffff',
     textDark: '#0f172a',
     muted: '#64748b',
-    border: '#e2e8f0',
+    border: '#cbd5e1',
     bg: '#f8fafc',
     error: '#ef4444',
+    errorBg: '#fef2f2',
     success: '#10b981',
-    glass: 'rgba(255, 255, 255, 0.95)'
+    glass: 'rgba(255, 255, 255, 0.85)',
+    glassBorder: 'rgba(255, 255, 255, 0.4)',
+    darkGlass: 'rgba(15, 23, 42, 0.85)'
   },
   shadows: {
-    card: '0 25px 50px -12px rgba(0, 51, 102, 0.15)',
-    glow: '0 0 20px rgba(255, 204, 0, 0.3)',
-    input: '0 4px 6px -1px rgba(0, 0, 0, 0.02)'
+    card: '0 30px 60px -15px rgba(0, 51, 102, 0.2), 0 0 0 1px rgba(255,255,255,0.5) inset',
+    glow: '0 0 30px rgba(255, 204, 0, 0.4)',
+    inputFocus: '0 0 0 4px rgba(0, 51, 102, 0.1)'
   },
-  animations: {
-    fade: 'fadeIn 0.6s ease-out',
-    slide: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+  fonts: {
+    main: "'Lora', serif"
   }
 };
 
 // --- 3. MICRO-COMPONENTS ---
 
 /**
- * Dynamic News Ticker Component for Left Panel
+ * Continuous Scrolling News Ticker
  */
-const NewsTicker = () => {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % ALUMNI_HIGHLIGHTS.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
+const ScrollingTicker = () => {
+  const tickerText = ALUMNI_HIGHLIGHTS.join(" ✦ ");
 
   return (
     <div style={{
       marginTop: 'auto',
-      background: 'rgba(0, 0, 0, 0.2)',
-      backdropFilter: 'blur(10px)',
-      padding: '20px',
-      borderRadius: '16px',
-      borderLeft: `4px solid ${theme.colors.accent}`,
-      animation: theme.animations.fade
+      background: 'rgba(0, 10, 20, 0.4)',
+      backdropFilter: 'blur(12px)',
+      borderTop: `1px solid rgba(255,204,0,0.3)`,
+      borderBottom: `1px solid rgba(255,204,0,0.3)`,
+      padding: '15px 0',
+      width: '100%',
+      overflow: 'hidden',
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center'
     }}>
-      <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1.5px', color: theme.colors.accent, marginBottom: '8px', fontWeight: '800' }}>
-        Live Updates
+      <div style={{ position: 'absolute', left: 0, zIndex: 2, background: 'linear-gradient(90deg, rgba(0,26,51,1) 0%, transparent 100%)', width: '80px', height: '100%' }} />
+      <div style={{
+        display: 'flex',
+        whiteSpace: 'nowrap',
+        animation: 'scrollText 45s linear infinite',
+        color: theme.colors.textLight,
+        fontSize: '1.05rem',
+        fontWeight: '500',
+        letterSpacing: '0.5px'
+      }}>
+        <span style={{ paddingRight: '50px' }}>{tickerText} ✦ </span>
+        <span style={{ paddingRight: '50px' }}>{tickerText} ✦ </span>
       </div>
-      <div style={{ color: 'white', fontSize: '1rem', fontWeight: '500', minHeight: '50px', display: 'flex', alignItems: 'center' }}>
-        {ALUMNI_HIGHLIGHTS[index].text}
-      </div>
-      <div style={{ display: 'flex', gap: '5px', marginTop: '15px' }}>
-        {ALUMNI_HIGHLIGHTS.map((_, i) => (
-          <div key={i} style={{ height: '3px', width: i === index ? '25px' : '10px', background: i === index ? theme.colors.accent : 'rgba(255,255,255,0.3)', borderRadius: '2px', transition: 'all 0.3s ease' }}></div>
-        ))}
-      </div>
+      <div style={{ position: 'absolute', right: 0, zIndex: 2, background: 'linear-gradient(-90deg, rgba(0,26,51,1) 0%, transparent 100%)', width: '80px', height: '100%' }} />
     </div>
   );
 };
 
 /**
- * Floating Label Input Component
+ * Enhanced Floating Label Input with CapsLock Detection
  */
 const FloatingInput = ({ label, type, name, value, onChange, icon, error, isPassword, onTogglePass }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [capsLockActive, setCapsLockActive] = useState(false);
   const hasValue = value.length > 0;
 
+  useEffect(() => {
+    const handleKeyUp = (e) => {
+      if (isPassword && isFocused) setCapsLockActive(e.getModifierState('CapsLock'));
+    };
+    window.addEventListener('keyup', handleKeyUp);
+    return () => window.removeEventListener('keyup', handleKeyUp);
+  }, [isPassword, isFocused]);
+
   return (
-    <div style={{ marginBottom: '24px', position: 'relative' }}>
+    <div style={{ marginBottom: '28px', position: 'relative' }}>
       <div 
         style={{
           position: 'relative',
-          backgroundColor: isFocused ? '#fff' : '#f8fafc',
-          borderRadius: '12px',
+          backgroundColor: isFocused ? '#ffffff' : 'rgba(255,255,255,0.6)',
+          borderRadius: '16px',
           border: error ? `2px solid ${theme.colors.error}` : isFocused ? `2px solid ${theme.colors.primary}` : `1px solid ${theme.colors.border}`,
-          transition: 'all 0.3s ease',
-          height: '64px',
+          transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          height: '68px',
           display: 'flex',
           alignItems: 'center',
-          boxShadow: isFocused ? '0 4px 12px rgba(0, 51, 102, 0.08)' : 'none'
+          boxShadow: isFocused ? theme.shadows.inputFocus : 'inset 0 2px 4px rgba(0,0,0,0.02)'
         }}
       >
         {/* Icon */}
-        <div style={{ width: '50px', display: 'flex', justifyContent: 'center', color: isFocused ? theme.colors.primary : theme.colors.muted, fontSize: '1.2rem', transition: 'color 0.3s' }}>
+        <div style={{ 
+          width: '54px', 
+          display: 'flex', 
+          justifyContent: 'center', 
+          color: error ? theme.colors.error : (isFocused ? theme.colors.primary : theme.colors.muted), 
+          fontSize: '1.3rem', 
+          transition: 'color 0.3s, transform 0.3s',
+          transform: isFocused ? 'scale(1.1)' : 'scale(1)'
+        }}>
           <i className={`bi ${icon}`}></i>
         </div>
 
-        {/* Input & Label Container */}
+        {/* Input & Label */}
         <div style={{ flex: 1, position: 'relative', height: '100%' }}>
           <label 
             style={{
               position: 'absolute',
               left: '0',
-              top: (isFocused || hasValue) ? '10px' : '22px',
-              fontSize: (isFocused || hasValue) ? '0.75rem' : '1rem',
+              top: (isFocused || hasValue) ? '12px' : '23px',
+              fontSize: (isFocused || hasValue) ? '0.8rem' : '1.05rem',
               color: error ? theme.colors.error : (isFocused ? theme.colors.primary : theme.colors.muted),
               fontWeight: (isFocused || hasValue) ? '700' : '500',
-              textTransform: (isFocused || hasValue) ? 'uppercase' : 'none',
               letterSpacing: (isFocused || hasValue) ? '0.5px' : '0',
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              pointerEvents: 'none'
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              pointerEvents: 'none',
+              fontFamily: theme.fonts.main
             }}
           >
             {label}
@@ -156,77 +178,98 @@ const FloatingInput = ({ label, type, name, value, onChange, icon, error, isPass
               height: '100%',
               border: 'none',
               background: 'transparent',
-              paddingTop: '20px',
+              paddingTop: '22px',
               paddingRight: '15px',
-              fontSize: '1.05rem',
+              fontSize: '1.15rem',
               color: theme.colors.textDark,
               fontWeight: '600',
-              outline: 'none'
+              outline: 'none',
+              fontFamily: theme.fonts.main
             }}
           />
         </div>
+
+        {/* Caps Lock Warning */}
+        {capsLockActive && (
+          <div style={{ position: 'absolute', right: isPassword ? '50px' : '15px', color: theme.colors.accentHover, animation: 'fadeIn 0.3s' }} title="Caps Lock is ON">
+            <i className="bi bi-capslock-fill fs-5"></i>
+          </div>
+        )}
 
         {/* Password Toggle */}
         {isPassword !== undefined && (
           <button 
             type="button"
             onClick={onTogglePass}
-            style={{ border: 'none', background: 'transparent', padding: '0 15px', cursor: 'pointer', color: theme.colors.muted }}
+            style={{ border: 'none', background: 'transparent', padding: '0 15px', cursor: 'pointer', color: theme.colors.muted, transition: 'color 0.2s' }}
+            onMouseOver={(e) => e.currentTarget.style.color = theme.colors.primary}
+            onMouseOut={(e) => e.currentTarget.style.color = theme.colors.muted}
           >
-            <i className={`bi ${isPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'}`}></i>
+            <i className={`bi ${isPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'} fs-5`}></i>
           </button>
         )}
       </div>
       
       {/* Error Message */}
       {error && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', color: theme.colors.error, fontSize: '0.85rem', fontWeight: '600', animation: 'shake 0.4s' }}>
-          <i className="bi bi-exclamation-octagon-fill"></i> {error}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', color: theme.colors.error, fontSize: '0.9rem', fontWeight: '600', animation: 'shake 0.4s' }}>
+          <i className="bi bi-exclamation-circle-fill"></i> {error}
         </div>
       )}
     </div>
   );
 };
 
-// --- 4. MAIN LOGIN LOGIC ---
+// --- 4. MAIN LOGIN LOGIC & LAYOUT ---
 
 const Login = () => {
   const navigate = useNavigate();
 
-  // --- STATE MANAGEMENT ---
-  const [systemReady, setSystemReady] = useState(false); // For Pre-flight check
-  const [activeTab, setActiveTab] = useState('alumni'); // 'alumni' | 'admin'
-  
-  // Credentials
+  // State Management
+  const [systemReady, setSystemReady] = useState(false);
+  const [activeTab, setActiveTab] = useState('alumni');
   const [creds, setCreds] = useState({ identifier: '', password: '' });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  // Recovery Wizard State
+  // Modals & Recovery State
   const [modalMode, setModalMode] = useState(null); // 'recovery' | 'biometric' | null
-  const [recoveryStep, setRecoveryStep] = useState(1); // 1: Email, 2: OTP, 3: Success
+  const [recoveryStep, setRecoveryStep] = useState(1);
   const [otp, setOtp] = useState(['', '', '', '']);
 
-  // --- INITIALIZATION EFFECT ---
+  // Initialization & Boot Sequence
   useEffect(() => {
-    // 1. Simulate Enterprise Security Check on Load
+    // Inject Lora Font & Global Styles dynamically
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+
+    // Bootstrap icons if not present
+    if (!document.querySelector('link[href*="bootstrap-icons"]')) {
+      const icons = document.createElement('link');
+      icons.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css';
+      icons.rel = 'stylesheet';
+      document.head.appendChild(icons);
+    }
+
+    // Pre-flight Systems Check (Simulated)
     const initSequence = async () => {
-      // Simulate checking secure connection, SSL, etc.
-      setTimeout(() => setSystemReady(true), 1200); 
+      setTimeout(() => setSystemReady(true), SYSTEM_CONFIG.SIMULATED_DELAY);
     };
     initSequence();
 
-    // 2. Check Persistence
+    // Hydrate persistent user ID
     const rememberedId = localStorage.getItem('sju_secure_id');
     if (rememberedId) {
       setCreds(prev => ({ ...prev, identifier: rememberedId }));
       setRememberMe(true);
     }
-  }, []);
 
-  // --- HANDLERS ---
+    return () => document.head.removeChild(link);
+  }, []);
 
   const handleInputChange = (e) => {
     setCreds({ ...creds, [e.target.name]: e.target.value });
@@ -236,16 +279,16 @@ const Login = () => {
   const validateForm = () => {
     const newErrors = {};
     if (!creds.identifier.trim()) {
-      newErrors.identifier = activeTab === 'admin' ? "Admin ID Required" : "Register Number Required";
+      newErrors.identifier = activeTab === 'admin' ? "Administrator ID is required." : "Register Number is required.";
     }
     if (!creds.password) {
-      newErrors.password = "Authentication Key Required";
+      newErrors.password = "Please enter your access key.";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // --- CORE AUTHENTICATION LOGIC ---
+  // Dual-Engine Authentication Logic
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -253,11 +296,9 @@ const Login = () => {
     setIsLoading(true);
     setErrors({});
 
-    // 1. MASTER KEY BYPASS (For Demo/Dev)
+    // 1. MASTER KEY BYPASS (For emergency admin access / Demo)
     if (activeTab === 'admin' && creds.identifier === 'ADMIN01' && creds.password === 'admin123') {
-      executeLoginSuccess({ 
-        id: 999, role: 'admin', name: 'System Administrator', reg_no: 'ADMIN01' 
-      });
+      executeLoginSuccess({ id: 999, role: 'admin', name: 'System Administrator', reg_no: 'ADMIN01' });
       return;
     }
 
@@ -268,19 +309,22 @@ const Login = () => {
     );
 
     if (foundUser) {
+      // Role enforcement check
+      if (activeTab === 'admin' && foundUser.role !== 'admin') {
+        setErrors({ global: "Access Denied: Insufficient Privileges for Admin Gateway." });
+        setIsLoading(false);
+        return;
+      }
       executeLoginSuccess(foundUser);
       return;
     }
 
-    // 3. API HANDSHAKE
+    // 3. API HANDSHAKE (REST Fallback)
     try {
       const response = await fetch(SYSTEM_CONFIG.API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          reg_no: creds.identifier, 
-          password: creds.password 
-        })
+        body: JSON.stringify({ reg_no: creds.identifier, password: creds.password })
       });
 
       const data = await response.json();
@@ -292,278 +336,312 @@ const Login = () => {
         executeLoginSuccess(data.user);
       } else {
         if (response.status === 403) {
-          setErrors({ global: "⚠️ Account Pending Verification" });
+          setErrors({ global: "Account Pending Verification. Please contact support." });
         } else {
-          setErrors({ global: "❌ Invalid Credentials" });
+          setErrors({ global: "The credentials provided do not match our records." });
         }
       }
     } catch (err) {
-      // Fallback Error
-      setErrors({ global: err.message || "❌ Connection Failed. Use Local Bridge." });
+      // Final Fallback if API is totally unreachable
+      setErrors({ global: err.message || "System currently unreachable. Please try again." });
     } finally {
-      if (!foundUser) setIsLoading(false); // Only stop loading if we didn't find a user (success redirects)
+      setIsLoading(false);
     }
   };
 
   const executeLoginSuccess = (userPayload) => {
-    // Save Session
     localStorage.setItem('user', JSON.stringify(userPayload));
-    
-    // Handle Remember Me
     if (rememberMe) localStorage.setItem('sju_secure_id', creds.identifier);
     else localStorage.removeItem('sju_secure_id');
 
-    // Artificial Delay for "Secure Handshake" visual
+    // Haptic/Visual delay for premium feel
     setTimeout(() => {
       navigate(userPayload.role === 'admin' ? '/admin' : '/directory');
-      window.location.reload();
-    }, 800);
+    }, 1000);
   };
 
-  // --- RENDER HELPERS ---
-
-  // OTP Handling for Recovery
   const handleOtpChange = (element, index) => {
     if (isNaN(element.value)) return;
     let otpArray = [...otp];
     otpArray[index] = element.value;
     setOtp(otpArray);
-    if (element.nextSibling && element.value) {
-      element.nextSibling.focus();
-    }
+    if (element.nextSibling && element.value) element.nextSibling.focus();
   };
 
-  // Pre-flight Loading Screen
+  // Simulated Biometric Authentication
+  const handleBiometricAuth = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setModalMode(null);
+      setErrors({ global: "Biometric hardware not detected. Please use password." });
+    }, 2000);
+  };
+
+  // --- RENDERING VIEWS ---
+
   if (!systemReady) {
     return (
-      <div style={{ height: '100vh', background: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-        <div className="spinner-border text-warning" style={{ width: '3rem', height: '3rem' }} role="status"></div>
-        <h4 style={{ marginTop: '20px', fontFamily: 'monospace' }}>INITIALIZING SECURE GATEWAY...</h4>
-        <span style={{ color: '#64748b', fontSize: '0.8rem' }}>Verifying SSL Handshake • {SYSTEM_CONFIG.VERSION}</span>
+      <div style={{ height: '100vh', background: theme.colors.secondary, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white', fontFamily: theme.fonts.main }}>
+        <div style={{ width: '70px', height: '70px', border: `4px solid rgba(255,204,0,0.2)`, borderTopColor: theme.colors.accent, borderRadius: '50%', animation: 'spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite' }}></div>
+        <h3 style={{ marginTop: '30px', fontWeight: '700', letterSpacing: '3px', textTransform: 'uppercase' }}>Establishing Secure Link</h3>
+        <p style={{ color: theme.colors.muted, marginTop: '10px', fontSize: '0.9rem', fontStyle: 'italic' }}>Verifying SSL Handshake • {SYSTEM_CONFIG.VERSION}</p>
+        
+        <style>{`
+          @keyframes spin { 100% { transform: rotate(360deg); } }
+        `}</style>
       </div>
     );
   }
 
-  // --- STYLES ---
+  // --- COMPONENT STYLES ---
   const styles = {
-    // Layout
+    // Find this in your styles.container
     container: {
-      minHeight: '100vh',
+      height: '100vh', // Changed from minHeight to height
       display: 'flex',
       background: theme.colors.bg,
-      fontFamily: "'Inter', sans-serif",
-      overflow: 'hidden'
+      fontFamily: theme.fonts.main,
+      overflow: 'hidden' // Prevents accidental scrollbars
     },
-    // Left Branding Panel
+    // Find this in your styles.brandPanel
     brandPanel: {
-      flex: '1.3',
-      background: `linear-gradient(135deg, ${theme.colors.primary} 0%, #001f3f 100%)`,
+      flex: '1.4',
+      background: `linear-gradient(145deg, ${theme.colors.primary} 0%, ${theme.colors.secondary} 100%)`,
       position: 'relative',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'center',
-      padding: '80px',
+      // REMOVE: justifyContent: 'center', 
+      padding: '0',
       color: 'white',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      boxShadow: 'inset -20px 0 50px rgba(0,0,0,0.3)'
     },
-    meshGradient: {
+    ambientOrbs: {
       position: 'absolute',
-      width: '150%',
-      height: '150%',
-      top: '-25%',
-      left: '-25%',
-      background: 'radial-gradient(circle at 50% 50%, rgba(255, 204, 0, 0.15) 0%, transparent 50%)',
-      filter: 'blur(80px)',
-      zIndex: 0
-    },
-    brandContent: {
-      position: 'relative',
-      zIndex: 10
-    },
-    secureBadge: {
-      background: 'rgba(255, 255, 255, 0.1)',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
-      borderRadius: '50px',
-      padding: '8px 16px',
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontSize: '0.85rem',
-      fontWeight: '600',
-      marginBottom: '30px',
-      color: theme.colors.accent
+      width: '100%',
+      height: '100%',
+      top: 0,
+      left: 0,
+      zIndex: 0,
+      background: `
+        radial-gradient(circle at 15% 50%, rgba(255, 204, 0, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.05), transparent 25%)
+      `,
+      animation: 'pulseOrbs 12s ease-in-out infinite alternate'
     },
     heading: {
-      fontSize: '4.5rem',
-      fontWeight: '900',
-      lineHeight: '1.1',
-      marginBottom: '20px',
-      letterSpacing: '-1.5px',
-      color: '#ffffff', // ENHANCEMENT: White Text
-      textShadow: '0 10px 30px rgba(0,0,0,0.3)' // ENHANCEMENT: Shadow for pop
+      fontSize: '5rem',
+      fontWeight: '700',
+      lineHeight: '1.05',
+      marginBottom: '25px',
+      letterSpacing: '-1px',
+      color: '#ffffff',
+      textShadow: '0 15px 40px rgba(0,0,0,0.4)',
+      fontFamily: theme.fonts.main
     },
     subHeading: {
-      fontSize: '1.25rem',
+      fontSize: '1.3rem',
       opacity: 0.9,
       fontWeight: '400',
-      maxWidth: '500px',
-      marginBottom: '60px',
-      lineHeight: '1.6',
-      color: '#e2e8f0'
+      maxWidth: '550px',
+      lineHeight: '1.7',
+      color: '#e2e8f0',
+      fontStyle: 'italic'
     },
-    // Right Form Panel
     formPanel: {
       flex: '1',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '40px',
-      background: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23003366' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+      padding: '50px',
+      background: '#f1f5f9',
+      position: 'relative',
+      zIndex: 5
     },
     card: {
       width: '100%',
-      maxWidth: '520px',
+      maxWidth: '540px',
+      minHeight: '680px',
       background: theme.colors.glass,
-      backdropFilter: 'blur(20px)',
-      borderRadius: '30px',
+      backdropFilter: 'blur(25px)',
+      WebkitBackdropFilter: 'blur(25px)',
+      borderRadius: '24px',
       padding: '50px',
       boxShadow: theme.shadows.card,
-      border: '1px solid white',
-      animation: theme.animations.slide
+      border: `1px solid ${theme.colors.glassBorder}`,
+      animation: 'slideUpFade 0.7s cubic-bezier(0.16, 1, 0.3, 1)'
     },
-    // Tabs
     tabContainer: {
       display: 'flex',
-      background: '#f1f5f9',
-      padding: '5px',
+      background: 'rgba(0, 51, 102, 0.05)',
+      padding: '6px',
       borderRadius: '16px',
-      marginBottom: '40px'
+      marginBottom: '45px',
+      position: 'relative'
     },
     tab: (active, color) => ({
       flex: 1,
-      padding: '12px',
+      padding: '14px',
       textAlign: 'center',
       borderRadius: '12px',
       cursor: 'pointer',
       fontWeight: '700',
-      fontSize: '0.9rem',
-      transition: 'all 0.3s ease',
+      fontSize: '1rem',
+      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       background: active ? 'white' : 'transparent',
       color: active ? color : theme.colors.muted,
-      boxShadow: active ? '0 4px 6px rgba(0,0,0,0.05)' : 'none'
+      boxShadow: active ? '0 8px 16px rgba(0,0,0,0.06)' : 'none',
+      zIndex: 2,
+      fontFamily: theme.fonts.main
     }),
-    // Button
     submitBtn: {
       width: '100%',
-      padding: '18px',
+      padding: '20px',
       borderRadius: '16px',
       border: 'none',
       background: activeTab === 'admin' 
-        ? `linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)`
+        ? `linear-gradient(135deg, ${theme.colors.error} 0%, #991b1b 100%)`
         : `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.secondary} 100%)`,
       color: 'white',
-      fontSize: '1.1rem',
+      fontSize: '1.2rem',
       fontWeight: '700',
+      letterSpacing: '1px',
       cursor: isLoading ? 'not-allowed' : 'pointer',
-      boxShadow: '0 10px 20px -5px rgba(0, 51, 102, 0.4)',
-      transition: 'transform 0.2s',
+      boxShadow: activeTab === 'admin' ? '0 10px 25px rgba(239, 68, 68, 0.4)' : '0 10px 25px rgba(0, 51, 102, 0.4)',
+      transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      gap: '10px'
+      gap: '12px',
+      fontFamily: theme.fonts.main
     },
-    // Biometric
     bioBtn: {
       marginTop: '20px',
       width: '100%',
-      padding: '12px',
-      border: '2px dashed #cbd5e1',
+      padding: '16px',
+      border: `2px dashed ${theme.colors.border}`,
       borderRadius: '16px',
       background: 'transparent',
-      color: theme.colors.muted,
+      color: theme.colors.primary,
       fontWeight: '600',
+      fontSize: '1.05rem',
       cursor: 'pointer',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: '10px',
-      transition: 'all 0.2s'
+      gap: '12px',
+      transition: 'all 0.2s ease',
+      fontFamily: theme.fonts.main
+    },
+    modalOverlay: {
+      position: 'fixed',
+      top: 0, left: 0, width: '100vw', height: '100vh',
+      background: theme.colors.darkGlass,
+      backdropFilter: 'blur(10px)',
+      zIndex: 1040,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      animation: 'fadeIn 0.3s'
     }
   };
 
   return (
     <div style={styles.container}>
       
-      {/* LEFT: BRANDING & NEWS */}
-      <div className="d-none d-lg-flex" style={styles.brandPanel}>
-        <div style={styles.meshGradient}></div>
-        <div style={styles.brandContent}>
+      {/* GLOBAL CSS INJECTIONS FOR ANIMATIONS */}
+      <style>{`
+        * { box-sizing: border-box; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scrollText { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes pulseOrbs { 0% { transform: scale(1) translate(0,0); } 100% { transform: scale(1.1) translate(20px, -20px); } }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+        @keyframes scanline { 0% { top: 0; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        
+        /* Media Query for mobile responsiveness */
+        @media (max-width: 992px) {
+          .desktop-brand-panel { display: none !important; }
+        }
+      `}</style>
+
+      {/* LEFT: IMMERSIVE BRANDING PANEL */}
+      <div className="desktop-brand-panel" style={styles.brandPanel}>
+        <div style={styles.ambientOrbs}></div>
+        
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 80px', zIndex: 10 }}>
           <div style={styles.secureBadge}>
             <i className="bi bi-shield-lock-fill"></i> SSL Encrypted Gateway
           </div>
-          
-          {/* ENHANCEMENT: BRIGHT WHITE TEXT AS REQUESTED */}
+
           <h1 style={styles.heading}>
             THE ALUMNI<br /> 
-            <span style={{ color: theme.colors.accent }}>CONNECTION.</span>
+            <span style={{ color: theme.colors.accent, textShadow: theme.shadows.glow }}>CONNECTION</span>
           </h1>
-          
           <p style={styles.subHeading}>
-            Authenticate to access the exclusive global network of St. Joseph's University. 
-            Connect, mentor, and grow with verified professionals.
+            Authenticate to access the exclusive global network of St. Joseph's University. Connect, mentor, and grow with verified professionals worldwide.
           </p>
-
-          <NewsTicker />
           
-          <div style={{ marginTop: '40px', display: 'flex', gap: '20px', fontSize: '0.85rem', opacity: 0.7 }}>
-            <span>&copy; 2026 SJU Tech</span>
-            <span>•</span>
-            <span>Privacy Policy</span>
-            <span>•</span>
-            <span>Terms of Service</span>
-          </div>
+          
         </div>
+
+        {/* Continuous Marquee Ticker */}
+        <ScrollingTicker />
       </div>
 
-      {/* RIGHT: AUTH FORM */}
+      {/* RIGHT: PRECISION AUTHENTICATION FORM */}
       <div style={styles.formPanel}>
+        {/* Subtle decorative background elements for form panel */}
+        <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(0,51,102,0.03) 0%, transparent 70%)', borderRadius: '50%' }}></div>
+
         <div style={styles.card}>
           
-          {/* Tab Switcher */}
+          {/* Morphing Tab Switcher */}
           <div style={styles.tabContainer}>
             <div 
               style={styles.tab(activeTab === 'alumni', theme.colors.primary)}
               onClick={() => { setActiveTab('alumni'); setErrors({}); }}
             >
-              <i className="bi bi-mortarboard-fill me-2"></i> Alumni
+              <i className="bi bi-mortarboard-fill me-2"></i> Alumni Portal
             </div>
             <div 
               style={styles.tab(activeTab === 'admin', theme.colors.error)}
               onClick={() => { setActiveTab('admin'); setErrors({}); }}
             >
-              <i className="bi bi-person-lock me-2"></i> Admin
+              <i className="bi bi-shield-lock-fill me-2"></i> Admin Gateway
             </div>
           </div>
 
-          {/* Header */}
-          <div className="text-center mb-4">
-            <h3 style={{ fontWeight: '800', color: theme.colors.textDark, marginBottom: '5px' }}>
+          {/* Dynamic Header */}
+          <div style={{ textAlign: 'center', marginBottom: '40px', animation: 'slideUpFade 0.5s ease-out' }}>
+            <h2 style={{ fontWeight: '700', color: theme.colors.textDark, marginBottom: '8px', fontSize: '2.2rem' }}>
               {activeTab === 'admin' ? 'Restricted Access' : 'Welcome Back'}
-            </h3>
-            <p style={{ color: theme.colors.muted, fontSize: '0.95rem' }}>
-              {activeTab === 'admin' ? 'Security clearance required' : 'Enter credentials to continue'}
+            </h2>
+            <p style={{ color: theme.colors.muted, fontSize: '1.05rem', fontStyle: 'italic' }}>
+              {activeTab === 'admin' ? 'Security clearance is mandatory to proceed.' : 'Enter your credentials to access the network.'}
             </p>
           </div>
 
-          {/* Global Error */}
+          {/* Global Alert Frame */}
           {errors.global && (
-            <div className="alert alert-danger d-flex align-items-center mb-4" style={{ borderRadius: '12px', border: 'none', background: '#fef2f2', color: '#b91c1c', fontWeight: '600' }}>
-              <i className="bi bi-exclamation-triangle-fill me-3"></i>
+            <div style={{ 
+              background: theme.colors.errorBg, 
+              color: '#991b1b', 
+              padding: '16px 20px', 
+              borderRadius: '16px', 
+              marginBottom: '30px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '12px',
+              fontWeight: '600',
+              borderLeft: `4px solid ${theme.colors.error}`,
+              animation: 'slideUpFade 0.3s ease-out'
+            }}>
+              <i className="bi bi-exclamation-triangle-fill fs-5"></i>
               {errors.global}
             </div>
           )}
 
-          {/* Login Form */}
+          {/* The Form Engine */}
           <form onSubmit={handleLogin}>
             <FloatingInput 
               label={activeTab === 'admin' ? "Administrator ID" : "Register Number"}
@@ -571,7 +649,7 @@ const Login = () => {
               name="identifier"
               value={creds.identifier}
               onChange={handleInputChange}
-              icon={activeTab === 'admin' ? "bi-hdd-network" : "bi-card-heading"}
+              icon={activeTab === 'admin' ? "bi-person-badge" : "bi-journal-bookmark-fill"}
               error={errors.identifier}
             />
 
@@ -581,27 +659,33 @@ const Login = () => {
               name="password"
               value={creds.password}
               onChange={handleInputChange}
-              icon="bi-fingerprint"
+              icon="bi-key-fill"
               error={errors.password}
               isPassword={showPass}
               onTogglePass={() => setShowPass(!showPass)}
             />
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <div className="form-check">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '35px', padding: '0 5px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                 <input 
-                  className="form-check-input" 
                   type="checkbox" 
-                  id="remember" 
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ width: '18px', height: '18px', accentColor: theme.colors.primary, cursor: 'pointer' }}
                 />
-                <label className="form-check-label" htmlFor="remember" style={{ fontSize: '0.9rem', color: theme.colors.muted, fontWeight: '500' }}>
-                  Remember Device
-                </label>
-              </div>
-              <button type="button" onClick={() => setModalMode('recovery')} style={{ background: 'none', border: 'none', color: theme.colors.primary, fontWeight: '700', fontSize: '0.9rem' }}>
+                <span style={{ fontSize: '0.95rem', color: theme.colors.textDark, fontWeight: '600' }}>Remember Device</span>
+              </label>
+              
+              <button 
+                type="button" 
+                onClick={() => setModalMode('recovery')} 
+                style={{ 
+                  background: 'none', border: 'none', color: theme.colors.primary, fontWeight: '700', fontSize: '0.95rem',
+                  textDecoration: 'underline', textDecorationColor: 'transparent', transition: 'text-decoration-color 0.3s', cursor: 'pointer'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.textDecorationColor = theme.colors.primary}
+                onMouseOut={(e) => e.currentTarget.style.textDecorationColor = 'transparent'}
+              >
                 Forgot Key?
               </button>
             </div>
@@ -610,117 +694,164 @@ const Login = () => {
               type="submit" 
               style={styles.submitBtn}
               disabled={isLoading}
-              onMouseOver={(e) => !isLoading && (e.currentTarget.style.transform = 'scale(1.02)')}
-              onMouseOut={(e) => !isLoading && (e.currentTarget.style.transform = 'scale(1)')}
+              onMouseOver={(e) => !isLoading && (e.currentTarget.style.transform = 'translateY(-3px)')}
+              onMouseOut={(e) => !isLoading && (e.currentTarget.style.transform = 'translateY(0)')}
+              onMouseDown={(e) => !isLoading && (e.currentTarget.style.transform = 'translateY(1px)')}
             >
               {isLoading ? (
                 <>
-                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  Verifying Identity...
+                  <div style={{ width: '24px', height: '24px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                  Verifying Protocol...
                 </>
               ) : (
-                <>AUTHENTICATE <i className="bi bi-arrow-right-short" style={{ fontSize: '1.2rem' }}></i></>
+                <>LOGIN <i className="bi bi-box-arrow-in-right" style={{ fontSize: '1.4rem' }}></i></>
               )}
             </button>
 
-            {/* Biometric Simulation */}
+            {/* Biometric Fallback Simulation (Alumni Only) */}
             {activeTab === 'alumni' && (
-              <button type="button" style={styles.bioBtn} onClick={() => setModalMode('biometric')}>
-                <i className="bi bi-qr-code-scan"></i> Login with Passkey / FaceID
+              <button 
+                type="button" 
+                style={styles.bioBtn} 
+                onClick={() => setModalMode('biometric')}
+                onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(0,51,102,0.05)'; e.currentTarget.style.borderColor = theme.colors.primary; }}
+                onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = theme.colors.border; }}
+              >
+                <i className="bi bi-qr-code-scan fs-5"></i> Login with Passkey / FaceID
               </button>
             )}
           </form>
 
-          {/* Footer */}
+          {/* New Account Creation / Registration Link */}
           {activeTab === 'alumni' && (
-            <div className="text-center mt-4 pt-3 border-top">
-              <span style={{ color: theme.colors.muted, fontSize: '0.95rem' }}>New to the portal? </span>
-              <Link to="/register" style={{ color: theme.colors.primary, fontWeight: '800', textDecoration: 'none' }}>
+            <div style={{ textAlign: 'center', marginTop: '40px', paddingTop: '20px', borderTop: `1px solid ${theme.colors.border}`, animation: 'fadeIn 0.8s' }}>
+              <span style={{ color: theme.colors.muted, fontSize: '1.05rem', fontStyle: 'italic' }}>New to the alumni network? </span>
+              <Link to="/register" style={{ 
+                color: theme.colors.primary, fontWeight: '800', fontSize: '1.05rem', textDecoration: 'none', marginLeft: '5px',
+                borderBottom: `2px solid transparent`, transition: 'border-color 0.3s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.borderBottomColor = theme.colors.primary}
+              onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}
+              >
                 Create Account
               </Link>
             </div>
           )}
+
         </div>
       </div>
 
-      {/* --- RECOVERY MODAL (Overlay) --- */}
+      {/* --- MODALS --- */}
+
+      {/* RECOVERY WIZARD MODAL */}
       {modalMode === 'recovery' && (
-        <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>
-      )}
-      {modalMode === 'recovery' && (
-        <div className="modal fade show d-block" tabIndex="-1" style={{ zIndex: 1050 }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{ borderRadius: '24px', padding: '20px', border: 'none', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}>
-              <div className="modal-header border-0">
-                <h5 className="modal-title fw-bold">Secure Account Recovery</h5>
-                <button type="button" className="btn-close" onClick={() => { setModalMode(null); setRecoveryStep(1); }}></button>
+        <div style={styles.modalOverlay}>
+          <div style={{ background: 'white', width: '100%', maxWidth: '480px', borderRadius: '24px', padding: '40px', boxShadow: '0 25px 50px rgba(0,0,0,0.5)', position: 'relative', animation: 'slideUpFade 0.4s ease-out' }}>
+            
+            <button 
+              onClick={() => { setModalMode(null); setRecoveryStep(1); }}
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', fontSize: '1.5rem', color: theme.colors.muted, cursor: 'pointer', transition: 'color 0.2s' }}
+              onMouseOver={(e) => e.currentTarget.style.color = theme.colors.error}
+              onMouseOut={(e) => e.currentTarget.style.color = theme.colors.muted}
+            >
+              <i className="bi bi-x-lg"></i>
+            </button>
+
+            <h3 style={{ fontWeight: '700', color: theme.colors.primary, marginBottom: '20px', fontFamily: theme.fonts.main }}>Secure Recovery</h3>
+            
+            {recoveryStep === 1 && (
+              <div style={{ animation: 'fadeIn 0.4s' }}>
+                <p style={{ color: theme.colors.muted, marginBottom: '25px', lineHeight: '1.6' }}>Provide your registered institution email to initiate the secure OTP recovery sequence.</p>
+                <FloatingInput label="Institution Email" type="email" name="rec_email" value="" onChange={() => {}} icon="bi-envelope-at" />
+                <button 
+                  style={{ width: '100%', padding: '16px', borderRadius: '14px', border: 'none', background: theme.colors.primary, color: 'white', fontWeight: '700', fontSize: '1.1rem', marginTop: '10px', cursor: 'pointer' }} 
+                  onClick={() => setRecoveryStep(2)}
+                >
+                  Initiate Sequence
+                </button>
               </div>
-              <div className="modal-body">
-                {/* STEP 1: EMAIL */}
-                {recoveryStep === 1 && (
-                  <div className="fade-in">
-                    <p className="text-muted mb-4">Enter your registered university email ID. We will send a One-Time Verification code.</p>
-                    <FloatingInput 
-                      label="University Email" 
-                      type="email" 
-                      name="rec_email" 
-                      value="" 
-                      onChange={() => {}} 
-                      icon="bi-envelope-at" 
+            )}
+
+            {recoveryStep === 2 && (
+              <div style={{ textAlign: 'center', animation: 'fadeIn 0.4s' }}>
+                <i className="bi bi-shield-lock" style={{ fontSize: '3.5rem', color: theme.colors.accent, marginBottom: '15px', display: 'block' }}></i>
+                <p style={{ color: theme.colors.muted, marginBottom: '25px' }}>Enter the 4-digit security token transmitted to your device.</p>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '30px' }}>
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      type="text"
+                      maxLength="1"
+                      style={{ width: '65px', height: '75px', borderRadius: '16px', border: `2px solid ${theme.colors.border}`, textAlign: 'center', fontSize: '2rem', fontWeight: '700', color: theme.colors.primary, outline: 'none', transition: 'border-color 0.2s' }}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(e.target, index)}
+                      onFocus={(e) => e.target.style.borderColor = theme.colors.primary}
+                      onBlur={(e) => e.target.style.borderColor = theme.colors.border}
                     />
-                    <button className="btn w-100 py-3 fw-bold text-white" style={{ background: theme.colors.primary, borderRadius: '12px' }} onClick={() => setRecoveryStep(2)}>
-                      Send Verification Code
-                    </button>
-                  </div>
-                )}
-
-                {/* STEP 2: OTP */}
-                {recoveryStep === 2 && (
-                  <div className="fade-in text-center">
-                    <div className="mb-4">
-                      <i className="bi bi-shield-check" style={{ fontSize: '3rem', color: theme.colors.accent }}></i>
-                    </div>
-                    <h5>Authentication Required</h5>
-                    <p className="text-muted">Enter the 4-digit code sent to your email.</p>
-                    <div className="d-flex justify-content-center gap-3 mb-4">
-                      {otp.map((digit, index) => (
-                        <input
-                          key={index}
-                          type="text"
-                          maxLength="1"
-                          className="form-control text-center fw-bold fs-4"
-                          style={{ width: '60px', height: '60px', borderRadius: '12px', border: `2px solid ${theme.colors.border}` }}
-                          value={digit}
-                          onChange={(e) => handleOtpChange(e.target, index)}
-                        />
-                      ))}
-                    </div>
-                    <button className="btn w-100 py-3 fw-bold text-white" style={{ background: theme.colors.success, borderRadius: '12px' }} onClick={() => setRecoveryStep(3)}>
-                      Verify & Proceed
-                    </button>
-                  </div>
-                )}
-
-                {/* STEP 3: SUCCESS */}
-                {recoveryStep === 3 && (
-                  <div className="fade-in text-center py-4">
-                    <h4 className="text-success fw-bold mb-3">Identity Verified</h4>
-                    <p className="text-muted">A temporary password link has been sent to your inbox.</p>
-                    <button className="btn btn-outline-dark px-5 mt-2 rounded-pill" onClick={() => setModalMode(null)}>Back to Login</button>
-                  </div>
-                )}
+                  ))}
+                </div>
+                <button 
+                  style={{ width: '100%', padding: '16px', borderRadius: '14px', border: 'none', background: theme.colors.success, color: 'white', fontWeight: '700', fontSize: '1.1rem', cursor: 'pointer' }} 
+                  onClick={() => setRecoveryStep(3)}
+                >
+                  Verify Token
+                </button>
               </div>
-            </div>
+            )}
+
+            {recoveryStep === 3 && (
+              <div style={{ textAlign: 'center', padding: '20px 0', animation: 'fadeIn 0.4s' }}>
+                <i className="bi bi-check-circle-fill" style={{ fontSize: '4rem', color: theme.colors.success, marginBottom: '20px', display: 'block' }}></i>
+                <h4 style={{ fontWeight: '700', color: theme.colors.textDark, marginBottom: '10px' }}>Identity Confirmed</h4>
+                <p style={{ color: theme.colors.muted, marginBottom: '30px' }}>Secure access instructions and a temporary key have been routed to your inbox.</p>
+                <button 
+                  style={{ padding: '12px 30px', borderRadius: '30px', border: `2px solid ${theme.colors.border}`, background: 'transparent', fontWeight: '700', color: theme.colors.textDark, cursor: 'pointer' }} 
+                  onClick={() => { setModalMode(null); setRecoveryStep(1); }}
+                >
+                  Return to Gateway
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* GLOBAL ANIMATIONS */}
-      <style>{`
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
-      `}</style>
+      {/* BIOMETRIC SIMULATION MODAL */}
+      {modalMode === 'biometric' && (
+        <div style={styles.modalOverlay}>
+          <div style={{ background: 'white', width: '100%', maxWidth: '400px', borderRadius: '30px', padding: '50px 30px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+            
+            <button 
+              onClick={() => setModalMode(null)}
+              style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', fontSize: '1.5rem', color: theme.colors.muted, cursor: 'pointer', zIndex: 10 }}
+            >
+              <i className="bi bi-x-circle-fill"></i>
+            </button>
+
+            <h4 style={{ fontWeight: '700', color: theme.colors.primary, marginBottom: '30px' }}>Biometric Verification</h4>
+            
+            <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 30px', border: `4px solid ${theme.colors.accent}`, borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              <i className="bi bi-fingerprint" style={{ fontSize: '4.5rem', color: theme.colors.primary }}></i>
+              {/* Scanline Animation */}
+              {isLoading && <div style={{ position: 'absolute', width: '100%', height: '4px', background: theme.colors.success, boxShadow: '0 0 10px #10b981', animation: 'scanline 1.5s linear infinite' }}></div>}
+            </div>
+
+            <p style={{ color: theme.colors.muted, fontWeight: '500', marginBottom: '30px' }}>
+              {isLoading ? "Scanning..." : "Position your face or finger to authenticate."}
+            </p>
+
+            <button 
+              onClick={handleBiometricAuth}
+              disabled={isLoading}
+              style={{ width: '100%', padding: '15px', borderRadius: '15px', border: 'none', background: theme.colors.primary, color: 'white', fontWeight: '700', cursor: isLoading ? 'not-allowed' : 'pointer' }}
+            >
+              {isLoading ? "Processing..." : "Initiate Scan"}
+            </button>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

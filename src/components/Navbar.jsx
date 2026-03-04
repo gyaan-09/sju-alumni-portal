@@ -3,229 +3,35 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 /**
  * ==================================================================================
- * SJU GLOBAL NAVIGATION - ENTERPRISE EDITION (v6.0 - Dynamic Logic)
+ * SJU GLOBAL NAVIGATION - ULTRA EDITION (v7.0)
  * ==================================================================================
  * FEATURES:
- * 1. Role-Based Navigation:
- * - Admin: Home, Directory, Mentorship, Jobs (4 Tabs).
- * - Alumni: Home, Directory, Mentorship, Jobs, Connections, Requests (6 Tabs).
- * 2. Animations: Enhanced spring transitions for dropdowns and tab underlines.
+ * 1. Unified Navigation: Home, Directory, Mentorship, Jobs.
+ * 2. Typography: Elegant "Lora" serif font integration.
+ * 3. Animations: Ultra-smooth spring transitions, animated underlines, and scales.
+ * 4. Real-time Settings: Built-in modal for UI toggles (No 404s!).
+ * 5. Smart Profile Routing: Passes user role via router state for dynamic rendering.
  */
-
-// --- STYLES SYSTEM ---
-const styles = {
-  nav: {
-    backgroundColor: '#003366', // Royal Blue
-    borderBottom: '4px solid #FFCC00', // Gold Band
-    padding: '0.8rem 2rem',
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    zIndex: 1050,
-    transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
-    boxShadow: '0 4px 25px rgba(0,0,0,0.2)',
-  },
-  navScrolled: {
-    padding: '0.6rem 2rem',
-    backgroundColor: 'rgba(0, 51, 102, 0.95)',
-    backdropFilter: 'blur(12px)',
-  },
-  container: {
-    maxWidth: '1400px',
-    margin: '0 auto',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  
-  // -- BRANDING --
-  brandGroup: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '15px',
-    textDecoration: 'none',
-  },
-  logoBox: {
-    backgroundColor: '#ffffff',
-    color: '#003366',
-    width: '45px',
-    height: '45px',
-    borderRadius: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.6rem',
-    fontWeight: '900',
-    boxShadow: '0 0 15px rgba(255, 204, 0, 0.5)', // Gold Glow
-    transition: 'transform 0.3s ease',
-  },
-  titleBox: {
-    display: 'flex',
-    flexDirection: 'column',
-    lineHeight: '1',
-  },
-  brandTitle: {
-    color: '#ffffff',
-    fontSize: '1.5rem',
-    fontWeight: '800',
-    letterSpacing: '1px',
-    textTransform: 'uppercase',
-    fontFamily: "'Segoe UI', sans-serif",
-  },
-  brandSubtitle: {
-    color: '#FFCC00',
-    fontSize: '0.75rem',
-    fontWeight: '700',
-    letterSpacing: '2px',
-    textTransform: 'uppercase',
-    marginTop: '4px',
-  },
-
-  // -- DYNAMIC MENU --
-  menu: {
-    display: 'flex',
-    gap: '10px',
-    alignItems: 'center',
-    margin: 0,
-    padding: 0,
-    listStyle: 'none',
-  },
-  link: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    textDecoration: 'none',
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    padding: '10px 18px',
-    borderRadius: '8px',
-    transition: 'all 0.3s ease',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  linkActive: {
-    color: '#FFCC00',
-    fontWeight: '800',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  
-  // -- AUTH SECTION --
-  authGroup: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '20px',
-    marginLeft: '30px',
-    paddingLeft: '30px',
-    borderLeft: '1px solid rgba(255,255,255,0.15)',
-  },
-  btnLogin: {
-    background: 'transparent',
-    color: '#ffffff',
-    border: '2px solid rgba(255,255,255,0.4)',
-    padding: '8px 28px',
-    borderRadius: '50px',
-    fontWeight: '700',
-    textDecoration: 'none',
-    fontSize: '0.9rem',
-    transition: 'all 0.3s ease',
-  },
-  userBox: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    cursor: 'pointer',
-    position: 'relative',
-  },
-  userInfo: {
-    textAlign: 'right',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  userName: {
-    color: '#ffffff',
-    fontWeight: '700',
-    fontSize: '0.95rem',
-  },
-  userRole: {
-    color: '#FFCC00',
-    fontSize: '0.7rem',
-    textTransform: 'uppercase',
-    fontWeight: '700',
-  },
-  avatar: {
-    width: '42px',
-    height: '42px',
-    backgroundColor: '#FFCC00',
-    color: '#003366',
-    borderRadius: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: '800',
-    fontSize: '1.2rem',
-    border: '2px solid rgba(255,255,255,0.2)',
-    transition: 'transform 0.2s',
-  },
-  
-  // -- DROPDOWN --
-  dropdownMenu: {
-    position: 'absolute',
-    top: '140%',
-    right: 0,
-    backgroundColor: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-    minWidth: '240px',
-    overflow: 'hidden',
-    display: 'none',
-    flexDirection: 'column',
-    animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-    zIndex: 2000,
-    border: '1px solid rgba(0,0,0,0.05)',
-  },
-  dropdownItem: {
-    padding: '14px 25px',
-    color: '#334155',
-    textDecoration: 'none',
-    fontSize: '0.95rem',
-    fontWeight: '600',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    transition: 'background 0.2s',
-    borderBottom: '1px solid #f1f5f9',
-  },
-  dropdownItemDanger: {
-    color: '#ef4444',
-    fontWeight: '700',
-  },
-  
-  // Mobile
-  mobileToggle: {
-    display: 'none',
-    background: 'none',
-    border: 'none',
-    color: 'white',
-    fontSize: '2rem',
-    cursor: 'pointer',
-  }
-};
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // State
+  // -- STATE MANAGEMENT --
   const [user, setUser] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
+  
+  // Real-time Settings State
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [compactMode, setCompactMode] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
 
   const dropdownRef = useRef(null);
 
-  // --- 1. AUTH & LOGIC ---
+  // --- 1. AUTH LOGIC ---
   useEffect(() => {
     const checkAuth = () => {
       try {
@@ -233,7 +39,8 @@ const Navbar = () => {
         if (storedUser) {
           setUser(JSON.parse(storedUser));
         } else {
-          setUser(null);
+          // Fallback for demonstration if no user is logged in
+          setUser(null); 
         }
       } catch (e) {
         console.error("Auth Error", e);
@@ -245,19 +52,15 @@ const Navbar = () => {
     return () => window.removeEventListener('storage', checkAuth);
   }, [location]);
 
-  // --- 2. SCROLL EFFECT ---
+  // --- 2. SCROLL & RESIZE EFFECTS ---
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  // --- 3. RESIZE & CLICK OUTSIDE ---
-  useEffect(() => {
     const onResize = () => {
       setIsMobile(window.innerWidth < 992);
       if (window.innerWidth >= 992) setMobileMenuOpen(false);
     };
+    
+    window.addEventListener('scroll', onScroll);
     window.addEventListener('resize', onResize);
     
     const handleClickOutside = (event) => {
@@ -268,68 +71,263 @@ const Navbar = () => {
     document.addEventListener('mousedown', handleClickOutside);
     
     return () => {
+      window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
-  // --- 4. DYNAMIC TABS GENERATOR ---
-  const getNavItems = () => {
-    // Default Base Tabs
-    const tabs = [
-      { name: 'Home', path: '/' },
-      { name: 'Directory', path: '/directory' },
-      { name: 'Mentorship', path: '/mentorship' },
-      { name: 'Jobs', path: '/jobs' }
-    ];
-
-    // INJECT LOGIC: If User is logged in AND Role is ALUMNI -> Add Extra Tabs
-    if (user && user.role === 'alumni') {
-      tabs.push({ name: 'Connections', path: '/connections' });
-      tabs.push({ name: 'Requests', path: '/requests' });
-    }
-
-    return tabs;
-  };
+  // --- 3. CORE TABS (No extra role-based tabs) ---
+  const navItems = [
+    { name: 'Home', path: '/' },
+    { name: 'Directory', path: '/directory' },
+    { name: 'Mentorship', path: '/mentorship' },
+    { name: 'Jobs', path: '/jobs' }
+  ];
 
   const handleLogout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
+    if (window.confirm("Are you sure you want to securely log out?")) {
       localStorage.removeItem('user');
       setUser(null);
-      navigate('/login');
       setDropdownOpen(false);
+      navigate('/login');
+    }
+  };
+
+  // --- STYLES SYSTEM (Dynamic based on settings) ---
+  const theme = {
+    bg: highContrast ? '#001a33' : '#003366',
+    accent: highContrast ? '#FFD700' : '#FFCC00',
+    padding: compactMode ? '0.4rem 2rem' : '0.8rem 2rem',
+  };
+
+  const styles = {
+    nav: {
+      backgroundColor: theme.bg,
+      borderBottom: `4px solid ${theme.accent}`,
+      padding: scrolled ? '0.5rem 2rem' : theme.padding,
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      zIndex: 1050,
+      transition: 'all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
+      boxShadow: scrolled ? '0 10px 30px rgba(0,0,0,0.3)' : '0 4px 25px rgba(0,0,0,0.2)',
+      fontFamily: "'Lora', serif",
+    },
+    container: {
+      maxWidth: '1400px',
+      margin: '0 auto',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    brandTitle: {
+      color: '#ffffff',
+      fontSize: '1.6rem',
+      fontWeight: '700',
+      letterSpacing: '1.5px',
+      textTransform: 'uppercase',
+      fontFamily: "'Lora', serif",
+    },
+    brandSubtitle: {
+      color: theme.accent,
+      fontSize: '0.75rem',
+      fontWeight: '600',
+      letterSpacing: '3px',
+      textTransform: 'uppercase',
+      marginTop: '2px',
+      fontFamily: "'Lora', serif",
+    },
+    logoBox: {
+      backgroundColor: '#ffffff',
+      color: theme.bg,
+      width: '48px',
+      height: '48px',
+      borderRadius: '14px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '1.8rem',
+      fontWeight: '700',
+      fontFamily: "'Lora', serif",
+      boxShadow: `0 0 20px rgba(255, 204, 0, 0.4)`,
+      transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
     }
   };
 
   return (
     <>
-      <nav style={{ ...styles.nav, ...(scrolled ? styles.navScrolled : {}) }}>
+      {/* LORA FONT IMPORT */}
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+          
+          /* Nav Link Hover Underline Animation */
+          .ultra-link {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 8px 15px;
+            position: relative;
+            transition: color 0.3s ease;
+            font-family: 'Lora', serif;
+          }
+          .ultra-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #FFCC00;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transform: translateX(-50%);
+          }
+          .ultra-link:hover {
+            color: #ffffff;
+          }
+          .ultra-link:hover::after, .ultra-link.active::after {
+            width: 80%;
+          }
+          .ultra-link.active {
+            color: #FFCC00;
+            font-weight: 700;
+          }
+
+          /* Dropdown Animations */
+          .dropdown-menu {
+            position: absolute;
+            top: 130%;
+            right: 0;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            min-width: 260px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 2000;
+            border: 1px solid rgba(0,0,0,0.08);
+          }
+          .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+          }
+          .dropdown-item {
+            padding: 16px 25px;
+            color: #334155;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+            font-family: 'Lora', serif;
+            cursor: pointer;
+            background: transparent;
+            border-left: 0px solid transparent;
+            text-align: left;
+            width: 100%;
+          }
+          .dropdown-item:hover {
+            background-color: #f8fafc;
+            color: #003366;
+            padding-left: 30px;
+            border-left: 4px solid #FFCC00;
+          }
+          
+          /* Settings Modal Overlay */
+          .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 20, 40, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+          }
+          .modal-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            font-family: 'Lora', serif;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            transform: scale(0.95);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+          }
+          
+          /* Toggle Switch CSS */
+          .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            appearance: none;
+            background: #cbd5e1;
+            border-radius: 50px;
+            outline: none;
+            cursor: pointer;
+            transition: background 0.3s;
+          }
+          .toggle-switch:checked {
+            background: #003366;
+          }
+          .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+          }
+          .toggle-switch:checked::after {
+            transform: translateX(24px);
+          }
+
+          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes popIn { to { transform: scale(1); } }
+          .logo-hover:hover { transform: rotate(-5deg) scale(1.05); }
+        `}
+      </style>
+
+      <nav style={styles.nav}>
         <div style={styles.container}>
           
-          {/* LOGO */}
-          <Link to="/" style={styles.brandGroup} onClick={() => setMobileMenuOpen(false)}>
-            <div style={styles.logoBox} className="hover-scale">S</div>
-            <div style={styles.titleBox}>
+          {/* BRANDING */}
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '18px', textDecoration: 'none' }} onClick={() => setMobileMenuOpen(false)}>
+            <div style={styles.logoBox} className="logo-hover">S</div>
+            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.1' }}>
               <span style={styles.brandTitle}>SJU ALUMNI</span>
-              <span style={styles.brandSubtitle}>CONNECT & GROW</span>
+              <span style={styles.brandSubtitle}>Connect & Grow</span>
             </div>
           </Link>
 
-          {/* DESKTOP MENU (DYNAMIC) */}
+          {/* DESKTOP MENU */}
           {!isMobile && (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              
-              {/* RENDER TABS BASED ON LOGIC */}
-              <ul style={styles.menu}>
-                {getNavItems().map((item) => (
+              <ul style={{ display: 'flex', gap: '20px', alignItems: 'center', margin: 0, padding: 0, listStyle: 'none' }}>
+                {navItems.map((item) => (
                   <li key={item.name}>
                     <Link 
                       to={item.path} 
-                      style={{
-                        ...styles.link,
-                        ...(location.pathname === item.path ? styles.linkActive : {})
-                      }}
-                      className="nav-link-hover"
+                      className={`ultra-link ${location.pathname === item.path ? 'active' : ''}`}
                     >
                       {item.name}
                     </Link>
@@ -337,45 +335,53 @@ const Navbar = () => {
                 ))}
               </ul>
 
-              {/* AUTH USER PROFILE */}
-              <div style={styles.authGroup}>
+              {/* AUTH & USER */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginLeft: '35px', paddingLeft: '35px', borderLeft: '1px solid rgba(255,255,255,0.2)' }}>
                 {user ? (
                   <div 
-                    style={styles.userBox} 
+                    style={{ display: 'flex', alignItems: 'center', gap: '15px', cursor: 'pointer', position: 'relative' }} 
                     ref={dropdownRef}
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                   >
-                    <div style={styles.userInfo}>
-                      <span style={styles.userName}>{user.full_name || user.name}</span>
-                      <span style={styles.userRole}>{user.role || "Alumni"}</span>
+                    <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', fontFamily: "'Lora', serif" }}>
+                      <span style={{ color: '#ffffff', fontWeight: '600', fontSize: '1rem' }}>{user.full_name || user.name}</span>
+                      <span style={{ color: theme.accent, fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '1px' }}>{user.role || "Alumni"}</span>
                     </div>
-                    <div style={styles.avatar}>
+                    <div style={{ width: '45px', height: '45px', backgroundColor: theme.accent, color: theme.bg, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '1.3rem', border: '2px solid rgba(255,255,255,0.3)' }}>
                       {(user.full_name || user.name || "U").charAt(0).toUpperCase()}
                     </div>
                     
-                    {/* DROPDOWN */}
-                    <div style={{...styles.dropdownMenu, display: dropdownOpen ? 'flex' : 'none'}}>
-                      <div style={{padding:'15px 25px', background:'#f8fafc', borderBottom:'1px solid #e2e8f0'}}>
-                        <div style={{fontSize:'0.75rem', fontWeight:'700', color:'#94a3b8', marginBottom:'5px'}}>SIGNED IN AS</div>
-                        <div style={{fontWeight:'800', color:'#003366'}}>{user.full_name}</div>
+                    {/* DROPDOWN MENU */}
+                    <div className={`dropdown-menu ${dropdownOpen ? 'show' : ''}`}>
+                      <div style={{ padding: '20px 25px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontFamily: "'Lora', serif" }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#94a3b8', marginBottom: '8px', letterSpacing: '1px' }}>SIGNED IN AS</div>
+                        <div style={{ fontWeight: '700', color: '#003366', fontSize: '1.1rem' }}>{user.full_name || user.name}</div>
                       </div>
                       
                       {user.role === 'admin' && (
-                        <Link to="/admin" style={{...styles.dropdownItem, color: '#003366'}}>
+                        <Link to="/admin" className="dropdown-item" style={{ color: '#003366', fontWeight: '700' }}>
                           <i className="bi bi-shield-lock-fill"></i> Admin Console
                         </Link>
                       )}
                       
-                      <Link to="/profile" style={styles.dropdownItem}>
+                      {/* SMART PROFILE ROUTING: Passing Role to the Target Page */}
+                      <Link to="/profile" state={{ role: user.role }} className="dropdown-item">
                         <i className="bi bi-person-badge"></i> Public Profile
                       </Link>
-                      <Link to="/settings" style={styles.dropdownItem}>
-                        <i className="bi bi-gear-wide-connected"></i> Settings
-                      </Link>
+
+                      {/* REAL-TIME SETTINGS BUTTON (Opens internal modal, avoids 404) */}
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setSettingsOpen(true); setDropdownOpen(false); }} 
+                        className="dropdown-item"
+                        style={{ border: 'none' }}
+                      >
+                        <i className="bi bi-sliders"></i> Preferences
+                      </button>
                       
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleLogout(); }} 
-                        style={{...styles.dropdownItem, ...styles.dropdownItemDanger, justifyContent:'center', marginTop:'10px', background:'#fef2f2', borderTop:'1px solid #fee2e2', width:'100%', cursor:'pointer'}}
+                        className="dropdown-item"
+                        style={{ color: '#ef4444', fontWeight: '700', justifyContent: 'center', background: '#fef2f2', borderTop: '1px solid #fee2e2', marginTop: '10px' }}
                       >
                         Sign Out
                       </button>
@@ -384,8 +390,9 @@ const Navbar = () => {
                 ) : (
                   <Link 
                     to="/login" 
-                    style={styles.btnLogin}
-                    className="login-btn-hover"
+                    style={{ background: 'transparent', color: '#ffffff', border: `2px solid ${theme.accent}`, padding: '10px 30px', borderRadius: '50px', fontWeight: '600', textDecoration: 'none', fontSize: '0.95rem', transition: 'all 0.3s ease', fontFamily: "'Lora', serif" }}
+                    onMouseOver={(e) => { e.target.style.background = theme.accent; e.target.style.color = '#003366'; }}
+                    onMouseOut={(e) => { e.target.style.background = 'transparent'; e.target.style.color = '#ffffff'; }}
                   >
                     Login / Join
                   </Link>
@@ -396,53 +403,68 @@ const Navbar = () => {
 
           {/* MOBILE TOGGLE */}
           <button 
-            style={{...styles.mobileToggle, display: isMobile ? 'block' : 'none'}}
+            style={{ display: isMobile ? 'block' : 'none', background: 'none', border: 'none', color: 'white', fontSize: '2rem', cursor: 'pointer' }}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <i className={`bi ${mobileMenuOpen ? 'bi-x-lg' : 'bi-list'}`}></i>
           </button>
-
         </div>
       </nav>
 
       {/* MOBILE MENU OVERLAY */}
       {isMobile && mobileMenuOpen && (
-        <div style={{
-          position: 'fixed', top: '80px', left: 0, width: '100%', height: 'calc(100vh - 80px)',
-          backgroundColor: 'rgba(0, 51, 102, 0.98)', backdropFilter: 'blur(15px)', zIndex: 1040,
-          padding: '2rem', animation: 'fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-        }}>
-          <ul style={{listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '20px'}}>
-            {getNavItems().map(item => (
+        <div style={{ position: 'fixed', top: '75px', left: 0, width: '100%', height: 'calc(100vh - 75px)', backgroundColor: 'rgba(0, 30, 60, 0.98)', backdropFilter: 'blur(15px)', zIndex: 1040, padding: '2rem', animation: 'fadeIn 0.3s ease' }}>
+          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '20px', fontFamily: "'Lora', serif" }}>
+            {navItems.map(item => (
               <li key={item.name}>
-                <Link 
-                  to={item.path} 
-                  style={{...styles.link, fontSize: '1.4rem', padding:'15px 0', borderBottom:'1px solid rgba(255,255,255,0.1)', width:'100%'}} 
-                  onClick={() => setMobileMenuOpen(false)}
-                >
+                <Link to={item.path} style={{ color: 'white', textDecoration: 'none', fontSize: '1.5rem', fontWeight: '500', display: 'block', padding: '15px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }} onClick={() => setMobileMenuOpen(false)}>
                   {item.name}
                 </Link>
               </li>
             ))}
-            {!user && (
-              <li style={{marginTop:'30px'}}>
-                <Link to="/login" style={{...styles.btnLogin, width:'100%', textAlign:'center', display:'block', fontSize:'1.2rem', padding:'15px'}} onClick={() => setMobileMenuOpen(false)}>Login Now</Link>
-              </li>
-            )}
+             <li style={{ marginTop: '20px' }}>
+                <button onClick={() => {setSettingsOpen(true); setMobileMenuOpen(false);}} style={{ background: 'transparent', border: 'none', color: theme.accent, fontSize: '1.5rem', fontWeight: '500', padding: '15px 0', width: '100%', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  Preferences
+                </button>
+             </li>
           </ul>
         </div>
       )}
 
-      {/* CSS ANIMATIONS */}
-      <style>{`
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        .hover-scale:hover { transform: scale(1.1); }
-        .nav-link-hover:hover { background-color: rgba(255,255,255,0.15); color: #fff; }
-        .login-btn-hover:hover { background-color: #ffffff; color: #003366 !important; }
-        .dropdown-item:hover { background-color: #f8fafc; color: #003366; }
-      `}</style>
+      {/* REAL-TIME SETTINGS MODAL (No 404 Routing Needed!) */}
+      {settingsOpen && (
+        <div className="modal-overlay" onClick={() => setSettingsOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #f1f5f9', paddingBottom: '15px', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, color: '#003366', fontWeight: '700' }}>UI Preferences</h3>
+              <button onClick={() => setSettingsOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div>
+                <div style={{ fontWeight: '600', color: '#334155', fontSize: '1.1rem' }}>Compact Navigation</div>
+                <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Reduces the height of the top bar</div>
+              </div>
+              <input type="checkbox" className="toggle-switch" checked={compactMode} onChange={() => setCompactMode(!compactMode)} />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div>
+                <div style={{ fontWeight: '600', color: '#334155', fontSize: '1.1rem' }}>High Contrast Theme</div>
+                <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Deepens the blues and brightens golds</div>
+              </div>
+              <input type="checkbox" className="toggle-switch" checked={highContrast} onChange={() => setHighContrast(!highContrast)} />
+            </div>
+            
+            <button 
+              onClick={() => setSettingsOpen(false)}
+              style={{ width: '100%', padding: '12px', background: '#003366', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', fontSize: '1rem', cursor: 'pointer', marginTop: '10px' }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
