@@ -11,7 +11,7 @@ admin.initializeApp({
 
 const db = admin.firestore();
 const collectionName = "alumni_data"; 
-const csvFilePath = "./SJU_ALUMNI.csv"; 
+const csvFilePath = "SJU_ALUMNI.csv"; 
 
 async function uploadData() {
   const results = [];

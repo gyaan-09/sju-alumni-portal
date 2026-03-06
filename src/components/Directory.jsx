@@ -8,12 +8,13 @@ import { getFirestore, collection, query, limit, onSnapshot } from 'firebase/fir
 // ============================================================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCiJ-4SeUb6u-f4FISN4RK104746HN-G74",
-  authDomain: "ainp-f8709.firebaseapp.com",
-  projectId: "ainp-f8709",
-  storageBucket: "ainp-f8709.firebasestorage.app",
-  messagingSenderId: "1027353321858",
-  appId: "1:1027353321858:web:b15c79969a62111e852f9b"
+  apiKey: "AIzaSyBP7hgY39bMxLX41Zxg5WD5kQ5iLxabjIU",
+  authDomain: "ainp-dc8dd.firebaseapp.com",
+  projectId: "ainp-dc8dd",
+  storageBucket: "ainp-dc8dd.firebasestorage.app",
+  messagingSenderId: "239428629866",
+  appId: "1:239428629866:web:e56f81d7252892bc676113",
+  measurementId: "G-7T9GHG2P1F"
 };
 
 // Zero-crash initialization: Prevents "Firebase App already exists" during HMR
