@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
 
 // ============================================================================
-// COMPONENT IMPORTS (Placeholders mapping to your project structure)
+// COMPONENT IMPORTS (Map these to your React + Vite project structure)
 // ============================================================================
 import Navbar from './components/Navbar';
 import Home from './components/Home';
@@ -15,72 +15,126 @@ import Mentorship from './components/Mentorship';
 import AdminDashboard from './components/AdminDashboard';
 
 // ============================================================================
-// CONFIGURATION & DATA (Policies & EmailJS Constants)
+// CONFIGURATION & CREDENTIALS
 // ============================================================================
 const EMAIL_GATEWAY = {
   serviceId: "service_gyaan",
-  templateId: "template_1jmzaa9", // Reusing the template ID from the admin portal
+  templateId: "template_1jmzaa9",
   publicKey: "MgWnLyUUS3faeP6W5",
 };
 
+// ============================================================================
+// ULTRA-DETAILED POLICY CONTENT 
+// ============================================================================
 const POLICY_CONTENT = {
   PRIVACY: {
-    title: "Privacy Policy",
-    content: `**1. Data Collection**
-St. Joseph's University (SJU) collects personal information including your name, graduation year, degree details, email address, and professional employment history. This data is sourced from university records and information you voluntarily provide during registration.
+    title: "Comprehensive Privacy Policy",
+    content: `Last Updated: March 2026
 
-**2. Usage of Information**
-Your data is strictly used for:
-- Facilitating alumni networking and mentorship matching.
-- Verifying your identity as a legitimate alumnus.
-- Communicating university updates, event invitations, and fundraising initiatives.
-- Generating aggregated, anonymous statistics for accreditation (NAAC/NIRF).
+1. INTRODUCTION & SCOPE
+St. Joseph's University ("SJU", "we", "us", or "our") is committed to protecting the privacy of our alumni, final-year students, and faculty. This Privacy Policy details how we collect, use, store, and share your personal data when you interact with the SJU Alumni Portal.
 
-**3. Data Protection**
-We employ industry-standard encryption (SSL/TLS) to protect your data during transmission. Access to sensitive personal records is restricted to authorized university administrative staff only.
+2. INFORMATION WE COLLECT
+a) Information You Provide:
+- Identity Data: Full name, registration number, date of birth, and graduation year.
+- Contact Data: Personal and professional email addresses, phone numbers, and physical addresses.
+- Professional Data: Current employer, job title, industry, and LinkedIn profile URLs.
+- Mentorship Data: Skills offered, areas of expertise, and mentorship availability.
 
-**4. Third-Party Sharing**
-SJU does NOT sell, rent, or trade your personal information to commercial third parties. Data may be shared with trusted vendors solely for the purpose of executing university services (e.g., email distribution systems) under strict confidentiality agreements.
+b) Automatically Collected Data:
+- Technical Data: IP addresses, browser types, operating systems, and device identifiers.
+- Usage Data: Login timestamps, page views, search queries within the directory, and interaction metrics.
 
-**5. User Rights**
-You retain the right to access, correct, or request the deletion of your digital profile at any time by contacting the Alumni Office.`
+3. HOW WE USE YOUR INFORMATION
+Your data is strictly utilized for the following university-sanctioned purposes:
+- Verification: Authenticating your identity to prevent unauthorized access to the alumni network.
+- Networking: Populating the searchable Alumni Directory (you control the visibility of specific fields).
+- Mentorship Matching: Connecting current students and recent graduates with established alumni.
+- Communications: Distributing the official SJU Alumni Newsletter, event invitations, and fundraising campaigns.
+- Accreditation & Analytics: Generating anonymized, aggregated demographic reports for NAAC, NIRF, and internal strategic planning.
+
+4. DATA SHARING & DISCLOSURE
+SJU strictly prohibits the monetization, sale, or unauthorized trading of your personal information. We only share data under the following circumstances:
+- Service Providers: Trusted third-party vendors (e.g., EmailJS, Firebase database hosting) who operate under strict confidentiality agreements.
+- Legal Compliance: When required by law, subpoena, or to protect the vital interests of the University and its community members.
+
+5. DATA RETENTION & SECURITY
+We employ industry-standard cryptographic protocols (SSL/TLS) for data in transit and robust access controls for data at rest. Your profile data is retained indefinitely to maintain the historical alumni archive, unless you explicitly request deletion.
+
+6. YOUR PRIVACY RIGHTS
+Depending on your jurisdiction, you possess the right to:
+- Access a copy of your personal data.
+- Rectify inaccuracies in your profile.
+- Restrict the processing of your data.
+- Request the erasure of your digital footprint on this portal (Right to be Forgotten).
+
+To exercise these rights, please contact the IT Administrator or Alumni Office directly.`
   },
   TERMS: {
-    title: "Terms of Service",
-    content: `**1. Acceptance of Terms**
-By accessing the SJU Alumni Portal, you agree to be bound by these terms. This portal is exclusively for the use of SJU alumni, current students (final year), and faculty.
+    title: "Terms of Service & Code of Conduct",
+    content: `Last Updated: March 2026
 
-**2. Code of Conduct**
-Users agree to maintain a professional standard of behavior. Prohibited activities include:
-- Harassment, hate speech, or bullying of any kind.
-- Posting spam, unauthorized advertising, or MLM schemes.
-- Scraping data for commercial use.
-- Impersonating other alumni or university officials.
+1. ACCEPTANCE OF TERMS
+By registering, accessing, or utilizing the SJU Alumni Portal, you formally agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you must immediately cease using the platform.
 
-**3. Account Security**
-You are responsible for maintaining the confidentiality of your login credentials. You agree to notify the IT department immediately of any unauthorized use of your account.
+2. ELIGIBILITY
+Access to this platform is restricted exclusively to:
+- Verified alumni of St. Joseph's University.
+- Currently enrolled final-year undergraduate (e.g., B.Sc.) and postgraduate students.
+- Current and former faculty members.
+Unauthorized account creation constitutes a breach of these terms.
 
-**4. Intellectual Property**
-All content, logos, and software associated with this portal are the property of St. Joseph's University.
+3. USER RESPONSIBILITIES & CODE OF CONDUCT
+The SJU Alumni Portal is a professional networking environment. You agree to:
+- Provide accurate, current, and truthful information during registration.
+- Maintain the confidentiality of your account credentials.
+- Treat all community members with respect and professionalism.
 
-**5. Termination**
-The University reserves the right to suspend or terminate accounts that violate these terms without prior notice.`
+You explicitly agree NOT to engage in:
+- Harassment, discrimination, hate speech, or targeted bullying.
+- The mass distribution of unsolicited promotional materials, spam, or multi-level marketing (MLM) schemes.
+- Data scraping, harvesting, or utilizing automated bots to extract alumni contact information for commercial purposes.
+- Impersonating university officials, administration, or other alumni.
+
+4. INTELLECTUAL PROPERTY RIGHTS
+All portal designs, graphics, text, logos, underlying code (React/Vite architecture), and databases are the exclusive property of St. Joseph's University. You may not reproduce, distribute, or create derivative works without explicit written permission.
+
+5. USER-GENERATED CONTENT
+By posting content (e.g., job listings, mentorship offers, forum posts), you grant SJU a non-exclusive, royalty-free license to display, modify, and distribute said content within the portal ecosystem.
+
+6. LIMITATION OF LIABILITY
+SJU provides this portal on an "AS IS" and "AS AVAILABLE" basis. We do not warrant that the service will be uninterrupted, error-free, or entirely secure. SJU shall not be liable for any indirect, incidental, or consequential damages arising from your use of the platform.
+
+7. ACCOUNT TERMINATION
+The University reserves the unilateral right to suspend, restrict, or permanently terminate any account that violates this Code of Conduct, with or without prior notice.`
   },
   COOKIE: {
-    title: "Cookie Policy",
-    content: `**1. What Are Cookies?**
-Cookies are small text files stored on your device to help the website function efficiently and recognize you on subsequent visits.
+    title: "Detailed Cookie Policy",
+    content: `Last Updated: March 2026
 
-**2. How We Use Cookies**
-- **Essential Cookies:** These are necessary for the portal to function (e.g., keeping you logged in securely). You cannot opt-out of these.
-- **Analytics Cookies:** We use anonymous trackers to understand which pages are most popular and improve user experience.
-- **Preference Cookies:** These remember your settings, such as language preferences or display modes.
+1. UNDERSTANDING COOKIES
+Cookies are micro-data files transferred to your device's browser when you visit the SJU Alumni Portal. They act as a memory for the website, allowing it to recognize your device upon subsequent visits.
 
-**3. Third-Party Cookies**
-Embedded content from other websites (e.g., YouTube videos of convocation, Google Maps for event locations) may behave in the exact same way as if the visitor has visited the other website.
+2. CLASSIFICATION OF COOKIES WE USE
+a) Strictly Necessary Cookies:
+These are fundamental to the operation of the portal. They facilitate secure logins, maintain your session state, and ensure the routing architecture functions correctly. The portal cannot operate without these, and they do not require user consent.
 
-**4. Managing Cookies**
-Most browsers allow you to refuse to accept cookies and to delete cookies. The methods for doing so vary from browser to browser, and from version to version.`
+b) Functional & Preference Cookies:
+These allow the platform to remember choices you make (such as language preferences, theme settings, or customized dashboard layouts) to provide a highly personalized experience.
+
+c) Analytical & Performance Cookies:
+We utilize these to collect aggregated, anonymous data on how users interact with the portal. This helps us understand metrics like page load times, popular job board sections, and error rates, allowing us to continuously optimize the user experience.
+
+3. THIRD-PARTY TRACKING
+Certain embedded features (such as Google Maps for alumni chapter events or YouTube embeds for university updates) may deploy their own cookies. SJU does not control these third-party trackers, and their usage is governed by the respective providers' privacy policies.
+
+4. MANAGING YOUR COOKIE PREFERENCES
+You maintain full control over your cookie environment. Most modern browsers allow you to:
+- View all active cookies.
+- Delete specific cookies or clear them entirely.
+- Block third-party cookies globally.
+
+Please note that disabling strictly necessary cookies will prevent you from authenticating and accessing secure areas of the SJU Alumni Portal.`
   }
 };
 
@@ -97,27 +151,27 @@ const styles = {
   },
   mainContent: {
     flex: '1 0 auto',
-    marginTop: '80px', // Offset for Fixed Navbar
+    marginTop: '80px', 
     width: '100%',
     position: 'relative',
   },
   
-  // --- ENHANCED FOOTER STYLES ---
+  // --- FOOTER STYLES ---
   footer: {
     flexShrink: 0,
-    backgroundColor: '#060e1a', // Deep Navy
+    backgroundColor: '#060e1a', 
     color: '#e2e8f0',
     paddingTop: '80px',
     paddingBottom: '30px',
-    borderTop: '4px solid #FFCC00', // SJU Gold accent border
-    fontFamily: "'Lora', serif", // Updated to Lora
+    borderTop: '4px solid #FFCC00', 
+    fontFamily: "'Lora', serif", 
     position: 'relative',
     overflow: 'hidden',
   },
   footerOverlay: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
-    backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(255, 204, 0, 0.03) 0%, transparent 70%)',
+    backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(255, 204, 0, 0.04) 0%, transparent 60%)',
     pointerEvents: 'none',
   },
   footerContainer: {
@@ -134,7 +188,6 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
   },
-  // Brand Section
   logoGroup: {
     display: 'flex',
     alignItems: 'center',
@@ -146,7 +199,7 @@ const styles = {
     fontSize: '1.8rem',
     backgroundColor: '#fff',
     color: '#060e1a',
-    borderRadius: '12px', // Slightly squared off for a modern crest look
+    borderRadius: '12px', 
     width: '50px', 
     height: '50px',
     display: 'flex', 
@@ -179,7 +232,6 @@ const styles = {
     maxWidth: '280px',
     fontWeight: '400',
   },
-  // Headings
   footerTitle: {
     color: '#ffffff',
     fontSize: '1.1rem',
@@ -190,7 +242,6 @@ const styles = {
     position: 'relative',
     paddingBottom: '10px',
   },
-  // Links
   linkList: {
     display: 'flex',
     flexDirection: 'column',
@@ -206,7 +257,6 @@ const styles = {
     alignItems: 'center',
     fontWeight: '500',
   },
-  // Contact Items
   contactItem: {
     display: 'flex',
     alignItems: 'flex-start',
@@ -223,7 +273,6 @@ const styles = {
     marginTop: '3px',
     filter: 'drop-shadow(0 0 4px rgba(255, 204, 0, 0.4))',
   },
-  // Newsletter
   newsletterBox: {
     display: 'flex',
     gap: '0',
@@ -268,6 +317,7 @@ const styles = {
     display: 'block',
     minHeight: '20px',
     transition: 'opacity 0.3s ease',
+    fontWeight: '500',
   },
   socialGroup: {
     marginTop: '30px',
@@ -289,7 +339,6 @@ const styles = {
     cursor: 'pointer',
     textDecoration: 'none'
   },
-  // Bottom Bar
   footerBottom: {
     marginTop: '70px',
     paddingTop: '30px',
@@ -322,8 +371,25 @@ const styles = {
     fontSize: 'inherit',
     position: 'relative',
   },
+  backToTopBtn: {
+    position: 'absolute',
+    right: '20px',
+    top: '-20px',
+    width: '40px',
+    height: '40px',
+    backgroundColor: '#FFCC00',
+    color: '#060e1a',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+    border: 'none',
+    transition: 'transform 0.3s ease',
+  },
 
-  // --- ULTRA-ENHANCED MODAL STYLES ---
+  // --- MODAL STYLES ---
   modalOverlay: {
     position: 'fixed',
     top: 0, left: 0, right: 0, bottom: 0,
@@ -340,7 +406,7 @@ const styles = {
     backgroundColor: '#ffffff',
     borderRadius: '16px',
     width: '100%',
-    maxWidth: '650px',
+    maxWidth: '700px',
     maxHeight: '85vh',
     display: 'flex',
     flexDirection: 'column',
@@ -384,7 +450,7 @@ const styles = {
     lineHeight: '1.8',
     color: '#334155',
     whiteSpace: 'pre-wrap',
-    fontFamily: "'Segoe UI', Roboto, sans-serif", // Keep body text readable
+    fontFamily: "'Segoe UI', Roboto, sans-serif",
   },
 
   // --- ERROR PAGES ---
@@ -443,7 +509,7 @@ const PolicyModal = ({ policy, onClose }) => {
   useEffect(() => {
     const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handleEsc);
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden'; 
     return () => {
       window.removeEventListener('keydown', handleEsc);
       document.body.style.overflow = 'unset';
@@ -507,30 +573,46 @@ const AdminRoute = ({ children }) => {
 };
 
 // ============================================================================
-// MEGA FOOTER (ULTRA ENHANCED w/ EMAILJS)
+// DYNAMIC MEGA FOOTER 
 // ============================================================================
 const MegaFooter = () => {
+  const location = useLocation();
   const [hoverLink, setHoverLink] = useState(null);
   const [activePolicy, setActivePolicy] = useState(null);
   const [email, setEmail] = useState('');
-  const [subStatus, setSubStatus] = useState('idle'); // 'idle', 'loading', 'success', 'error'
+  const [subStatus, setSubStatus] = useState('idle'); 
 
+  // --- HIDE FOOTER LOGIC ---
+  // The footer will NOT render if the current URL exactly matches or starts with these routes.
+  const hiddenRoutes = ['/login', '/register', '/admin'];
+  const shouldHideFooter = hiddenRoutes.some(route => location.pathname.startsWith(route));
+
+  if (shouldHideFooter) {
+    return null; // Render absolutely nothing on these pages.
+  }
+
+  // --- ROBUST EMAILJS HANDLER ---
   const handleSubscribe = async (e) => {
     e.preventDefault();
-    if (!email || !email.includes('@')) return;
+    
+    // Basic Regex Validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      setSubStatus('error');
+      setTimeout(() => setSubStatus('idle'), 3000);
+      return;
+    }
     
     setSubStatus('loading');
     
     try {
+      // Corrected payload mapping
       await emailjs.send(
         EMAIL_GATEWAY.serviceId,
         EMAIL_GATEWAY.templateId,
         {
-          to_email: email,
-          to_name: "SJU Community Member",
-          message: "Thank you for subscribing to the official SJU Alumni Newsletter! You will now receive updates on events, mentorship programs, and university news.",
-          reply_to: "alumni.sju.ainp@gmail.com",
-          account_credentials:""
+          to_email: email, // Maps to your EmailJS template variable
+          to_name: "SJU Alumni Member", 
         },
         EMAIL_GATEWAY.publicKey
       );
@@ -547,9 +629,9 @@ const MegaFooter = () => {
 
   const getStatusMessage = () => {
     switch (subStatus) {
-      case 'loading': return <span style={{ color: '#FFCC00' }}><i className="bi bi-hourglass-split spin"></i> Processing...</span>;
-      case 'success': return <span style={{ color: '#10B981' }}><i className="bi bi-check-circle-fill"></i> Successfully subscribed!</span>;
-      case 'error': return <span style={{ color: '#EF4444' }}><i className="bi bi-exclamation-triangle-fill"></i> Subscription failed. Please try again.</span>;
+      case 'loading': return <span style={{ color: '#FFCC00' }}><i className="bi bi-hourglass-split spin"></i> Verifying...</span>;
+      case 'success': return <span style={{ color: '#10B981' }}><i className="bi bi-check-circle-fill"></i> Welcome to the list!</span>;
+      case 'error': return <span style={{ color: '#EF4444' }}><i className="bi bi-exclamation-triangle-fill"></i> Invalid email or server error.</span>;
       default: return <span style={{ color: '#64748B', opacity: 0 }}>Placeholder</span>;
     }
   };
@@ -559,6 +641,8 @@ const MegaFooter = () => {
     color: hoverLink === name ? '#FFCC00' : '#cbd5e1',
     transform: hoverLink === name ? 'translateX(6px)' : 'translateX(0)',
   });
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
     <>
@@ -624,9 +708,9 @@ const MegaFooter = () => {
             <h4 style={styles.footerTitle} className="title-underline">Stay Updated</h4>
             <p style={{...styles.footerDesc, marginBottom: '10px'}}>Subscribe to get the latest news and event invites directly to your inbox.</p>
             
-            <form onSubmit={handleSubscribe} className="newsletter-form" style={{...styles.newsletterBox, borderColor: subStatus === 'loading' ? '#FFCC00' : 'rgba(255,255,255,0.1)'}}>
+            <form onSubmit={handleSubscribe} className="newsletter-form" style={{...styles.newsletterBox, borderColor: subStatus === 'loading' ? '#FFCC00' : subStatus === 'error' ? '#EF4444' : 'rgba(255,255,255,0.1)'}}>
               <input 
-                type="email" 
+                type="text" // Changed from email to allow regex check before native browser validation
                 placeholder="Your Email Address" 
                 style={styles.input} 
                 required 
@@ -646,7 +730,6 @@ const MegaFooter = () => {
             </form>
             <div style={styles.statusText}>{getStatusMessage()}</div>
             
-            {/* SOCIAL MEDIA LINKS (Official SJU Accounts + YouTube) */}
             <div style={styles.socialGroup}>
               <a href="https://www.linkedin.com/school/st-joseph's-university-bengaluru/" target="_blank" rel="noreferrer" className="social-glowing" style={styles.socialIcon} aria-label="LinkedIn">
                 <i className="bi bi-linkedin"></i>
@@ -657,9 +740,6 @@ const MegaFooter = () => {
               <a href="https://www.instagram.com/stjosephsuniversity/" target="_blank" rel="noreferrer" className="social-glowing" style={styles.socialIcon} aria-label="Instagram">
                 <i className="bi bi-instagram"></i>
               </a>
-              <a href="https://www.facebook.com/sjubengaluru/" target="_blank" rel="noreferrer" className="social-glowing" style={styles.socialIcon} aria-label="Facebook">
-                <i className="bi bi-facebook"></i>
-              </a>
               <a href="https://www.youtube.com/@StJosephsUniversityBengaluru" target="_blank" rel="noreferrer" className="social-glowing" style={styles.socialIcon} aria-label="YouTube">
                 <i className="bi bi-youtube"></i>
               </a>
@@ -669,6 +749,9 @@ const MegaFooter = () => {
 
         {/* BOTTOM BAR WITH POLICY TRIGGERS */}
         <div style={styles.footerBottom}>
+          <button onClick={scrollToTop} style={styles.backToTopBtn} className="back-to-top-hover" aria-label="Back to top">
+            <i className="bi bi-arrow-up-short" style={{fontSize: '1.5rem'}}></i>
+          </button>
           <div>© {new Date().getFullYear()} St. Joseph's University Alumni Portal. All Rights Reserved.</div>
           <div style={styles.legalLinks}>
             <button onClick={() => setActivePolicy('PRIVACY')} style={styles.legalLink} className="legal-link-hover">Privacy Policy</button>
@@ -715,7 +798,7 @@ const MegaFooter = () => {
             box-shadow: 0 10px 20px -5px rgba(255, 204, 0, 0.5);
           }
 
-          /* Bottom Links */
+          /* Bottom Links & Buttons */
           .legal-link-hover::after {
             content: ''; position: absolute; width: 100%; transform: scaleX(0);
             height: 1px; bottom: -2px; left: 0; background-color: #FFCC00;
@@ -723,6 +806,8 @@ const MegaFooter = () => {
           }
           .legal-link-hover:hover { color: #FFCC00 !important; }
           .legal-link-hover:hover::after { transform: scaleX(1); transform-origin: bottom left; }
+          
+          .back-to-top-hover:hover { transform: translateY(-5px) !important; background-color: #fff !important; }
 
           /* Modal Close button */
           .modal-close-hover:hover { background: #cbd5e1 !important; color: #ef4444 !important; transform: rotate(90deg); }
@@ -737,7 +822,9 @@ const MegaFooter = () => {
           @media (max-width: 650px) { 
             footer > div.footerContainer { grid-template-columns: 1fr; gap: 40px; } 
             .legalLinks { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; }
-            .footerBottom { flex-direction: column; text-align: center; }
+            .footerBottom { flex-direction: column; text-align: center; padding-top: 50px; }
+            .backToTopBtn { top: -20px; right: 50%; transform: translateX(50%); }
+            .back-to-top-hover:hover { transform: translate(50%, -5px) !important; }
           }
         `}</style>
       </footer>
@@ -765,6 +852,7 @@ function App() {
             {/* PUBLIC ROUTES */}
             <Route path="/" element={<Home />} />
             
+            {/* ROUTES WHERE FOOTER IS HIDDEN (Handled inside MegaFooter) */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             

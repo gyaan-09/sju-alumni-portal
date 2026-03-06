@@ -1,6 +1,5 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,8 +10,5 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-
-// RE-LINKED TO YOUR CUSTOM "ainp" DATABASE
-export const db = getFirestore(app, "ainp");
-export const storage = getStorage(app);
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app); // Ensure 'db' is exported
