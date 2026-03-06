@@ -1,5 +1,5 @@
 {pkgs}: {
   packages = [
-    pkgs.nodejs-22_x
+    pkgs.nodejs-18_x
   ];
 }
