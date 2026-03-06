@@ -21,7 +21,7 @@ admin.initializeApp({
 // FIX: Use your explicit 'ainp' database name
 const db = getFirestore(admin.app(), 'ainp'); 
 const collectionName = 'alumni_data'; 
-const csvFilePath = './SJU_ALUMNI.csv';
+const csvFilePath = './scripts/SJU_ALUMNI.csv';
 
 // ... (uploadData function logic as provided earlier) ...
 
