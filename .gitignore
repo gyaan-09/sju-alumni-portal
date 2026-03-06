@@ -22,3 +22,17 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+{
+  "type": "service_account",
+  "project_id": "sju-alumni-portal",
+  "private_key_id": "0c25f5ee95cbde42dff78a2d08e7c97d73e182bb",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCdZpawvpcoMeb4\n0DOutcNZGJWpLPI/Dqd+igUILD3oyzzM1XuRF7pDN5cxfHNW8Z17Ddf510tCkIvy\nfz2U2z/dlF6msTWDtL/uPfurWnH1GVxBq6mt5uxG31N1pmWvUS9wnM/4Fv1w81Wp\n9NDi9kGnvTW386FIX/xjpGo7+UESf8I1Zh/dngza4ie51oY1SwVf9HWbTl4K1335\nFiPP2ndmVqSMIoqpQt4axUqkQDASIdpuMct1pbeZ/lRjEczGCVc9kE/u536iUK7A\n1BA71DWPjEG+gMhhJqZ4RDtqoBR2lE4PJPDjpHY8mOAEmhxBzg+DPSJiP9nT6EUO\nPloG/LWhAgMBAAECggEABXrNawyjk18TYQenOPaefP2oXi9QpVsuVRnbKChEJSnd\ngsMO43j9lM/8t+4Sz4zR/vdMf31G4zkdiifIXiQ457mohunwnevJv8f8I5XJQFoY\nQQ1dIaRXsaBI60sLoLbKmEN5UQmEhsK4nCtdUf12loSgOA3SXa7ryOXv2zPSV7a5\ncoq1/WlNx2XXTnZ+F5ACjSQ9AQZnkjjnTrI9fG1VS+SD5ZvFUBZiNJ7cEkzDxKA4\nkFnAlxmPqP0RCX4d9V1WqU5+BSQUGdw4vQf0Z00BBV5ZW5imDi6OfGZJa8VQ2IZO\nBU2wWYsecEC6zp3aL921cD3dFX3WgrUbDRt5be0RTQKBgQDMesTxzpDhE3uC0IFz\njXGVEMBBcPtMs94IQWmLm95kJjruBjDY5PzTfJkS1WSlrezo1vJSquqxBhY3hRN9\nlxWw1kKvvgmqKmEOG5xzjN9/1TTfCGi9H9spBZ+RqHhqmJlpf7r1PTLYWQKSsYT0\ncx7r1eX5bTaYmO8JrLnFRH519QKBgQDFDyp+bdRwxTV5+BmlX5HqVOTN0PJPYgxH\nTROCw059uWbiaJ8maHXYKd4CgzRcNEdcb+6ghNlA/g//e2pRv1eVFt1ZUePL2r27\no6JTAMMZTbACfoPyg8DMRA7MjbOdNMLoa0emhK8DLP7grsf7ZbYgka04a4WOehV8\nxXDiqImJfQKBgAJT224NNeT5/cvtZ6vTDlnuCOI10QZ8faiGZhcqvQtSzBTtiRzO\n7nnRz0RBnZWtNycnWzbJr0Y4lYQoRaKGV77dkYDCnwWK2fP5KHzAO8MOwD1RsS+F\n7062O6zCyCwedJCY3Z3xBmUkDj1xO9w0e0Of+bAvKBHwm7f2eV7ferkJAoGASBU9\nIRRB4qJw5lXX48Nq18IIFDV7fYhLH4XVPj79JkY8mVNV7DHH8bOW72pZK+U/uVOE\ngZk282w8I+NcR9zrR7EedP7cigRQ5SN9TEl6FHZzjOYElCCX1OCMXUz0R+w149ji\nU8ozTsEV1tB4fMB+97jyGTJTn4OO+p4qpe6qqO0CgYEAqJ1CfEX/Xq23uJLuPk6D\nJiXZBdfmOKjIXlMlPfy6ap97ERX/w/mbGtv6IDLYSS5GCDTrCXZqVEqR75OyIrgi\nHKlqYrRsPU1kD/GydoOw7HH+lTEaaqKMGt0sM8+TIvu2J0MXHOR5F+wt0PDu9u/d\nRSu/MMFq+ijtrTJ9C/4uH90=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@sju-alumni-portal.iam.gserviceaccount.com",
+  "client_id": "108297514680599253502",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40sju-alumni-portal.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

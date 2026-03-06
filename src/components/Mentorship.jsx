@@ -1,68 +1,47 @@
-//// src/MentorshipGateway.jsx
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, query, orderBy } from "firebase/firestore";
-
-/**
- * =================================================================================
- * SJU MENTORSHIP GATEWAY: UNIFIED ENHANCED ENTERPRISE BUILD (MERGED)
- * =================================================================================
- * Architecture & Features Preserved:
- * - Typography: Strictly enforces "Lora" serif font.
- * - Views: Seamless Views (Grid, List, Analytics).
- * - Filtering: Dynamic Faceted Filters with smooth accordion animations.
- * - Booking: Integrated multi-step Booking Wizard.
- * - Analytics: Custom React-SVG PowerBI-Style visualizations.
- * - Firebase: Production-ready Firestore integration with SAFE dynamic fallback.
- * =================================================================================
- */
+import { db } from '../firebase'; 
+import { collection, onSnapshot, query, limit } from "firebase/firestore";
 
 /* =========================================================
-   1) CONFIGURATION & THEME
+   1) CONFIGURATION & THEME (ENTERPRISE GRADE)
    ========================================================= */
 const CONFIG = {
   SYSTEM: {
-    APP_NAME: "SJU Mentorship Connect",
-    VERSION: "3.0.0 Enterprise",
-    ORG: "St. Joseph's University"
+    APP_NAME: "SJU Mentorship Gateway",
+    VERSION: "5.0.0 Enterprise Ultra",
+    ORG: "St. Joseph's University",
+    BUILD: "2026.11.X.NEXUS"
   },
   DATA: {
-    TOTAL_RECORDS: 1500, // Balanced from both versions
-    PAGE_SIZE: 12
+    PAGE_SIZE: 100, // Optimized for dense component rendering
   },
   THEME: {
-    NAVY_DARK: '#061121',
-    NAVY_MAIN: '#0C2340',
-    NAVY_LITE: '#1A3B66',
-    GOLD_MAIN: '#D4AF37', 
-    GOLD_LITE: '#F9F1D8',
-    ACCENT_CYAN: '#00B4D8',
-    ACCENT_PURPLE: '#7B2CBF',
-    SUCCESS: '#10B981',
-    SUCCESS_BG: 'rgba(16, 185, 129, 0.1)',
-    WARNING: '#F59E0B',
-    WARNING_BG: 'rgba(245, 158, 11, 0.1)',
-    DANGER: '#EF4444',
-    DANGER_BG: 'rgba(239, 68, 68, 0.1)',
-    INFO: '#3B82F6',
-    INFO_BG: 'rgba(59, 130, 246, 0.1)',
-    BG_APP: '#F4F7F9',
-    BG_SURFACE: '#FFFFFF',
-    BG_SURFACE_ALT: '#F8FAFC',
-    BORDER: 'rgba(12, 35, 64, 0.12)',
-    BORDER_LIGHT: '#E2E8F0',
-    TEXT_PRI: '#0F172A',
-    TEXT_SEC: '#475569',
-    TEXT_TER: '#94A3B8',
-    RADIUS_SM: '6px',
-    RADIUS_MD: '12px',
-    RADIUS_LG: '20px',
-    RADIUS_XL: '32px',
-    RADIUS_FULL: '9999px',
+    // Core Palette
+    NAVY_DARK: '#061121', NAVY_MAIN: '#0C2340', NAVY_LITE: '#1A3B66',
+    GOLD_MAIN: '#D4AF37', GOLD_LITE: '#F9F1D8',
+    
+    // Accents & Semantic States
+    ACCENT_CYAN: '#00B4D8', ACCENT_PURPLE: '#7B2CBF',
+    SUCCESS: '#10B981', SUCCESS_BG: 'rgba(16, 185, 129, 0.1)',
+    WARNING: '#F59E0B', WARNING_BG: 'rgba(245, 158, 11, 0.1)',
+    DANGER: '#EF4444', DANGER_BG: 'rgba(239, 68, 68, 0.1)',
+    INFO: '#3B82F6', INFO_BG: 'rgba(59, 130, 246, 0.1)',
+    
+    // Surfaces & Typography
+    BG_APP: '#F4F7F9', BG_SURFACE: '#FFFFFF', BG_SURFACE_ALT: '#F8FAFC',
+    BORDER: 'rgba(12, 35, 64, 0.12)', BORDER_LIGHT: '#E2E8F0',
+    TEXT_PRI: '#0F172A', TEXT_SEC: '#475569', TEXT_TER: '#94A3B8',
+    
+    // Geometry
+    RADIUS_SM: '6px', RADIUS_MD: '12px', RADIUS_LG: '20px', RADIUS_XL: '32px', RADIUS_FULL: '9999px',
+    
+    // Elevation
     SHADOW_SM: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
     SHADOW_MD: '0 10px 15px -3px rgba(0, 0, 0, 0.08)',
     SHADOW_LG: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
     SHADOW_HOVER: '0 30px 60px -15px rgba(0, 0, 0, 0.25), 0 0 20px rgba(212, 175, 55, 0.15)',
+    
+    // Motion
     TRANSITION_FAST: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     TRANSITION_SMOOTH: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
     TRANSITION_BOUNCE: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
@@ -70,100 +49,39 @@ const CONFIG = {
 };
 
 /* =========================================================
-   2) EXPANDED ENTERPRISE MOCK DATABASE
-   ========================================================= */
-const MockDB = {
-  firstNames: ["Aarav", "Diya", "David", "Sarah", "Yusuf", "Aisha", "Wei", "Priya", "Rohan", "Emma", "Kavya", "Arjun", "Sanya", "Liam", "Olivia"],
-  lastNames: ["Sharma", "Patel", "Smith", "Jones", "Khan", "Martinez", "Chen", "Reddy", "Gowda", "Williams", "Verma", "Iyer", "Nair", "Brown", "Taylor"],
-  domains: ["Product Management", "Data Science", "Investment Banking", "Software Engineering", "Corporate Law", "Digital Marketing", "Civil Services", "Entrepreneurship", "Biotech Research"],
-  companies: [
-    { name: "Google", tier: "MNC" }, { name: "Microsoft", tier: "MNC" }, { name: "Amazon", tier: "MNC" },
-    { name: "Goldman Sachs", tier: "Finance" }, { name: "McKinsey", tier: "Consulting" },
-    { name: "Tesla", tier: "Auto" }, { name: "SJU Research", tier: "Academic" }, 
-    { name: "Deloitte", tier: "Consulting" }, { name: "Zerodha", tier: "Fintech" }, { name: "Swiggy", tier: "Startup" }
-  ],
-  languages: ["English", "Hindi", "Kannada", "Tamil", "Telugu", "Spanish", "French", "German"],
-  sessionTypes: ["1:1 Call", "Mock Interview", "Resume Review", "Long-term Mentorship"],
-
-  pick: (arr) => arr[Math.floor(Math.random() * arr.length)],
-
-  generate: (count = CONFIG.DATA.TOTAL_RECORDS) => {
-    const data = [];
-    for (let i = 1; i <= count; i++) {
-      const domain = MockDB.pick(MockDB.domains);
-      const comp = MockDB.pick(MockDB.companies);
-      const fname = MockDB.pick(MockDB.firstNames);
-      const lname = MockDB.pick(MockDB.lastNames);
-      const experience = Math.floor(Math.random() * 25) + 2;
-
-      let tier = "Peer Mentor";
-      if (experience > 10) tier = "Industry Leader";
-      else if (experience > 5) tier = "Senior Mentor";
-
-      const price = experience > 10 ? 2000 : (experience > 5 ? 1000 : 0);
-
-      data.push({
-        id: `MENTOR-${20000 + i}`,
-        name: `${fname} ${lname}`,
-        email: `${fname.toLowerCase()}.${lname.toLowerCase()}@alumni.sju.edu`,
-        domain: domain,
-        company: comp.name,
-        companyTier: comp.tier,
-        role: i % 3 === 0 ? "Director" : (i % 2 === 0 ? "Senior Manager" : "Associate"),
-        tier: tier,
-        experience: experience,
-        languages: [...new Set(["English", MockDB.pick(MockDB.languages)])],
-        sessionTypes: [...new Set([MockDB.sessionTypes[0], MockDB.pick(MockDB.sessionTypes)])],
-        availability: i % 5 === 0 ? "Weekends Only" : (i % 3 === 0 ? "Evenings" : "Flexible"),
-        rating: (4.0 + Math.random()).toFixed(1),
-        sessionsConducted: Math.floor(Math.random() * 200),
-        responseRate: Math.floor(Math.random() * (100 - 80) + 80),
-        initials: `${fname[0]}${lname[0]}`,
-        isTopRated: Math.random() > 0.85,
-        price: price,
-        priceCategory: price === 0 ? 'Free' : 'Paid',
-        bio: `Driven ${domain} professional with ${experience} years of experience at top-tier firms like ${comp.name}. Passionate about guiding the next generation of SJU leaders through focused mentoring and actionable insights.`
-      });
-    }
-    return data;
-  }
-};
-
-/* =========================================================
-   3) GLOBAL STYLES & ANIMATION ENGINE
+   2) GLOBAL STYLES & ANIMATION ENGINE
    ========================================================= */
 const GlobalStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
     
     body {
-      margin: 0; padding: 0;
-      background-color: ${CONFIG.THEME.BG_APP};
-      font-family: 'Lora', serif;
-      color: ${CONFIG.THEME.TEXT_PRI};
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      margin: 0; padding: 0; background-color: ${CONFIG.THEME.BG_APP};
+      font-family: 'Lora', serif; color: ${CONFIG.THEME.TEXT_PRI};
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
       overflow-x: hidden; line-height: 1.6;
     }
 
     * { box-sizing: border-box; }
     h1, h2, h3, h4, h5, h6, button, input, select, textarea, span, p, div, table, th, td { font-family: 'Lora', serif; }
 
-    ::-webkit-scrollbar { width: 12px; height: 12px; }
-    ::-webkit-scrollbar-track { background: ${CONFIG.THEME.BG_APP}; border-left: 1px solid ${CONFIG.THEME.BORDER_LIGHT}; }
-    ::-webkit-scrollbar-thumb { background: ${CONFIG.THEME.BORDER}; border-radius: 10px; border: 3px solid ${CONFIG.THEME.BG_APP}; }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: ${CONFIG.THEME.BORDER}; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: ${CONFIG.THEME.TEXT_TER}; }
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideUpFade { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes scaleInModal { from { opacity: 0; transform: scale(0.97) translateY(15px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @keyframes slideLeft { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); } 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); } }
+    @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+    @keyframes scanline { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
     .animated-card {
       background: ${CONFIG.THEME.BG_SURFACE}; border-radius: ${CONFIG.THEME.RADIUS_LG};
       border: 1px solid ${CONFIG.THEME.BORDER_LIGHT}; transition: ${CONFIG.THEME.TRANSITION_BOUNCE};
-      cursor: pointer; position: relative; overflow: hidden; z-index: 1;
+      cursor: pointer; position: relative; overflow: hidden; z-index: 1; display: flex; flex-direction: column;
     }
     .animated-card::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -189,33 +107,47 @@ const GlobalStyles = () => (
       border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: ${CONFIG.THEME.SHADOW_SM};
     }
 
-    .sju-input {
-      width: 100%; padding: 16px 20px 16px 48px; border-radius: ${CONFIG.THEME.RADIUS_FULL};
-      border: 1px solid ${CONFIG.THEME.BORDER_LIGHT}; font-size: 1rem; background: ${CONFIG.THEME.BG_SURFACE}; 
-      transition: all 0.3s ease; color: ${CONFIG.THEME.TEXT_PRI};
+    .skeleton-box {
+      background: #E2E8F0; background-image: linear-gradient(90deg, #E2E8F0 0px, #F1F5F9 40px, #E2E8F0 80px);
+      background-size: 1000px 100%; animation: shimmer 2.5s infinite linear; border-radius: ${CONFIG.THEME.RADIUS_SM};
     }
-    .sju-input:focus { border-color: ${CONFIG.THEME.NAVY_MAIN}; box-shadow: 0 0 0 4px rgba(12, 35, 64, 0.1); outline: none; }
+
+    .sju-input, .sju-textarea {
+      width: 100%; padding: 16px 20px; border-radius: ${CONFIG.THEME.RADIUS_LG};
+      border: 1px solid ${CONFIG.THEME.BORDER_LIGHT}; font-size: 1rem; background: ${CONFIG.THEME.BG_SURFACE}; 
+      transition: all 0.3s ease; color: ${CONFIG.THEME.TEXT_PRI}; font-family: 'Lora', serif;
+    }
+    .sju-input.has-icon { padding-left: 48px; border-radius: ${CONFIG.THEME.RADIUS_FULL}; }
+    .sju-input:focus, .sju-textarea:focus { border-color: ${CONFIG.THEME.NAVY_MAIN}; box-shadow: 0 0 0 4px rgba(12, 35, 64, 0.1); outline: none; }
   `}</style>
 );
 
 /* =========================================================
-   4) UTILITIES & FORMATTERS
+   3) DATA UTILITIES & FORMATTERS
    ========================================================= */
 const Utils = {
   formatNumber: (num) => num > 999 ? (num / 1000).toFixed(1) + 'k' : num.toString(),
-  formatCurrency: (amount) => amount === 0 ? "Free" : `₹${amount}/hr`,
+  formatCurrency: (amount) => amount === 0 ? "Pro-Bono (Free)" : `₹${amount}/hr`,
   
   generateAvatarGradient: (str) => {
+    if (!str) return `linear-gradient(135deg, ${CONFIG.THEME.NAVY_MAIN}, ${CONFIG.THEME.NAVY_LITE})`;
     let hash = 0;
     for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
     const h1 = Math.abs(hash) % 50 + 200; 
     const h2 = (h1 + 40) % 360;
     return `linear-gradient(135deg, hsl(${h1}, 70%, 25%), hsl(${h2}, 80%, 40%))`;
+  },
+
+  // Pseudo-random deterministic generator for missing mock data based on ID
+  seedGen: (str) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return Math.abs(hash);
   }
 };
 
 /* =========================================================
-   5) ATOMIC UI COMPONENTS
+   4) ATOMIC UI COMPONENTS
    ========================================================= */
 const Badge = ({ label, color, bg, icon, outline = false }) => (
   <span style={{ 
@@ -229,12 +161,13 @@ const Badge = ({ label, color, bg, icon, outline = false }) => (
   </span>
 );
 
-const Button = ({ children, onClick, variant = 'primary', active = false, fullWidth = false, disabled = false }) => {
+const Button = ({ children, onClick, variant = 'primary', active = false, fullWidth = false, disabled = false, style = {} }) => {
   let baseStyle = {
     padding: '12px 24px', borderRadius: CONFIG.THEME.RADIUS_FULL, fontWeight: '700', fontSize: '0.875rem',
     cursor: disabled ? 'not-allowed' : 'pointer', transition: CONFIG.THEME.TRANSITION_FAST,
     width: fullWidth ? '100%' : 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-    gap: '8px', border: 'none', opacity: disabled ? 0.6 : 1, textTransform: 'uppercase', letterSpacing: '0.1em'
+    gap: '8px', border: 'none', opacity: disabled ? 0.6 : 1, textTransform: 'uppercase', letterSpacing: '0.1em',
+    ...style
   };
 
   if (variant === 'primary') {
@@ -272,18 +205,11 @@ const FilterAccordion = ({ title, options, activeValue, onSelect }) => {
 
   return (
     <div style={{ marginBottom: '16px', borderBottom: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingBottom: '16px' }}>
-      <div 
-        onClick={() => setIsOpen(!isOpen)} 
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
-      >
+      <div onClick={() => setIsOpen(!isOpen)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}>
         <span style={{ fontSize: '0.85rem', fontWeight: '700', color: CONFIG.THEME.NAVY_MAIN, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</span>
         <span style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s', color: CONFIG.THEME.TEXT_TER }}>▼</span>
       </div>
-      
-      <div style={{ 
-        maxHeight: isOpen ? '600px' : '0px', overflow: 'hidden', transition: CONFIG.THEME.TRANSITION_SMOOTH,
-        marginTop: isOpen ? '12px' : '0px', display: 'flex', flexDirection: 'column', gap: '4px'
-      }}>
+      <div style={{ maxHeight: isOpen ? '600px' : '0px', overflow: 'hidden', transition: CONFIG.THEME.TRANSITION_SMOOTH, marginTop: isOpen ? '12px' : '0px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
         {options.map(opt => {
           const isActive = activeValue === opt.val;
           return (
@@ -310,70 +236,102 @@ const FilterAccordion = ({ title, options, activeValue, onSelect }) => {
   );
 };
 
-const AdvancedPagination = ({ currentPage, totalPages, onPageChange, totalItems }) => {
+const AdvancedPagination = ({ currentPage, totalPages, onPageChange, totalItems, pageSize }) => {
   if (totalPages <= 1) return null;
-
   const handleNav = (dir) => {
     if (dir === 'first') onPageChange(1);
     if (dir === 'prev' && currentPage > 1) onPageChange(currentPage - 1);
     if (dir === 'next' && currentPage < totalPages) onPageChange(currentPage + 1);
     if (dir === 'last') onPageChange(totalPages);
   };
-
   const btnStyle = (disabled) => ({
-    padding: '8px 16px', background: CONFIG.THEME.BG_SURFACE, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`,
-    borderRadius: CONFIG.THEME.RADIUS_SM, color: disabled ? CONFIG.THEME.TEXT_TER : CONFIG.THEME.NAVY_MAIN,
+    padding: '8px 16px', background: '#FFFFFF', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`,
+    borderRadius: '6px', color: disabled ? '#94A3B8' : '#0C2340',
     fontWeight: '700', fontSize: '0.875rem', cursor: disabled ? 'not-allowed' : 'pointer',
-    transition: CONFIG.THEME.TRANSITION_FAST, display: 'flex', alignItems: 'center', gap: '6px'
+    transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px'
   });
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 0', marginTop: '32px', borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
-      <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC }}>
-        Showing <strong>{((currentPage - 1) * CONFIG.DATA.PAGE_SIZE) + 1}</strong> to <strong>{Math.min(currentPage * CONFIG.DATA.PAGE_SIZE, totalItems)}</strong> of <strong>{totalItems}</strong> entries
-      </div>
+      <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC }}>Showing <strong>{((currentPage - 1) * pageSize) + 1}</strong> to <strong>{Math.min(currentPage * pageSize, totalItems)}</strong> of <strong>{totalItems}</strong> mentors</div>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-        <button onClick={() => handleNav('first')} disabled={currentPage === 1} style={btnStyle(currentPage === 1)}><span>«</span> First</button>
-        <button onClick={() => handleNav('prev')} disabled={currentPage === 1} style={btnStyle(currentPage === 1)}><span>‹</span> Prev</button>
-        <div style={{ padding: '8px 20px', background: CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN, borderRadius: CONFIG.THEME.RADIUS_SM, fontWeight: '700', fontSize: '0.875rem', boxShadow: CONFIG.THEME.SHADOW_SM }}>Page {currentPage} of {totalPages}</div>
-        <button onClick={() => handleNav('next')} disabled={currentPage === totalPages} style={btnStyle(currentPage === totalPages)}>Next <span>›</span></button>
-        <button onClick={() => handleNav('last')} disabled={currentPage === totalPages} style={btnStyle(currentPage === totalPages)}>Last <span>»</span></button>
+        <button onClick={() => handleNav('first')} disabled={currentPage === 1} style={btnStyle(currentPage === 1)}>« First</button>
+        <button onClick={() => handleNav('prev')} disabled={currentPage === 1} style={btnStyle(currentPage === 1)}>‹ Prev</button>
+        <div style={{ padding: '8px 20px', background: CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN, borderRadius: '6px', fontWeight: '700', fontSize: '0.875rem' }}>Page {currentPage} of {totalPages}</div>
+        <button onClick={() => handleNav('next')} disabled={currentPage === totalPages} style={btnStyle(currentPage === totalPages)}>Next ›</button>
+        <button onClick={() => handleNav('last')} disabled={currentPage === totalPages} style={btnStyle(currentPage === totalPages)}>Last »</button>
       </div>
     </div>
   );
 };
 
+const SkeletonLoader = () => (
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+    {[...Array(6)].map((_, i) => (
+      <div key={i} className="glass-panel" style={{ padding: '32px 24px', borderRadius: CONFIG.THEME.RADIUS_LG, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+        <div className="skeleton-box" style={{ width: '80px', height: '80px', borderRadius: '50%', margin: '0 auto 24px' }} />
+        <div className="skeleton-box" style={{ width: '60%', height: '24px', margin: '0 auto 12px' }} />
+        <div className="skeleton-box" style={{ width: '80%', height: '16px', margin: '0 auto 24px' }} />
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
+          <div className="skeleton-box" style={{ width: '60px', height: '24px', borderRadius: '12px' }} />
+          <div className="skeleton-box" style={{ width: '60px', height: '24px', borderRadius: '12px' }} />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const EmptyState = ({ msg = "No records found matching your current filter criteria." }) => (
+  <div style={{ padding: '100px 20px', textAlign: 'center', background: 'transparent', animation: 'fadeIn 0.5s' }}>
+    <div style={{ fontSize: '4rem', opacity: 0.2, marginBottom: '24px' }}>📭</div>
+    <h3 style={{ color: CONFIG.THEME.NAVY_MAIN, margin: '0 0 12px 0', fontSize: '1.5rem', fontWeight: '700' }}>No Mentors Found</h3>
+    <p style={{ color: CONFIG.THEME.TEXT_SEC, fontSize: '1rem' }}>{msg}</p>
+  </div>
+);
+
 /* =========================================================
-   6) BOOKING WIZARD COMPONENT
+   5) ULTRA-DETAILED BOOKING WIZARD
    ========================================================= */
 const BookingWizard = ({ mentor, onClose, onConfirm }) => {
   const [step, setStep] = useState(1);
   const [selectedType, setSelectedType] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [bookingNote, setBookingNote] = useState('');
 
-  const dates = ['Mon, 12th', 'Tue, 13th', 'Wed, 14th'];
-  const times = ['10:00 AM', '02:00 PM', '04:30 PM'];
+  // Mock Calendar Generation based on mentor ID
+  const generateSlots = () => {
+    const dates = ['Tomorrow', 'Next Wednesday', 'Next Friday'];
+    const times = ['10:00 AM', '02:00 PM', '04:30 PM', '06:00 PM', '08:00 PM'];
+    const s = Utils.seedGen(mentor.id);
+    return { 
+      dates, 
+      times: times.filter((_, i) => (s + i) % 2 !== 0 || i === 0) 
+    };
+  };
+  const slots = useMemo(generateSlots, [mentor.id]);
 
   return (
-    <div style={{ padding: '10px 0', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <h2 style={{ fontSize: '2rem', color: CONFIG.THEME.NAVY_MAIN, marginBottom: '8px', marginTop: 0 }}>Book Session</h2>
-      <p style={{ color: CONFIG.THEME.TEXT_SEC, marginBottom: '32px', fontSize: '1.1rem' }}>Initiating request with <strong>{mentor.name}</strong></p>
+    <div style={{ padding: '10px 0', height: '100%', display: 'flex', flexDirection: 'column', animation: 'fadeIn 0.4s ease' }}>
+      <h2 style={{ fontSize: '2rem', color: CONFIG.THEME.NAVY_MAIN, marginBottom: '8px', marginTop: 0 }}>Schedule Session</h2>
+      <p style={{ color: CONFIG.THEME.TEXT_SEC, marginBottom: '32px', fontSize: '1.1rem' }}>Initiating request with <strong>{mentor.name}</strong> • {mentor.domain} Expert</p>
 
       <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
-        {[1, 2, 3].map(s => (
+        {[1, 2, 3, 4].map(s => (
           <div key={s} style={{ flex: 1, height: '6px', borderRadius: '3px', background: s <= step ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.BORDER_LIGHT, transition: CONFIG.THEME.TRANSITION_SMOOTH }} />
         ))}
       </div>
 
-      <div style={{ flex: 1, minHeight: '300px' }}>
+      <div style={{ flex: 1, minHeight: '350px' }}>
         {step === 1 && (
           <div style={{ animation: 'fadeIn 0.3s ease' }}>
-            <h4 style={{ margin: '0 0 20px 0', fontSize: '1.1rem', color: CONFIG.THEME.TEXT_PRI }}>Select Session Type</h4>
+            <h4 style={{ margin: '0 0 20px 0', fontSize: '1.1rem', color: CONFIG.THEME.TEXT_PRI }}>Select Engagement Model</h4>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               {mentor.sessionTypes.map(type => (
-                <div key={type} onClick={() => setSelectedType(type)} style={{ border: `2px solid ${selectedType === type ? CONFIG.THEME.GOLD_MAIN : CONFIG.THEME.BORDER_LIGHT}`, borderRadius: CONFIG.THEME.RADIUS_LG, padding: '24px', cursor: 'pointer', background: selectedType === type ? CONFIG.THEME.GOLD_LITE : CONFIG.THEME.BG_SURFACE, transition: CONFIG.THEME.TRANSITION_FAST }}>
-                  <div style={{ fontWeight: '700', fontSize: '1.1rem', color: CONFIG.THEME.NAVY_MAIN, marginBottom: '8px' }}>{type}</div>
-                  <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC, fontWeight: '500' }}>60 Minutes • {Utils.formatCurrency(mentor.price)}</div>
+                <div key={type} onClick={() => setSelectedType(type)} style={{ border: `2px solid ${selectedType === type ? CONFIG.THEME.GOLD_MAIN : CONFIG.THEME.BORDER_LIGHT}`, borderRadius: CONFIG.THEME.RADIUS_LG, padding: '24px', cursor: 'pointer', background: selectedType === type ? CONFIG.THEME.GOLD_LITE : CONFIG.THEME.BG_SURFACE, transition: CONFIG.THEME.TRANSITION_FAST, position: 'relative', overflow: 'hidden' }}>
+                  {selectedType === type && <div style={{ position: 'absolute', top: 0, right: 0, background: CONFIG.THEME.GOLD_MAIN, color: CONFIG.THEME.NAVY_MAIN, padding: '4px 12px', borderBottomLeftRadius: CONFIG.THEME.RADIUS_MD, fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Selected</div>}
+                  <div style={{ fontWeight: '700', fontSize: '1.25rem', color: CONFIG.THEME.NAVY_MAIN, marginBottom: '8px' }}>{type}</div>
+                  <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC, fontWeight: '500', marginBottom: '16px' }}>{type.includes('Mock') ? 'Intensive 90-min review' : 'Standard 45-min sync'}</div>
+                  <div style={{ fontSize: '1.1rem', color: CONFIG.THEME.SUCCESS, fontWeight: '800' }}>{Utils.formatCurrency(type.includes('Mock') ? mentor.price * 1.5 : mentor.price)}</div>
                 </div>
               ))}
             </div>
@@ -383,11 +341,11 @@ const BookingWizard = ({ mentor, onClose, onConfirm }) => {
         {step === 2 && (
           <div style={{ animation: 'fadeIn 0.3s ease' }}>
             <h4 style={{ margin: '0 0 20px 0', fontSize: '1.1rem', color: CONFIG.THEME.TEXT_PRI }}>Select Availability Slot</h4>
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-              {dates.map(d => <button key={d} style={{ padding: '12px 20px', borderRadius: CONFIG.THEME.RADIUS_FULL, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, background: CONFIG.THEME.BG_SURFACE, fontWeight: '700', color: CONFIG.THEME.TEXT_PRI, cursor: 'pointer' }}>{d}</button>)}
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+              {slots.dates.map((d, i) => <button key={d} style={{ padding: '12px 20px', borderRadius: CONFIG.THEME.RADIUS_FULL, border: `1px solid ${i === 0 ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.BORDER_LIGHT}`, background: i === 0 ? CONFIG.THEME.NAVY_LITE : CONFIG.THEME.BG_SURFACE, fontWeight: '700', color: i === 0 ? '#FFF' : CONFIG.THEME.TEXT_PRI, cursor: 'pointer' }}>{d}</button>)}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-              {times.map(t => (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '16px' }}>
+              {slots.times.map(t => (
                 <button key={t} onClick={() => setSelectedDate(t)} style={{ padding: '16px', borderRadius: CONFIG.THEME.RADIUS_MD, border: `2px solid ${selectedDate === t ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.BORDER_LIGHT}`, background: selectedDate === t ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.BG_SURFACE, color: selectedDate === t ? CONFIG.THEME.GOLD_MAIN : CONFIG.THEME.TEXT_PRI, fontWeight: '700', cursor: 'pointer', transition: CONFIG.THEME.TRANSITION_FAST }}>{t}</button>
               ))}
             </div>
@@ -395,27 +353,63 @@ const BookingWizard = ({ mentor, onClose, onConfirm }) => {
         )}
 
         {step === 3 && (
-          <div style={{ textAlign: 'center', padding: '40px 0', animation: 'scaleInModal 0.3s ease' }}>
+          <div style={{ animation: 'fadeIn 0.3s ease' }}>
+            <h4 style={{ margin: '0 0 20px 0', fontSize: '1.1rem', color: CONFIG.THEME.TEXT_PRI }}>Context & Agenda (Optional but recommended)</h4>
+            <p style={{ color: CONFIG.THEME.TEXT_SEC, fontSize: '0.9rem', marginBottom: '16px' }}>Help {mentor.name} prepare by providing a brief overview of what you want to achieve.</p>
+            <textarea 
+              className="sju-textarea" 
+              rows="6" 
+              placeholder="E.g., I'd like to discuss transitioning from Frontend to Full-Stack, specifically regarding Node.js architectures..."
+              value={bookingNote}
+              onChange={(e) => setBookingNote(e.target.value)}
+            />
+          </div>
+        )}
+
+        {step === 4 && (
+          <div style={{ textAlign: 'center', padding: '20px 0', animation: 'scaleInModal 0.3s ease' }}>
             <div style={{ width: '96px', height: '96px', background: CONFIG.THEME.SUCCESS_BG, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px auto', border: `2px solid ${CONFIG.THEME.SUCCESS}` }}>
               <span style={{ fontSize: '2.5rem', color: CONFIG.THEME.SUCCESS }}>✓</span>
             </div>
-            <h3 style={{ margin: '0 0 12px 0', color: CONFIG.THEME.NAVY_MAIN, fontSize: '1.5rem', fontWeight: '700' }}>Ready to Confirm?</h3>
-            <p style={{ color: CONFIG.THEME.TEXT_SEC, fontSize: '1.1rem', margin: 0 }}>{selectedType} on <strong>Tue, 13th at {selectedDate}</strong></p>
-            <p style={{ color: CONFIG.THEME.TEXT_TER, fontSize: '0.875rem', marginTop: '16px' }}>Total Cost: {Utils.formatCurrency(mentor.price)}</p>
+            <h3 style={{ margin: '0 0 12px 0', color: CONFIG.THEME.NAVY_MAIN, fontSize: '1.5rem', fontWeight: '700' }}>Confirm Session Details</h3>
+            
+            <div style={{ background: CONFIG.THEME.BG_SURFACE_ALT, borderRadius: CONFIG.THEME.RADIUS_LG, padding: '24px', textAlign: 'left', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, marginTop: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: 'bold' }}>Mentor</div>
+                  <div style={{ fontWeight: 'bold', color: CONFIG.THEME.TEXT_PRI, fontSize: '1.1rem' }}>{mentor.name}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: 'bold' }}>Session Type</div>
+                  <div style={{ fontWeight: 'bold', color: CONFIG.THEME.TEXT_PRI, fontSize: '1.1rem' }}>{selectedType}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: 'bold' }}>Schedule</div>
+                  <div style={{ fontWeight: 'bold', color: CONFIG.THEME.TEXT_PRI, fontSize: '1.1rem' }}>Tomorrow at {selectedDate}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: 'bold' }}>Total Cost</div>
+                  <div style={{ fontWeight: '900', color: CONFIG.THEME.SUCCESS, fontSize: '1.25rem' }}>{Utils.formatCurrency(selectedType?.includes('Mock') ? mentor.price * 1.5 : mentor.price)}</div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingTop: '24px', marginTop: '24px' }}>
         <Button variant="outline" onClick={() => step === 1 ? onClose() : setStep(s => s - 1)}>Back</Button>
-        <Button variant="primary" disabled={(step === 1 && !selectedType) || (step === 2 && !selectedDate)} onClick={() => step === 3 ? onConfirm() : setStep(s => s + 1)}>{step === 3 ? 'Confirm Booking' : 'Next Step'}</Button>
+        <Button variant="primary" disabled={(step === 1 && !selectedType) || (step === 2 && !selectedDate)} onClick={() => step === 4 ? onConfirm() : setStep(s => s + 1)}>
+          {step === 4 ? 'Confirm Booking' : 'Next Step'}
+        </Button>
       </div>
     </div>
   );
 };
 
+
 /* =========================================================
-   7) VIEWS: GRID, LIST, ANALYTICS
+   6) VIEWS (GRID, LIST, ANALYTICS, CALENDAR, SMART MATCH)
    ========================================================= */
 
 const GridView = ({ data, onSelect, onBook }) => {
@@ -423,14 +417,15 @@ const GridView = ({ data, onSelect, onBook }) => {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
       {data.map((m, i) => (
-        <div key={m.id} className="animated-card" style={{ animation: `slideUpFade 0.4s ease forwards ${Math.min(i * 0.04, 0.4)}s`, opacity: 0 }} onClick={() => onSelect(m)}>
-          <div style={{ padding: '32px 24px' }}>
+        <div key={m.id} className="animated-card" style={{ animation: `slideUpFade 0.4s ease forwards ${Math.min(i * 0.04, 0.4)}s`, opacity: 0, height: '100%' }} onClick={() => onSelect(m)}>
+          <div style={{ padding: '32px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+            
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px', position: 'relative' }}>
               <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: Utils.generateAvatarGradient(m.name), color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.75rem', fontWeight: '700', boxShadow: CONFIG.THEME.SHADOW_MD }}>
                 {m.initials}
               </div>
               {m.isTopRated && (
-                <div style={{ position: 'absolute', bottom: 0, right: '50%', transform: 'translate(35px, 0)', background: CONFIG.THEME.GOLD_MAIN, color: CONFIG.THEME.NAVY_MAIN, borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', border: `2px solid ${CONFIG.THEME.BG_SURFACE}`, fontWeight: 'bold' }} title="Top Rated">★</div>
+                <div style={{ position: 'absolute', bottom: 0, right: '50%', transform: 'translate(30px, 0)', background: CONFIG.THEME.GOLD_MAIN, color: CONFIG.THEME.NAVY_MAIN, borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', border: `3px solid ${CONFIG.THEME.BG_SURFACE}`, fontWeight: 'bold', animation: 'pulseGlow 2s infinite' }} title="Top Rated Mentor">★</div>
               )}
             </div>
             
@@ -441,17 +436,18 @@ const GridView = ({ data, onSelect, onBook }) => {
               </p>
             </div>
             
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '24px' }}>
-              <Badge label={m.domain} color={CONFIG.THEME.NAVY_MAIN} bg={CONFIG.THEME.BG_SURFACE_ALT} />
-              <Badge label={m.tier} color={CONFIG.THEME.ACCENT_PURPLE} outline />
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '24px', flex: 1 }}>
+              {m.domain && <Badge label={m.domain} color={CONFIG.THEME.NAVY_MAIN} bg={CONFIG.THEME.BG_SURFACE_ALT} />}
+              {m.tier && m.tier !== "N/A" && <Badge label={m.tier} color={CONFIG.THEME.ACCENT_PURPLE} outline />}
+              <Badge label={`${m.rating}★`} color={CONFIG.THEME.WARNING} bg={CONFIG.THEME.WARNING_BG} />
             </div>
             
-            <div style={{ borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
               <div>
                 <div style={{ fontSize: '0.7rem', fontWeight: '700', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Hourly Rate</div>
-                <div style={{ fontSize: '1rem', fontWeight: '800', color: CONFIG.THEME.SUCCESS }}>{Utils.formatCurrency(m.price)}</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '800', color: CONFIG.THEME.SUCCESS }}>{Utils.formatCurrency(m.price)}</div>
               </div>
-              <Button variant="outline" onClick={(e) => { e.stopPropagation(); onBook(m); }}>Book</Button>
+              <Button variant="outline" onClick={(e) => { e.stopPropagation(); onBook(m); }}>Book Now</Button>
             </div>
           </div>
         </div>
@@ -465,10 +461,10 @@ const ListView = ({ data, onSelect, onBook }) => {
   return (
     <div className="glass-panel" style={{ borderRadius: CONFIG.THEME.RADIUS_LG, overflow: 'hidden', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '900px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1000px' }}>
           <thead style={{ background: CONFIG.THEME.BG_SURFACE_ALT, color: CONFIG.THEME.NAVY_MAIN }}>
             <tr>
-              {['Mentor Profile', 'Expertise Domain', 'Professional Role', 'Availability', 'Rate', 'Action'].map(h => (
+              {['Mentor Profile', 'Expertise Domain', 'Professional Role', 'Performance', 'Rate', 'Action'].map(h => (
                 <th key={h} style={{ padding: '20px 24px', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '700', borderBottom: `2px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>{h}</th>
               ))}
             </tr>
@@ -480,24 +476,29 @@ const ListView = ({ data, onSelect, onBook }) => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{ position: 'relative' }}>
                       <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: Utils.generateAvatarGradient(m.name), color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '1rem' }}>{m.initials}</div>
-                      {m.isTopRated && <div style={{ position: 'absolute', bottom: -2, right: -2, background: CONFIG.THEME.GOLD_MAIN, color: CONFIG.THEME.NAVY_MAIN, borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', border: `1px solid ${CONFIG.THEME.BG_SURFACE}`, fontWeight: 'bold' }}>★</div>}
+                      {m.isTopRated && <div style={{ position: 'absolute', bottom: -2, right: -2, background: CONFIG.THEME.GOLD_MAIN, color: CONFIG.THEME.NAVY_MAIN, borderRadius: '50%', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', border: `2px solid ${CONFIG.THEME.BG_SURFACE}`, fontWeight: 'bold' }}>★</div>}
                     </div>
                     <div>
                       <div style={{ fontWeight: '700', color: CONFIG.THEME.NAVY_MAIN, fontSize: '1rem' }}>{m.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER }}>{m.email}</div>
+                      <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER }}>{m.tier || 'Mentor'}</div>
                     </div>
                   </div>
                 </td>
                 <td style={{ padding: '16px 24px' }}>
-                  <div style={{ fontWeight: '600', color: CONFIG.THEME.TEXT_PRI, fontSize: '0.875rem' }}>{m.domain}</div>
-                  <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_SEC }}>{m.rating}/5.0 • {m.sessionsConducted} sessions</div>
+                  <div style={{ fontWeight: '600', color: CONFIG.THEME.TEXT_PRI, fontSize: '0.875rem', marginBottom: '4px' }}>{m.domain}</div>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    {m.languages.slice(0, 2).map(l => <Badge key={l} label={l} color={CONFIG.THEME.TEXT_SEC} outline />)}
+                  </div>
                 </td>
                 <td style={{ padding: '16px 24px' }}>
                   <div style={{ fontWeight: '500', fontSize: '0.875rem', color: CONFIG.THEME.TEXT_PRI }}>{m.role}</div>
                   <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_SEC }}>{m.company}</div>
                 </td>
-                <td style={{ padding: '16px 24px', fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC, fontWeight: '500' }}>{m.availability}</td>
-                <td style={{ padding: '16px 24px', fontWeight: '800', color: CONFIG.THEME.SUCCESS }}>{Utils.formatCurrency(m.price)}</td>
+                <td style={{ padding: '16px 24px' }}>
+                   <div style={{ fontWeight: '800', fontSize: '0.875rem', color: CONFIG.THEME.WARNING }}>{m.rating} ★</div>
+                   <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_SEC }}>{m.sessionsConducted} sessions</div>
+                </td>
+                <td style={{ padding: '16px 24px', fontWeight: '800', color: CONFIG.THEME.SUCCESS, fontSize: '1.1rem' }}>{Utils.formatCurrency(m.price)}</td>
                 <td style={{ padding: '16px 24px' }}>
                   <Button variant="outline" onClick={(e) => { e.stopPropagation(); onBook(m); }}>Book</Button>
                 </td>
@@ -612,38 +613,113 @@ const AnalyticsView = ({ data }) => {
   );
 };
 
-const EmptyState = ({ msg = "No records found matching your current filter criteria." }) => (
-  <div style={{ padding: '100px 20px', textAlign: 'center', background: 'transparent' }}>
-    <div style={{ fontSize: '4rem', opacity: 0.2, marginBottom: '24px' }}>📭</div>
-    <h3 style={{ color: CONFIG.THEME.NAVY_MAIN, margin: '0 0 12px 0', fontSize: '1.5rem', fontWeight: '700' }}>No Results</h3>
-    <p style={{ color: CONFIG.THEME.TEXT_SEC, fontSize: '1rem' }}>{msg}</p>
-  </div>
-);
+const CalendarView = ({ data, onSelect, onBook }) => {
+  // Aggregate data by mock availability logic (Weekdays vs Weekends)
+  const weekdays = data.filter(m => m.availability.includes('Weekday') || m.availability === 'Flexible');
+  const weekends = data.filter(m => m.availability.includes('Weekend') || m.availability === 'Flexible');
 
-/* =========================================================
-   8) FIREBASE CONFIG (SAFE WRAPPER TO PREVENT WHITE SCREEN)
-   ========================================================= */
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "sju-alumni-portal.firebaseapp.com",
-  projectId: "sju-alumni-portal",
-  storageBucket: "sju-alumni-portal.appspot.com",
-  messagingSenderId: "YOUR_ID",
-  appId: "YOUR_APP_ID"
+  const Row = ({ title, mentors }) => (
+    <div style={{ marginBottom: '40px' }}>
+      <h3 style={{ color: CONFIG.THEME.NAVY_MAIN, borderBottom: `2px solid ${CONFIG.THEME.GOLD_MAIN}`, paddingBottom: '12px', marginBottom: '24px', display: 'inline-block' }}>{title} ({mentors.length})</h3>
+      <div style={{ display: 'flex', gap: '24px', overflowX: 'auto', paddingBottom: '16px' }}>
+        {mentors.slice(0, 8).map(m => (
+          <div key={m.id} className="animated-card" style={{ minWidth: '280px', padding: '24px', flexShrink: 0 }} onClick={() => onSelect(m)}>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '16px' }}>
+               <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: Utils.generateAvatarGradient(m.name), color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: '700' }}>{m.initials}</div>
+               <div>
+                 <div style={{ fontWeight: '700', color: CONFIG.THEME.NAVY_MAIN, fontSize: '1.1rem' }}>{m.name}</div>
+                 <div style={{ fontSize: '0.8rem', color: CONFIG.THEME.TEXT_SEC }}>{m.domain}</div>
+               </div>
+            </div>
+            <Button fullWidth variant="outline" onClick={(e) => { e.stopPropagation(); onBook(m); }}>See Slots</Button>
+          </div>
+        ))}
+        {mentors.length > 8 && (
+          <div style={{ minWidth: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: CONFIG.THEME.BG_SURFACE_ALT, borderRadius: CONFIG.THEME.RADIUS_LG, border: `1px dashed ${CONFIG.THEME.BORDER_LIGHT}`, color: CONFIG.THEME.NAVY_MAIN, fontWeight: 'bold', cursor: 'pointer' }}>
+            + View {mentors.length - 8} more
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="glass-panel" style={{ padding: '40px', borderRadius: CONFIG.THEME.RADIUS_LG, animation: 'fadeIn 0.5s ease', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+      <h2 style={{ marginTop: 0, color: CONFIG.THEME.NAVY_MAIN }}>Availability Matrix</h2>
+      <p style={{ color: CONFIG.THEME.TEXT_SEC, marginBottom: '40px' }}>Quickly locate mentors based on their general availability schedules.</p>
+      <Row title="Available This Weekday" mentors={weekdays} />
+      <Row title="Available This Weekend" mentors={weekends} />
+    </div>
+  );
 };
 
-let db = null;
-try {
-  // If API keys are dummy values, this might throw an error depending on the environment.
-  // We catch it so the app doesn't white-screen and can use MockDB.
-  const firebaseApp = initializeApp(firebaseConfig);
-  db = getFirestore(firebaseApp);
-} catch (error) {
-  console.warn("Firebase initialization skipped/failed. Falling back to Mock DB safely.");
-}
+const SmartMatchView = ({ data, onSelect }) => {
+  const [analyzing, setAnalyzing] = useState(false);
+  const [matched, setMatched] = useState([]);
+  const [goal, setGoal] = useState('');
+
+  const handleMatch = () => {
+    if (!goal) return;
+    setAnalyzing(true);
+    setMatched([]);
+    // Simulate AI match calculation
+    setTimeout(() => {
+      // Basic mock ranking based on text overlap (simulating NLP)
+      const keyword = goal.split(' ')[0].toLowerCase();
+      const sorted = [...data].sort((a,b) => {
+        const aScore = a.domain.toLowerCase().includes(keyword) ? 10 : 0 + a.rating;
+        const bScore = b.domain.toLowerCase().includes(keyword) ? 10 : 0 + b.rating;
+        return bScore - aScore;
+      });
+      setMatched(sorted.slice(0, 3));
+      setAnalyzing(false);
+    }, 2500);
+  };
+
+  return (
+    <div className="glass-panel" style={{ padding: '48px', borderRadius: CONFIG.THEME.RADIUS_LG, animation: 'fadeIn 0.5s ease', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, minHeight: '600px', position: 'relative', overflow: 'hidden' }}>
+      
+      {analyzing && (
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255,255,255,0.9)', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '100%', height: '4px', background: CONFIG.THEME.NAVY_LITE, position: 'absolute', top: 0, animation: 'scanline 2s linear infinite' }} />
+          <div style={{ width: '80px', height: '80px', border: `4px solid ${CONFIG.THEME.BORDER_LIGHT}`, borderTopColor: CONFIG.THEME.ACCENT_PURPLE, borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '24px' }} />
+          <h2 style={{ color: CONFIG.THEME.NAVY_MAIN, letterSpacing: '0.1em' }}>ANALYZING MENTOR GRAPH...</h2>
+          <p style={{ color: CONFIG.THEME.TEXT_SEC }}>Matching your goals with semantic domains and historic success rates.</p>
+        </div>
+      )}
+
+      <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center', marginBottom: '48px' }}>
+        <h2 style={{ fontSize: '2.5rem', color: CONFIG.THEME.NAVY_MAIN, marginBottom: '16px' }}>AI Smart Match</h2>
+        <p style={{ color: CONFIG.THEME.TEXT_SEC, fontSize: '1.1rem', marginBottom: '32px' }}>Tell us what you want to achieve, and our matching algorithm will find the top 3 highly compatible mentors for your exact needs.</p>
+        <div style={{ position: 'relative' }}>
+          <input className="sju-input" placeholder="E.g., I want to learn React performance optimization..." value={goal} onChange={(e) => setGoal(e.target.value)} style={{ padding: '20px 24px', fontSize: '1.1rem', boxShadow: CONFIG.THEME.SHADOW_MD, border: `2px solid ${CONFIG.THEME.BORDER_LIGHT}` }} />
+          <Button onClick={handleMatch} disabled={!goal} style={{ position: 'absolute', right: '8px', top: '8px', bottom: '8px', padding: '0 32px' }}>Find Mentors</Button>
+        </div>
+      </div>
+
+      {matched.length > 0 && !analyzing && (
+        <div style={{ animation: 'slideUpFade 0.6s ease' }}>
+          <h3 style={{ textAlign: 'center', color: CONFIG.THEME.SUCCESS, marginBottom: '32px', fontSize: '1.5rem', fontWeight: '800' }}>✓ Top Matches Found</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+             {matched.map((m, i) => (
+               <div key={m.id} className="animated-card" style={{ padding: '32px 24px', textAlign: 'center', border: `2px solid ${i === 0 ? CONFIG.THEME.GOLD_MAIN : CONFIG.THEME.BORDER_LIGHT}`, position: 'relative' }} onClick={() => onSelect(m)}>
+                 {i === 0 && <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translate(-50%, -50%)', background: CONFIG.THEME.GOLD_MAIN, color: CONFIG.THEME.NAVY_MAIN, padding: '4px 16px', borderRadius: '20px', fontWeight: 'bold', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>98% Best Match</div>}
+                 <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: Utils.generateAvatarGradient(m.name), color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: '700', margin: '0 auto 16px auto', boxShadow: CONFIG.THEME.SHADOW_MD }}>{m.initials}</div>
+                 <h3 style={{ margin: '0 0 8px', fontSize: '1.25rem', color: CONFIG.THEME.NAVY_MAIN }}>{m.name}</h3>
+                 <p style={{ margin: '0 0 24px 0', fontSize: '0.9rem', color: CONFIG.THEME.TEXT_SEC }}>{m.role} @ {m.company}</p>
+                 <Badge label={m.domain} color={CONFIG.THEME.NAVY_MAIN} bg={CONFIG.THEME.BG_SURFACE_ALT} />
+               </div>
+             ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 
 /* =========================================================
-   9) MAIN APPLICATION (INTEGRATED LOGIC)
+   7) MAIN APPLICATION (INTEGRATED ENTERPRISE LOGIC)
    ========================================================= */
 const MentorshipGateway = () => {
   const [data, setData] = useState([]);
@@ -664,33 +740,66 @@ const MentorshipGateway = () => {
 
   const scrollRef = useRef(null);
 
+  // Pure-Database Real-time Mentorship Fetch mapping generic alumni to Mentor shape
   useEffect(() => {
-    const loadMentorsData = async () => {
-      setLoading(true);
-      try {
-        if (db && firebaseConfig.apiKey !== "YOUR_API_KEY") {
-          const mentorsRef = collection(db, 'mentors'); 
-          const q = query(mentorsRef, orderBy('name', 'asc')); 
-          const querySnapshot = await getDocs(q);
-          const firestoreData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          if (firestoreData.length > 0) {
-            setData(firestoreData);
-            setLoading(false);
-            return;
-          }
-        }
-      } catch (error) {
-        console.error("Firestore Error, falling back to MockDB:", error);
-      } 
-      
-      // Fallback: Using MockDB with a simulated network delay
-      setTimeout(() => {
-        setData(MockDB.generate(CONFIG.DATA.TOTAL_RECORDS)); 
+    setLoading(true);
+    try {
+      const mentorsRef = collection(db, 'alumni_data'); 
+      const q = query(mentorsRef, limit(CONFIG.DATA.PAGE_SIZE * 5)); 
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const fetched = snapshot.docs.map(doc => {
+          const d = doc.data();
+          const clean = (val, fb = "N/A") => (!val || String(val).toLowerCase().includes("not applicable") || String(val).toLowerCase() === "none") ? fb : val;
+          
+          const fullName = clean(d["Full Name"] || d.fullName || d.Name, "Alumni Mentor");
+          const batchYear = parseInt(d["Batch Year"] || d.batchYear || 2020);
+          const exp = Math.max(0, 2026 - batchYear);
+          const rawTier = clean(d.Tier || d.tier, null);
+          const validTier = rawTier ? rawTier : (exp > 10 ? "Industry Leader" : exp > 5 ? "Senior Mentor" : "Peer Mentor");
+          
+          const basePrice = exp > 10 ? 2500 : exp > 5 ? 1500 : 0;
+          const seed = Utils.seedGen(doc.id);
+          
+          return {
+            id: doc.id,
+            name: fullName,
+            email: clean(d.Email || d.email, "Hidden"),
+            initials: fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
+            domain: clean(d.Degree || d.degree || d.Domain, "Tech & Engineering"),
+            role: clean(d.Designation || d.designation || d.Role, "Professional"),
+            company: clean(d["Company Name"] || d.company || d.Company, "Independent"),
+            tier: validTier,
+            mentorship: (d.Mentorship === "Available" || d["Current Status"] === "Working" || d.Status === "Working") ? "Available" : "Unavailable",
+            experience: exp,
+            bio: clean(d.Reviews || d.bio, `Experienced professional offering guidance in ${clean(d.Degree || "their domain")}. Passions include scaling systems and career coaching.`),
+            
+            // Mocked Enterprise metrics derived deterministically from ID
+            rating: (4.0 + (seed % 10) / 10).toFixed(1),
+            sessionsConducted: (seed % 150) + 5,
+            price: d.price !== undefined ? d.price : basePrice,
+            priceCategory: basePrice === 0 ? "Pro-Bono (Free)" : basePrice < 2000 ? "Standard Rates" : "Premium Tier",
+            isTopRated: (seed % 5) === 0, // 20% are top rated
+            languages: ['English', seed % 2 === 0 ? 'Hindi' : 'Spanish'],
+            availability: seed % 3 === 0 ? "Weekends" : seed % 2 === 0 ? "Weekdays" : "Flexible",
+            responseRate: 90 + (seed % 10),
+            sessionTypes: ['1:1 Career Sync', 'Resume Review', 'Mock Interview (Technical)'],
+            companyTier: clean(d.companyTier || d.CompanyTier, "Corporate")
+          };
+        });
+        
+        // Only inject users marked available for mentoring
+        setData(fetched.filter(m => m.mentorship === "Available"));
         setLoading(false);
-      }, 1000);
-    };
-    
-    loadMentorsData();
+      }, (err) => {
+        console.error("Firebase Listen Error:", err);
+        setLoading(false);
+      });
+      return () => unsubscribe();
+    } catch (err) {
+      console.error("Firebase Initialization Error:", err);
+      setLoading(false);
+    }
   }, []);
 
   const { filteredData, facets } = useMemo(() => {
@@ -715,7 +824,7 @@ const MentorshipGateway = () => {
     const counts = { domain: {}, tier: {}, availability: {}, priceCategory: {}, language: {}, companyTier: {} };
     res.forEach(m => {
       counts.domain[m.domain] = (counts.domain[m.domain] || 0) + 1;
-      counts.tier[m.tier] = (counts.tier[m.tier] || 0) + 1;
+      if(m.tier) counts.tier[m.tier] = (counts.tier[m.tier] || 0) + 1;
       counts.availability[m.availability] = (counts.availability[m.availability] || 0) + 1;
       counts.priceCategory[m.priceCategory] = (counts.priceCategory[m.priceCategory] || 0) + 1;
       counts.companyTier[m.companyTier] = (counts.companyTier[m.companyTier] || 0) + 1;
@@ -757,21 +866,22 @@ const MentorshipGateway = () => {
 
   const showToast = (msg) => {
     setToast(msg);
-    setTimeout(() => setToast(null), 3000);
+    setTimeout(() => setToast(null), 4000);
   };
 
   const handleBookingConfirm = () => {
     setIsBooking(false);
     setSelectedMentor(null);
-    showToast(`Session successfully booked!`);
+    showToast(`Session successfully booked! A calendar invite has been dispatched.`);
   };
 
+  // Pre-Loader Display
   if (loading) return (
     <div style={{ height: '100vh', width: '100vw', background: CONFIG.THEME.NAVY_DARK, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
       <GlobalStyles />
       <div style={{ width: '80px', height: '80px', border: `4px solid rgba(212, 175, 55, 0.1)`, borderTopColor: CONFIG.THEME.GOLD_MAIN, borderRadius: '50%', animation: 'spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite', marginBottom: '32px' }} />
       <div style={{ fontSize: '2rem', fontWeight: '700', letterSpacing: '0.1em', color: CONFIG.THEME.GOLD_MAIN, textTransform: 'uppercase' }}>{CONFIG.SYSTEM.ORG}</div>
-      <div style={{ fontSize: '1rem', fontWeight: '500', letterSpacing: '0.2em', color: CONFIG.THEME.TEXT_TER, marginTop: '8px' }}>INITIALIZING MENTORSHIP GATEWAY</div>
+      <div style={{ fontSize: '1rem', fontWeight: '500', letterSpacing: '0.2em', color: CONFIG.THEME.TEXT_TER, marginTop: '8px' }}>INITIALIZING MENTORSHIP NEXUS</div>
     </div>
   );
 
@@ -785,13 +895,13 @@ const MentorshipGateway = () => {
         <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', margin: '0 auto', padding: '0 24px' }}>
           <h1 style={{ color: 'white', fontSize: '3.5rem', fontWeight: '700', margin: '0 0 20px 0', letterSpacing: '-0.02em', lineHeight: 1.1 }}>{CONFIG.SYSTEM.APP_NAME}</h1>
           <p style={{ color: CONFIG.THEME.TEXT_TER, fontSize: '1.25rem', margin: 0, fontWeight: '400', lineHeight: 1.6 }}>
-            Book 1:1 sessions with {Utils.formatNumber(data.length)}+ industry experts. Accelerate your career with personalized, actionable guidance.
+            Book 1:1 sessions with {Utils.formatNumber(data.length)}+ verified industry experts. Accelerate your career with personalized, actionable guidance.
           </p>
         </div>
       </header>
 
       {/* ENTERPRISE WORKSPACE LAYOUT */}
-      <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: '320px 1fr', gap: '40px', position: 'relative', zIndex: 10, marginTop: '-50px' }}>
+      <div style={{ maxWidth: '1700px', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: '340px 1fr', gap: '40px', position: 'relative', zIndex: 10, marginTop: '-50px' }}>
         
         {/* SIDEBAR FILTERS */}
         <aside style={{ height: 'calc(100vh - 40px)', position: 'sticky', top: '20px' }}>
@@ -806,9 +916,9 @@ const MentorshipGateway = () => {
             <FilterAccordion title="Expertise Domain" options={getFacetArray(facets.domain)} activeValue={filters.domain} onSelect={(v) => toggleFilter('domain', v)} />
             <FilterAccordion title="Experience Tier" options={getFacetArray(facets.tier)} activeValue={filters.tier} onSelect={(v) => toggleFilter('tier', v)} />
             <FilterAccordion title="Company Tier" options={getFacetArray(facets.companyTier)} activeValue={filters.companyTier} onSelect={(v) => toggleFilter('companyTier', v)} />
-            <FilterAccordion title="Availability" options={getFacetArray(facets.availability)} activeValue={filters.availability} onSelect={(v) => toggleFilter('availability', v)} />
-            <FilterAccordion title="Pricing Type" options={getFacetArray(facets.priceCategory)} activeValue={filters.priceCategory} onSelect={(v) => toggleFilter('priceCategory', v)} />
-            <FilterAccordion title="Languages" options={getFacetArray(facets.language)} activeValue={filters.language} onSelect={(v) => toggleFilter('language', v)} />
+            <FilterAccordion title="Availability Scope" options={getFacetArray(facets.availability)} activeValue={filters.availability} onSelect={(v) => toggleFilter('availability', v)} />
+            <FilterAccordion title="Pricing Category" options={getFacetArray(facets.priceCategory)} activeValue={filters.priceCategory} onSelect={(v) => toggleFilter('priceCategory', v)} />
+            <FilterAccordion title="Communication Lang" options={getFacetArray(facets.language)} activeValue={filters.language} onSelect={(v) => toggleFilter('language', v)} />
           </div>
         </aside>
 
@@ -818,11 +928,11 @@ const MentorshipGateway = () => {
           <div className="glass-panel" style={{ padding: '20px 32px', borderRadius: CONFIG.THEME.RADIUS_LG, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
             <div style={{ position: 'relative', width: '450px' }}>
               <span style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>🔍</span>
-              <input className="sju-input" placeholder="Search mentors by name, company, or domain..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
+              <input className="sju-input has-icon" placeholder="Search mentors by name, company, or domain..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
             </div>
             
             <div style={{ display: 'flex', gap: '8px', background: CONFIG.THEME.BG_APP, padding: '8px', borderRadius: CONFIG.THEME.RADIUS_SM, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
-              {['GRID', 'LIST', 'ANALYTICS'].map(v => (
+              {['GRID', 'LIST', 'CALENDAR', 'SMART MATCH', 'ANALYTICS'].map(v => (
                 <button key={v} onClick={() => { setView(v); setPage(1); }} style={{ padding: '8px 20px', border: 'none', background: view === v ? CONFIG.THEME.BG_SURFACE : 'transparent', borderRadius: '6px', fontWeight: '700', fontSize: '0.8rem', letterSpacing: '0.05em', color: view === v ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.TEXT_SEC, cursor: 'pointer', boxShadow: view === v ? CONFIG.THEME.SHADOW_SM : 'none', transition: CONFIG.THEME.TRANSITION_FAST }}>{v}</button>
               ))}
             </div>
@@ -831,11 +941,13 @@ const MentorshipGateway = () => {
           <div style={{ minHeight: '800px' }}>
             {view === 'GRID' && <GridView data={paginatedData} onSelect={setSelectedMentor} onBook={(m) => { setSelectedMentor(m); setIsBooking(true); }} />}
             {view === 'LIST' && <ListView data={paginatedData} onSelect={setSelectedMentor} onBook={(m) => { setSelectedMentor(m); setIsBooking(true); }} />}
+            {view === 'CALENDAR' && <CalendarView data={filteredData} onSelect={setSelectedMentor} onBook={(m) => { setSelectedMentor(m); setIsBooking(true); }} />}
+            {view === 'SMART MATCH' && <SmartMatchView data={filteredData} onSelect={setSelectedMentor} />}
             {view === 'ANALYTICS' && <AnalyticsView data={filteredData} />}
           </div>
 
-          {view !== 'ANALYTICS' && (
-            <AdvancedPagination currentPage={page} totalPages={totalPages} onPageChange={handlePageChange} totalItems={filteredData.length} />
+          {(view === 'GRID' || view === 'LIST') && (
+            <AdvancedPagination currentPage={page} totalPages={totalPages} onPageChange={handlePageChange} totalItems={filteredData.length} pageSize={CONFIG.DATA.PAGE_SIZE} />
           )}
         </main>
       </div>
@@ -843,7 +955,7 @@ const MentorshipGateway = () => {
       {/* ZERO-OVERLAP, SCALABLE MODAL DIALOG */}
       {selectedMentor && (
         <div role="dialog" aria-modal="true" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(6, 17, 33, 0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '6vh', paddingBottom: '6vh', zIndex: 99999, overflowY: 'auto' }} onClick={() => { setSelectedMentor(null); setIsBooking(false); }}>
-          <div style={{ background: CONFIG.THEME.BG_SURFACE, width: '92%', maxWidth: isBooking ? '700px' : '950px', borderRadius: CONFIG.THEME.RADIUS_XL, padding: '48px', position: 'relative', animation: 'scaleInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards', boxShadow: CONFIG.THEME.SHADOW_LG, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: CONFIG.THEME.BG_SURFACE, width: '92%', maxWidth: isBooking ? '800px' : '1050px', borderRadius: CONFIG.THEME.RADIUS_XL, padding: '48px', position: 'relative', animation: 'scaleInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards', boxShadow: CONFIG.THEME.SHADOW_LG, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }} onClick={e => e.stopPropagation()}>
             <button onClick={() => { setSelectedMentor(null); setIsBooking(false); }} style={{ position: 'absolute', top: '32px', right: '32px', background: CONFIG.THEME.BG_APP, border: 'none', width: '48px', height: '48px', borderRadius: '50%', fontSize: '1.25rem', cursor: 'pointer', color: CONFIG.THEME.TEXT_SEC, transition: CONFIG.THEME.TRANSITION_FAST, zIndex: 100 }} onMouseEnter={(e) => { e.currentTarget.style.background = CONFIG.THEME.DANGER_BG; e.currentTarget.style.color = CONFIG.THEME.DANGER; }} onMouseLeave={(e) => { e.currentTarget.style.background = CONFIG.THEME.BG_APP; e.currentTarget.style.color = CONFIG.THEME.TEXT_SEC; }}>✕</button>
             
             {isBooking ? (
@@ -862,47 +974,57 @@ const MentorshipGateway = () => {
                     
                     <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '32px' }}>
                       <Badge label={selectedMentor.domain} color={CONFIG.THEME.NAVY_MAIN} bg={CONFIG.THEME.BG_SURFACE_ALT} />
-                      <Badge label={selectedMentor.tier} color={CONFIG.THEME.ACCENT_PURPLE} outline />
-                      <Badge label={`${selectedMentor.sessionsConducted} Sessions`} color={CONFIG.THEME.TEXT_SEC} outline />
-                      <Badge label={`${selectedMentor.rating} / 5.0 Rating`} color={CONFIG.THEME.SUCCESS} bg={CONFIG.THEME.SUCCESS_BG} />
+                      {selectedMentor.tier && selectedMentor.tier !== "N/A" && <Badge label={selectedMentor.tier} color={CONFIG.THEME.ACCENT_PURPLE} outline />}
+                      <Badge label={`${selectedMentor.sessionsConducted} Lifetime Sessions`} color={CONFIG.THEME.TEXT_SEC} outline />
+                      <Badge label={`${selectedMentor.rating} / 5.0 Rating`} color={CONFIG.THEME.WARNING} bg={CONFIG.THEME.WARNING_BG} />
                     </div>
 
                     <div style={{ display: 'flex', gap: '16px' }}>
-                      <Button onClick={() => setIsBooking(true)}>Book Session</Button>
-                      <Button variant="outline" onClick={() => alert(`Message interface opened.`)}>Send Message</Button>
+                      <Button onClick={() => setIsBooking(true)}>Schedule Sync</Button>
+                      <Button variant="outline" onClick={() => alert(`Direct Message interface opened for ${selectedMentor.name}.`)}>Message Mentor</Button>
                     </div>
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '48px' }}>
                   <div>
-                    <h4 style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', marginTop: 0 }}>Executive Summary</h4>
+                    <h4 style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', marginTop: 0 }}>Executive Bio</h4>
                     <p style={{ margin: '0 0 40px 0', lineHeight: 1.8, color: CONFIG.THEME.TEXT_PRI, fontSize: '1.1rem' }}>{selectedMentor.bio}</p>
 
-                    <h4 style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Languages & Support</h4>
-                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                      {selectedMentor.languages.map(l => (
-                        <span key={l} style={{ padding: '8px 16px', background: CONFIG.THEME.BG_APP, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, borderRadius: CONFIG.THEME.RADIUS_FULL, fontSize: '0.875rem', color: CONFIG.THEME.NAVY_MAIN, fontWeight: '600', transition: CONFIG.THEME.TRANSITION_FAST }}>{l}</span>
+                    <h4 style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Languages Supported</h4>
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '32px' }}>
+                      {selectedMentor.languages.map(lang => (
+                        <Badge key={lang} label={lang} color={CONFIG.THEME.TEXT_SEC} outline />
+                      ))}
+                    </div>
+
+                    <h4 style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Offered Session Types</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                      {selectedMentor.sessionTypes.map(type => (
+                        <div key={type} style={{ padding: '16px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, borderRadius: CONFIG.THEME.RADIUS_MD, background: CONFIG.THEME.BG_APP }}>
+                          <div style={{ fontWeight: 'bold', color: CONFIG.THEME.NAVY_MAIN }}>{type}</div>
+                          <div style={{ fontSize: '0.8rem', color: CONFIG.THEME.TEXT_SEC, marginTop: '4px' }}>Standard Rate Applies</div>
+                        </div>
                       ))}
                     </div>
                   </div>
 
                   <div style={{ background: CONFIG.THEME.BG_SURFACE_ALT, borderRadius: CONFIG.THEME.RADIUS_LG, padding: '32px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
                     <div style={{ marginBottom: '32px' }}>
-                      <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '8px', fontWeight: '700', letterSpacing: '0.05em' }}>Experience & Domain</div>
+                      <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '8px', fontWeight: '700', letterSpacing: '0.05em' }}>Domain & Experience</div>
                       <div style={{ fontWeight: '700', color: CONFIG.THEME.TEXT_PRI, fontSize: '1.1rem' }}>{selectedMentor.domain}</div>
-                      <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC, marginTop: '8px' }}>{selectedMentor.experience} Years of Expertise</div>
+                      <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC, marginTop: '8px' }}>{selectedMentor.experience} Years active in industry</div>
                     </div>
 
                     <div style={{ borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingTop: '32px', marginBottom: '32px' }}>
-                      <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '8px', fontWeight: '700', letterSpacing: '0.05em' }}>Availability</div>
-                      <div style={{ fontWeight: '700', color: CONFIG.THEME.TEXT_PRI, fontSize: '1rem', marginBottom: '8px' }}>{selectedMentor.availability}</div>
-                      <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC }}>Response Rate: {selectedMentor.responseRate}%</div>
+                      <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '8px', fontWeight: '700', letterSpacing: '0.05em' }}>Logistics & Availability</div>
+                      <div style={{ fontWeight: '700', color: CONFIG.THEME.TEXT_PRI, fontSize: '1rem', marginBottom: '8px' }}>{selectedMentor.availability} slots usually open</div>
+                      <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC }}>Typical Response: ~{selectedMentor.responseRate}% rate</div>
                     </div>
 
                     <div style={{ borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingTop: '32px' }}>
-                      <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '8px', fontWeight: '700', letterSpacing: '0.05em' }}>Session Rate</div>
-                      <div style={{ fontWeight: '800', color: CONFIG.THEME.SUCCESS, fontSize: '1.25rem' }}>{Utils.formatCurrency(selectedMentor.price)}</div>
+                      <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '8px', fontWeight: '700', letterSpacing: '0.05em' }}>Base Hourly Rate</div>
+                      <div style={{ fontWeight: '800', color: CONFIG.THEME.SUCCESS, fontSize: '1.5rem' }}>{Utils.formatCurrency(selectedMentor.price)}</div>
                     </div>
                   </div>
                 </div>
@@ -912,11 +1034,11 @@ const MentorshipGateway = () => {
         </div>
       )}
 
-      {/* TOAST NOTIFICATION */}
+      {/* FLOATING TOAST NOTIFICATION */}
       {toast && (
-        <div style={{ position: 'fixed', bottom: '32px', right: '32px', background: CONFIG.THEME.NAVY_MAIN, color: 'white', padding: '16px 24px', borderRadius: CONFIG.THEME.RADIUS_MD, boxShadow: CONFIG.THEME.SHADOW_LG, display: 'flex', alignItems: 'center', gap: '16px', zIndex: 999999, animation: 'slideLeft 0.3s ease' }}>
+        <div style={{ position: 'fixed', bottom: '32px', right: '32px', background: CONFIG.THEME.NAVY_MAIN, color: 'white', padding: '16px 24px', borderRadius: CONFIG.THEME.RADIUS_MD, boxShadow: CONFIG.THEME.SHADOW_LG, display: 'flex', alignItems: 'center', gap: '16px', zIndex: 999999, animation: 'slideUpFade 0.3s ease' }}>
           <div style={{ background: CONFIG.THEME.GOLD_MAIN, color: CONFIG.THEME.NAVY_MAIN, width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>✓</div>
-          <span style={{ fontWeight: '600', fontFamily: 'Lora, serif', fontSize: '0.9rem' }}>{toast}</span>
+          <span style={{ fontWeight: '600', fontFamily: 'Lora, serif', fontSize: '1rem' }}>{toast}</span>
         </div>
       )}
     </div>

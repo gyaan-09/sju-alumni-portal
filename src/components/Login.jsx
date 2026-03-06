@@ -13,6 +13,7 @@ import { useNavigate, Link } from 'react-router-dom';
  * - Live Ticker: Continuous CSS marquee scrolling for campus updates.
  * - Security UX: Caps-lock detection, real-time input validation, haptic-style delays.
  * - Modules: Biometric Simulation, Secure Recovery Wizard, Pre-flight Integrity Check.
+ * - FIX APPLIED: 'key' prop injection on tab content to prevent DOM overlapping.
  * ==================================================================================
  */
 
@@ -288,6 +289,15 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Tab Switch Handler (Resets necessary state cleanly)
+  const handleTabSwitch = (tab) => {
+    if (activeTab === tab) return;
+    setActiveTab(tab);
+    setErrors({});
+    setCreds({ identifier: '', password: '' }); // Clear inputs on tab switch to prevent accidental bleed
+    setShowPass(false);
+  };
+
   // Dual-Engine Authentication Logic
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -309,7 +319,6 @@ const Login = () => {
     );
 
     if (foundUser) {
-      // Role enforcement check
       if (activeTab === 'admin' && foundUser.role !== 'admin') {
         setErrors({ global: "Access Denied: Insufficient Privileges for Admin Gateway." });
         setIsLoading(false);
@@ -342,7 +351,6 @@ const Login = () => {
         }
       }
     } catch (err) {
-      // Final Fallback if API is totally unreachable
       setErrors({ global: err.message || "System currently unreachable. Please try again." });
     } finally {
       setIsLoading(false);
@@ -354,7 +362,6 @@ const Login = () => {
     if (rememberMe) localStorage.setItem('sju_secure_id', creds.identifier);
     else localStorage.removeItem('sju_secure_id');
 
-    // Haptic/Visual delay for premium feel
     setTimeout(() => {
       navigate(userPayload.role === 'admin' ? '/admin' : '/directory');
     }, 1000);
@@ -368,7 +375,6 @@ const Login = () => {
     if (element.nextSibling && element.value) element.nextSibling.focus();
   };
 
-  // Simulated Biometric Authentication
   const handleBiometricAuth = () => {
     setIsLoading(true);
     setTimeout(() => {
@@ -396,22 +402,19 @@ const Login = () => {
 
   // --- COMPONENT STYLES ---
   const styles = {
-    // Find this in your styles.container
     container: {
-      height: '100vh', // Changed from minHeight to height
+      height: '100vh', 
       display: 'flex',
       background: theme.colors.bg,
       fontFamily: theme.fonts.main,
-      overflow: 'hidden' // Prevents accidental scrollbars
+      overflow: 'hidden' 
     },
-    // Find this in your styles.brandPanel
     brandPanel: {
       flex: '1.4',
       background: `linear-gradient(145deg, ${theme.colors.primary} 0%, ${theme.colors.secondary} 100%)`,
       position: 'relative',
       display: 'flex',
       flexDirection: 'column',
-      // REMOVE: justifyContent: 'center', 
       padding: '0',
       color: 'white',
       overflow: 'hidden',
@@ -463,6 +466,8 @@ const Login = () => {
       width: '100%',
       maxWidth: '540px',
       minHeight: '680px',
+      display: 'flex',
+      flexDirection: 'column',
       background: theme.colors.glass,
       backdropFilter: 'blur(25px)',
       WebkitBackdropFilter: 'blur(25px)',
@@ -478,7 +483,8 @@ const Login = () => {
       padding: '6px',
       borderRadius: '16px',
       marginBottom: '45px',
-      position: 'relative'
+      position: 'relative',
+      flexShrink: 0
     },
     tab: (active, color) => ({
       flex: 1,
@@ -553,6 +559,7 @@ const Login = () => {
         * { box-sizing: border-box; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes subtleFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes scrollText { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         @keyframes pulseOrbs { 0% { transform: scale(1) translate(0,0); } 100% { transform: scale(1.1) translate(20px, -20px); } }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
@@ -569,7 +576,11 @@ const Login = () => {
         <div style={styles.ambientOrbs}></div>
         
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 80px', zIndex: 10 }}>
-          <div style={styles.secureBadge}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)', padding: '8px 16px',
+            borderRadius: '30px', border: '1px solid rgba(255,255,255,0.2)', marginBottom: '30px', width: 'fit-content',
+            fontSize: '0.9rem', fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase'
+          }}>
             <i className="bi bi-shield-lock-fill"></i> SSL Encrypted Gateway
           </div>
 
@@ -580,8 +591,6 @@ const Login = () => {
           <p style={styles.subHeading}>
             Authenticate to access the exclusive global network of St. Joseph's University. Connect, mentor, and grow with verified professionals worldwide.
           </p>
-          
-          
         </div>
 
         {/* Continuous Marquee Ticker */}
@@ -599,145 +608,155 @@ const Login = () => {
           <div style={styles.tabContainer}>
             <div 
               style={styles.tab(activeTab === 'alumni', theme.colors.primary)}
-              onClick={() => { setActiveTab('alumni'); setErrors({}); }}
+              onClick={() => handleTabSwitch('alumni')}
             >
               <i className="bi bi-mortarboard-fill me-2"></i> Alumni Portal
             </div>
             <div 
               style={styles.tab(activeTab === 'admin', theme.colors.error)}
-              onClick={() => { setActiveTab('admin'); setErrors({}); }}
+              onClick={() => handleTabSwitch('admin')}
             >
               <i className="bi bi-shield-lock-fill me-2"></i> Admin Gateway
             </div>
           </div>
 
-          {/* Dynamic Header */}
-          <div style={{ textAlign: 'center', marginBottom: '40px', animation: 'slideUpFade 0.5s ease-out' }}>
-            <h2 style={{ fontWeight: '700', color: theme.colors.textDark, marginBottom: '8px', fontSize: '2.2rem' }}>
-              {activeTab === 'admin' ? 'Restricted Access' : 'Welcome Back'}
-            </h2>
-            <p style={{ color: theme.colors.muted, fontSize: '1.05rem', fontStyle: 'italic' }}>
-              {activeTab === 'admin' ? 'Security clearance is mandatory to proceed.' : 'Enter your credentials to access the network.'}
-            </p>
-          </div>
-
-          {/* Global Alert Frame */}
-          {errors.global && (
-            <div style={{ 
-              background: theme.colors.errorBg, 
-              color: '#991b1b', 
-              padding: '16px 20px', 
-              borderRadius: '16px', 
-              marginBottom: '30px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '12px',
-              fontWeight: '600',
-              borderLeft: `4px solid ${theme.colors.error}`,
-              animation: 'slideUpFade 0.3s ease-out'
-            }}>
-              <i className="bi bi-exclamation-triangle-fill fs-5"></i>
-              {errors.global}
-            </div>
-          )}
-
-          {/* The Form Engine */}
-          <form onSubmit={handleLogin}>
-            <FloatingInput 
-              label={activeTab === 'admin' ? "Administrator ID" : "Register Number"}
-              type="text"
-              name="identifier"
-              value={creds.identifier}
-              onChange={handleInputChange}
-              icon={activeTab === 'admin' ? "bi-person-badge" : "bi-journal-bookmark-fill"}
-              error={errors.identifier}
-            />
-
-            <FloatingInput 
-              label="Access Key (Password)"
-              type={showPass ? "text" : "password"}
-              name="password"
-              value={creds.password}
-              onChange={handleInputChange}
-              icon="bi-key-fill"
-              error={errors.password}
-              isPassword={showPass}
-              onTogglePass={() => setShowPass(!showPass)}
-            />
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '35px', padding: '0 5px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input 
-                  type="checkbox" 
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  style={{ width: '18px', height: '18px', accentColor: theme.colors.primary, cursor: 'pointer' }}
-                />
-                <span style={{ fontSize: '0.95rem', color: theme.colors.textDark, fontWeight: '600' }}>Remember Device</span>
-              </label>
-              
-              <button 
-                type="button" 
-                onClick={() => setModalMode('recovery')} 
-                style={{ 
-                  background: 'none', border: 'none', color: theme.colors.primary, fontWeight: '700', fontSize: '0.95rem',
-                  textDecoration: 'underline', textDecorationColor: 'transparent', transition: 'text-decoration-color 0.3s', cursor: 'pointer'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.textDecorationColor = theme.colors.primary}
-                onMouseOut={(e) => e.currentTarget.style.textDecorationColor = 'transparent'}
-              >
-                Forgot Key?
-              </button>
+          {/* FIX APPLIED: Added key={activeTab} container wrapper.
+            This forces React to completely tear down and rebuild this specific DOM node 
+            when the tab changes, preventing any layout overlap or animation stuttering 
+            between the two different form states. 
+          */}
+          <div key={activeTab} style={{ display: 'flex', flexDirection: 'column', flex: 1, animation: 'subtleFadeIn 0.3s ease-out forwards' }}>
+            
+            {/* Dynamic Header */}
+            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+              <h2 style={{ fontWeight: '700', color: theme.colors.textDark, marginBottom: '8px', fontSize: '2.2rem' }}>
+                {activeTab === 'admin' ? 'Restricted Access' : 'Welcome Back'}
+              </h2>
+              <p style={{ color: theme.colors.muted, fontSize: '1.05rem', fontStyle: 'italic' }}>
+                {activeTab === 'admin' ? 'Security clearance is mandatory to proceed.' : 'Enter your credentials to access the network.'}
+              </p>
             </div>
 
-            <button 
-              type="submit" 
-              style={styles.submitBtn}
-              disabled={isLoading}
-              onMouseOver={(e) => !isLoading && (e.currentTarget.style.transform = 'translateY(-3px)')}
-              onMouseOut={(e) => !isLoading && (e.currentTarget.style.transform = 'translateY(0)')}
-              onMouseDown={(e) => !isLoading && (e.currentTarget.style.transform = 'translateY(1px)')}
-            >
-              {isLoading ? (
-                <>
-                  <div style={{ width: '24px', height: '24px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                  Verifying Protocol...
-                </>
-              ) : (
-                <>LOGIN <i className="bi bi-box-arrow-in-right" style={{ fontSize: '1.4rem' }}></i></>
-              )}
-            </button>
-
-            {/* Biometric Fallback Simulation (Alumni Only) */}
-            {activeTab === 'alumni' && (
-              <button 
-                type="button" 
-                style={styles.bioBtn} 
-                onClick={() => setModalMode('biometric')}
-                onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(0,51,102,0.05)'; e.currentTarget.style.borderColor = theme.colors.primary; }}
-                onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = theme.colors.border; }}
-              >
-                <i className="bi bi-qr-code-scan fs-5"></i> Login with Passkey / FaceID
-              </button>
+            {/* Global Alert Frame */}
+            {errors.global && (
+              <div style={{ 
+                background: theme.colors.errorBg, 
+                color: '#991b1b', 
+                padding: '16px 20px', 
+                borderRadius: '16px', 
+                marginBottom: '30px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '12px',
+                fontWeight: '600',
+                borderLeft: `4px solid ${theme.colors.error}`,
+                animation: 'slideUpFade 0.3s ease-out'
+              }}>
+                <i className="bi bi-exclamation-triangle-fill fs-5"></i>
+                {errors.global}
+              </div>
             )}
-          </form>
 
-          {/* New Account Creation / Registration Link */}
-          {activeTab === 'alumni' && (
-            <div style={{ textAlign: 'center', marginTop: '40px', paddingTop: '20px', borderTop: `1px solid ${theme.colors.border}`, animation: 'fadeIn 0.8s' }}>
-              <span style={{ color: theme.colors.muted, fontSize: '1.05rem', fontStyle: 'italic' }}>New to the alumni network? </span>
-              <Link to="/register" style={{ 
-                color: theme.colors.primary, fontWeight: '800', fontSize: '1.05rem', textDecoration: 'none', marginLeft: '5px',
-                borderBottom: `2px solid transparent`, transition: 'border-color 0.3s'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.borderBottomColor = theme.colors.primary}
-              onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}
-              >
-                Create Account
-              </Link>
-            </div>
-          )}
+            {/* The Form Engine */}
+            <form onSubmit={handleLogin} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <FloatingInput 
+                label={activeTab === 'admin' ? "Administrator ID" : "Register Number"}
+                type="text"
+                name="identifier"
+                value={creds.identifier}
+                onChange={handleInputChange}
+                icon={activeTab === 'admin' ? "bi-person-badge" : "bi-journal-bookmark-fill"}
+                error={errors.identifier}
+              />
 
+              <FloatingInput 
+                label="Access Key (Password)"
+                type={showPass ? "text" : "password"}
+                name="password"
+                value={creds.password}
+                onChange={handleInputChange}
+                icon="bi-key-fill"
+                error={errors.password}
+                isPassword={showPass}
+                onTogglePass={() => setShowPass(!showPass)}
+              />
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '35px', padding: '0 5px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    style={{ width: '18px', height: '18px', accentColor: theme.colors.primary, cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '0.95rem', color: theme.colors.textDark, fontWeight: '600' }}>Remember Device</span>
+                </label>
+                
+                <button 
+                  type="button" 
+                  onClick={() => setModalMode('recovery')} 
+                  style={{ 
+                    background: 'none', border: 'none', color: theme.colors.primary, fontWeight: '700', fontSize: '0.95rem',
+                    textDecoration: 'underline', textDecorationColor: 'transparent', transition: 'text-decoration-color 0.3s', cursor: 'pointer'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.textDecorationColor = theme.colors.primary}
+                  onMouseOut={(e) => e.currentTarget.style.textDecorationColor = 'transparent'}
+                >
+                  Forgot Key?
+                </button>
+              </div>
+
+              <div style={{ marginTop: 'auto' }}>
+                <button 
+                  type="submit" 
+                  style={styles.submitBtn}
+                  disabled={isLoading}
+                  onMouseOver={(e) => !isLoading && (e.currentTarget.style.transform = 'translateY(-3px)')}
+                  onMouseOut={(e) => !isLoading && (e.currentTarget.style.transform = 'translateY(0)')}
+                  onMouseDown={(e) => !isLoading && (e.currentTarget.style.transform = 'translateY(1px)')}
+                >
+                  {isLoading ? (
+                    <>
+                      <div style={{ width: '24px', height: '24px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                      Verifying Protocol...
+                    </>
+                  ) : (
+                    <>LOGIN <i className="bi bi-box-arrow-in-right" style={{ fontSize: '1.4rem' }}></i></>
+                  )}
+                </button>
+
+                {/* Biometric Fallback Simulation (Alumni Only) */}
+                {activeTab === 'alumni' && (
+                  <button 
+                    type="button" 
+                    style={styles.bioBtn} 
+                    onClick={() => setModalMode('biometric')}
+                    onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(0,51,102,0.05)'; e.currentTarget.style.borderColor = theme.colors.primary; }}
+                    onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = theme.colors.border; }}
+                  >
+                    <i className="bi bi-qr-code-scan fs-5"></i> Login with Passkey / FaceID
+                  </button>
+                )}
+              </div>
+            </form>
+
+            {/* New Account Creation / Registration Link */}
+            {activeTab === 'alumni' && (
+              <div style={{ textAlign: 'center', marginTop: '40px', paddingTop: '20px', borderTop: `1px solid ${theme.colors.border}`, animation: 'fadeIn 0.8s' }}>
+                <span style={{ color: theme.colors.muted, fontSize: '1.05rem', fontStyle: 'italic' }}>New to the alumni network? </span>
+                <Link to="/register" style={{ 
+                  color: theme.colors.primary, fontWeight: '800', fontSize: '1.05rem', textDecoration: 'none', marginLeft: '5px',
+                  borderBottom: `2px solid transparent`, transition: 'border-color 0.3s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.borderBottomColor = theme.colors.primary}
+                onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}
+                >
+                  Create Account
+                </Link>
+              </div>
+            )}
+
+          </div> {/* END OF KEYED CONTAINER */}
         </div>
       </div>
 

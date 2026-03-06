@@ -18,7 +18,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = getFirestore(app, "ainp");
 
 const EMAIL_GATEWAY = {
   serviceId: "service_gyaan",
@@ -709,45 +709,42 @@ const ReviewsSection = () => {
   const [loading, setLoading] = useState(true);
 
   // Simulated Firebase Fetch
+  // Active Firebase Fetch
   useEffect(() => {
     const fetchVoices = async () => {
       try {
-        /*
-          // REAL FIREBASE IMPLEMENTATION (Uncomment when Firebase is setup)
-          const q = query(collection(db, "alumni_data"), limit(6));
-          const querySnapshot = await getDocs(q);
-          const fetchedData = [];
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            if(data.Reviews && data.Reviews.trim() !== "") {
-              fetchedData.push({
-                id: doc.id,
-                text: data.Reviews,
-                author: data.full_name,
-                batch: data.batch_year
-              });
-            }
-          });
-          setReviews(fetchedData);
-        */
+        // Fetch up to 20 records to ensure we find enough people who actually wrote a review/bio
+        const q = query(collection(db, "alumni_data"), limit(20));
+        const querySnapshot = await getDocs(q);
         
-        // Simulated Data (Acting as Firestore fallback)
-        setTimeout(() => {
-          setReviews([
-            { id: 1, text: "The foundation of discipline and knowledge I received at SJU was the cornerstone of my career in public service. It taught me that education is a tool for societal transformation.", author: "Arjun Mehta", batch: "Batch of 1995" },
-            { id: 2, text: "Connecting with the global SJU network has opened doors for international research collaborations I never thought possible. The unified directory is a game changer.", author: "Dr. Sarah Lin", batch: "Batch of 2012" },
-            { id: 3, text: "Returning to campus to mentor final-year students has been profoundly fulfilling. The caliber of students remains exceptional year after year.", author: "Rahul Deshmukh", batch: "Batch of 2008" },
-            { id: 4, text: "The alumni association provides a seamless bridge between academic life and professional excellence. Proud to be a Josephite forever.", author: "Priya Sharma", batch: "Batch of 2019" },
-            { id: 5, text: "Fide et Labore isn't just a motto; it's a way of life that St. Joseph's instills in every student that walks its corridors. The new library block is phenomenal.", author: "Vikram Reddy", batch: "Batch of 2001" },
-            { id: 6, text: "The transition from a college to a full-fledged university has only amplified the academic rigor and opportunities available on the global stage.", author: "Anita Desai", batch: "Batch of 2023" }
-          ]);
-          setLoading(false);
-        }, 800);
+        const fetchedData = [];
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          // Check for 'Reviews' field, fallback to 'Bio' if that's what your CSV uses
+          const reviewText = data.Reviews || data.Bio || ""; 
+          
+          if(reviewText.trim() !== "") {
+            fetchedData.push({
+              id: doc.id,
+              text: reviewText,
+              // Map to your CSV's exact headers
+              author: data.Name || "SJU Alumni",
+              batch: data.GraduationYear ? `Batch of ${data.GraduationYear}` : "Alumni Batch"
+            });
+          }
+        });
+
+        // Limit the final output to 6 to keep your grid layout perfectly balanced
+        setReviews(fetchedData.slice(0, 6));
+        setLoading(false);
+
       } catch (error) {
-        console.error("Error fetching documents: ", error);
+        console.error("Error fetching reviews from Firebase: ", error);
         setLoading(false);
       }
     };
+    
     fetchVoices();
   }, []);
 
@@ -855,7 +852,8 @@ const AppUnifiedHome = () => {
       event_time: eventDetails.time,
       event_loc: eventDetails.loc,
       message: `You have successfully registered for ${eventDetails.title}. Please arrive 15 minutes prior to the scheduled start time at ${eventDetails.loc}. Your official confirmation ID will be verified at the entrance.`,
-      reply_to: "events@sju.edu.in"
+      reply_to: "events@sju.edu.in",
+      account_credentials: ""
     };
 
     try {

@@ -363,11 +363,6 @@ const Navbar = () => {
                           <i className="bi bi-shield-lock-fill"></i> Admin Console
                         </Link>
                       )}
-                      
-                      {/* SMART PROFILE ROUTING: Passing Role to the Target Page */}
-                      <Link to="/profile" state={{ role: user.role }} className="dropdown-item">
-                        <i className="bi bi-person-badge"></i> Public Profile
-                      </Link>
 
                       {/* REAL-TIME SETTINGS BUTTON (Opens internal modal, avoids 404) */}
                       <button 

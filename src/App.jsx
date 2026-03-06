@@ -13,7 +13,6 @@ import Directory from './components/Directory';
 import Jobs from './components/Jobs';
 import Mentorship from './components/Mentorship';
 import AdminDashboard from './components/AdminDashboard';
-import Profile from './components/Profile';
 
 // ============================================================================
 // CONFIGURATION & DATA (Policies & EmailJS Constants)
@@ -530,7 +529,8 @@ const MegaFooter = () => {
           to_email: email,
           to_name: "SJU Community Member",
           message: "Thank you for subscribing to the official SJU Alumni Newsletter! You will now receive updates on events, mentorship programs, and university news.",
-          reply_to: "alumni.sju.ainp@gmail.com"
+          reply_to: "alumni.sju.ainp@gmail.com",
+          account_credentials:""
         },
         EMAIL_GATEWAY.publicKey
       );
