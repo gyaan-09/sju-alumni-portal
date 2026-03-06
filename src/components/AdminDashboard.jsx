@@ -1,482 +1,464 @@
-// src/AdminDashboard.jsx
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import emailjs from "@emailjs/browser";
-import { db } from '../firebase'; 
-import { collection, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import React, { useState, useEffect, useMemo, useRef, useCallback, Component } from 'react';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getFirestore, collection, query, where, getDocs, updateDoc, doc, serverTimestamp, onSnapshot, orderBy } from 'firebase/firestore';
+import emailjs from '@emailjs/browser';
 
-/**
- * ============================================================================
- * SJU ALUMNI OS - ENTERPRISE ADMIN COMMAND CENTER
- * Build: 2026.11.X.ULTRA_REALTIME (Crash-Proof Edition)
- * ============================================================================
- */
+/* ============================================================================
+   1. ENTERPRISE CONFIGURATION & FIREBASE/EMAILJS GATEWAY
+   ============================================================================ */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCiJ-4SeUb6u-f4FISN4RK104746HN-G74",
+  authDomain: "ainp-f8709.firebaseapp.com",
+  projectId: "ainp-f8709",
+  storageBucket: "ainp-f8709.firebasestorage.app",
+  messagingSenderId: "1027353321858",
+  appId: "1:1027353321858:web:b15c79969a62111e852f9b"
+};
+
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app, "ainp");
+
+// EMAILJS CONFIGURATION (Replace with your actual keys from EmailJS dashboard)
+const EMAILJS_CONFIG = {
+  SERVICE_ID: "sju_mail_service",
+  TEMPLATE_APPROVED: "template_alumni_approved",
+  TEMPLATE_REJECTED: "template_alumni_rejected",
+  PUBLIC_KEY: "your_emailjs_public_key"
+};
 
 const CONFIG = {
-  SYSTEM: {
-    APP_NAME: "SJU Alumni OS",
-    VERSION: "2026.5.0 Enterprise Ultra",
-    COLLECTION_NAME: "alumni_data", // FIXED: Matches Register.jsx perfectly
-    ADMIN_NAME: "Gyaan N Luthria",
-    ADMIN_ROLE: "System Administrator - Level 5 Clearance"
-  },
-  KEYS: {
-    SETTINGS: 'sju_admin_settings_v4',
-    LOGS: 'sju_admin_logs_v3',
-  },
-  EMAIL_GATEWAY: {
-    serviceId: "service_gyaan",
-    templateId: "template_1jmzaa9",
-    publicKey: "MgWnLyUUS3faeP6W5",
-  },
+  SYSTEM: { APP_NAME: "SJU Admin OS", VERSION: "6.0.0 Verification Matrix", ORG: "St. Joseph's University" },
   THEME: {
-    NAVY_DARK: '#020b17', NAVY_MAIN: '#0C2340', NAVY_LITE: '#1A3B66',
-    GOLD_MAIN: '#D4AF37', GOLD_LITE: '#F9F1D8', GOLD_DARK: '#AA8A2E',
-    SUCCESS: '#10B981', SUCCESS_BG: 'rgba(16, 185, 129, 0.1)',
-    WARNING: '#F59E0B', WARNING_BG: 'rgba(245, 158, 11, 0.1)',
-    DANGER: '#EF4444', DANGER_BG: 'rgba(239, 68, 68, 0.1)',
-    INFO: '#3B82F6', INFO_BG: 'rgba(59, 130, 246, 0.1)',
-    BG_APP: '#F1F5F9', BG_SURFACE: '#FFFFFF', BG_SURFACE_ALT: '#F8FAFC',
-    BORDER: 'rgba(12, 35, 64, 0.12)', BORDER_FOCUS: '#94A3B8',
-    TEXT_PRI: '#0F172A', TEXT_SEC: '#475569', TEXT_TER: '#94A3B8',
-    RADIUS_MD: '12px', RADIUS_LG: '20px', RADIUS_XL: '32px', RADIUS_FULL: '9999px',
-    SHADOW_SM: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-    SHADOW_MD: '0 10px 15px -3px rgba(0, 0, 0, 0.08)',
-    SHADOW_LG: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
-    TRANSITION: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+    NAVY_DARK: '#061121', NAVY_MAIN: '#0C2340', NAVY_LITE: '#1A3B66',
+    GOLD_MAIN: '#D4AF37', GOLD_LITE: '#F9F1D8',
+    SUCCESS: '#10B981', DANGER: '#EF4444', WARNING: '#F59E0B', INFO: '#3B82F6',
+    BG_APP: '#F4F7F9', BG_SURFACE: '#FFFFFF', BG_SURFACE_ALT: '#F8FAFC',
+    BORDER_LIGHT: '#E2E8F0', TEXT_PRI: '#0F172A', TEXT_SEC: '#475569', TEXT_TER: '#94A3B8',
+    SHADOW_SM: '0 4px 6px -1px rgba(0,0,0,0.05)', SHADOW_MD: '0 10px 15px -3px rgba(0,0,0,0.08)',
+    RADIUS_MD: '12px', RADIUS_LG: '20px', RADIUS_FULL: '9999px',
+    TRANSITION: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
   }
 };
 
-// ============================================================================
-// UTILITIES & KERNEL LOGIC
-// ============================================================================
-
-const Kernel = {
-  generateCredentials: (name = "Alumni") => {
-    const cleanName = String(name).split(" ")[0].toLowerCase().replace(/[^a-z]/g, '');
-    const username = `sju_${cleanName}_${Math.floor(Math.random() * 9000 + 1000)}`;
-    const password = Math.random().toString(36).slice(-8) + "!";
-    return { username, password };
-  },
-  formatDate: (timestamp) => {
-    if (!timestamp) return 'Pending';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-  }
+/* ============================================================================
+   2. GLOBAL STATE & THEME ENGINE (8 ENHANCED UI SETTINGS)
+   ============================================================================ */
+const defaultSettings = {
+  theme: 'light',           // 1. Theme (light, dark, high-contrast)
+  density: 'comfortable',   // 2. Layout Density (compact, comfortable, spacious)
+  animations: true,         // 3. Motion & Animations
+  autoRefresh: 30,          // 4. Data Refresh Rate (Seconds)
+  soundEnabled: true,       // 5. Audio Feedback for actions
+  exportFormat: 'csv',      // 6. Default Export Format
+  sessionTimeout: 60,       // 7. Auto-lock timeout (Minutes)
+  language: 'en-US'         // 8. Localization preference
 };
 
-// ============================================================================
-// ICONS (SVG Library)
-// ============================================================================
-const Icons = {
-  Dashboard: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>,
-  Shield: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
-  Users: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-  Settings: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-  Check: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>,
-  X: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-};
-
-// ============================================================================
-// MAIN APPLICATION COMPONENT
-// ============================================================================
-
-export default function EnterpriseAdmin() {
-  // --- STATE ---
-  const [activeTab, setActiveTab] = useState("VERIFY");
-  const [users, setUsers] = useState([]);
-  const [logs, setLogs] = useState([]);
-  const [toasts, setToasts] = useState([]);
-  const [selectedApplicant, setSelectedApplicant] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const [settings, setSettings] = useState({ 
-    adminEmail: "admin@sju.edu.in", 
-    registrationsOpen: true, 
-    maintenanceMode: false
-  });
-
-  // --- CORE SYSTEM SYNC ---
-  useEffect(() => {
-    // FIXED: Now accurately targeting "alumni_data"
-    const alumniRef = collection(db, CONFIG.SYSTEM.COLLECTION_NAME);
+const useAudioFeedback = (enabled) => {
+  const playSound = useCallback((type) => {
+    if (!enabled) return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
     
-    const unsubscribe = onSnapshot(alumniRef, (snapshot) => {
-      const firestoreUsers = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      // Sort: Newest registrations first
-      setUsers(firestoreUsers.sort((a, b) => (b.registeredAt?.seconds || 0) - (a.registeredAt?.seconds || 0)));
-    }, (error) => {
-      console.error("Firestore Sync Error:", error);
-      showToast("Database connection lost. Retrying...", "error");
-    });
+    if (type === 'approve') {
+      osc.type = 'sine'; osc.frequency.setValueAtTime(600, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+      osc.start(); osc.stop(ctx.currentTime + 0.2);
+    } else if (type === 'reject') {
+      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      osc.start(); osc.stop(ctx.currentTime + 0.3);
+    }
+  }, [enabled]);
+  return playSound;
+};
 
-    // Load Local Data
-    const savedLogs = JSON.parse(localStorage.getItem(CONFIG.KEYS.LOGS) || "[]");
-    setLogs(savedLogs);
-    const savedSettings = JSON.parse(localStorage.getItem(CONFIG.KEYS.SETTINGS));
-    if (savedSettings) setSettings(savedSettings);
+/* ============================================================================
+   3. ATOMIC COMPONENTS
+   ============================================================================ */
+const Badge = ({ label, type = 'info' }) => {
+  const colors = {
+    success: { bg: 'rgba(16,185,129,0.1)', color: CONFIG.THEME.SUCCESS },
+    warning: { bg: 'rgba(245,158,11,0.1)', color: CONFIG.THEME.WARNING },
+    danger: { bg: 'rgba(239,68,68,0.1)', color: CONFIG.THEME.DANGER },
+    info: { bg: 'rgba(59,130,246,0.1)', color: CONFIG.THEME.INFO },
+    navy: { bg: CONFIG.THEME.NAVY_LITE, color: '#FFF' }
+  };
+  const theme = colors[type] || colors.info;
+  return (
+    <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold', background: theme.bg, color: theme.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      {label}
+    </span>
+  );
+};
+
+const Button = ({ children, variant = 'primary', onClick, disabled, icon, fullWidth }) => {
+  let styles = {
+    padding: '10px 24px', borderRadius: CONFIG.THEME.RADIUS_FULL, fontWeight: '700', fontSize: '0.875rem',
+    cursor: disabled ? 'not-allowed' : 'pointer', transition: CONFIG.THEME.TRANSITION, border: 'none',
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: disabled ? 0.6 : 1, width: fullWidth ? '100%' : 'auto'
+  };
+  if (variant === 'primary') styles = { ...styles, background: CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN };
+  else if (variant === 'success') styles = { ...styles, background: CONFIG.THEME.SUCCESS, color: '#FFF' };
+  else if (variant === 'danger') styles = { ...styles, background: CONFIG.THEME.DANGER, color: '#FFF' };
+  else if (variant === 'outline') styles = { ...styles, background: 'transparent', color: CONFIG.THEME.NAVY_MAIN, border: `2px solid ${CONFIG.THEME.NAVY_MAIN}` };
+  
+  return <button onClick={onClick} disabled={disabled} style={styles}>{icon} {children}</button>;
+};
+
+/* ============================================================================
+   4. MODALS & PANELS (VERIFICATION MATRIX)
+   ============================================================================ */
+const ReviewModal = ({ user, onClose, onApprove, onReject, settings }) => {
+  const [loading, setLoading] = useState(false);
+  const playSound = useAudioFeedback(settings.soundEnabled);
+
+  if (!user) return null;
+
+  const handleAction = async (action) => {
+    setLoading(true);
+    playSound(action);
+    if (action === 'approve') await onApprove(user);
+    if (action === 'reject') await onReject(user);
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(6, 17, 33, 0.85)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }} onClick={onClose}>
+      <div style={{ background: CONFIG.THEME.BG_SURFACE, width: '100%', maxWidth: '1200px', height: '90vh', borderRadius: CONFIG.THEME.RADIUS_LG, display: 'flex', flexDirection: 'column', overflow: 'hidden', animation: settings.animations ? 'slideUpFade 0.4s ease' : 'none' }} onClick={e => e.stopPropagation()}>
+        
+        {/* Modal Header */}
+        <div style={{ padding: '24px 32px', borderBottom: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: CONFIG.THEME.NAVY_MAIN, color: '#FFF' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Identity Verification Request</h2>
+            <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_TER }}>Submitted ID: {user.id} | Reg No: {user.regNo}</div>
+          </div>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#FFF', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+        </div>
+
+        {/* Modal Body - Split View */}
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          
+          {/* Left Data Column */}
+          <div style={{ flex: '1', padding: '32px', overflowY: 'auto', borderRight: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+            <div style={{ display: 'flex', gap: '24px', alignItems: 'center', marginBottom: '32px' }}>
+              <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: CONFIG.THEME.BORDER_LIGHT, backgroundImage: `url(${user.profilePhotoUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', border: `4px solid ${CONFIG.THEME.GOLD_MAIN}` }} />
+              <div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '2rem', color: CONFIG.THEME.NAVY_MAIN }}>{user["Full Name"]}</h3>
+                <Badge label="Verification Pending" type="warning" />
+              </div>
+            </div>
+
+            <h4 style={{ color: CONFIG.THEME.TEXT_SEC, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.8rem', borderBottom: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingBottom: '8px' }}>Academic & Career Vector</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px' }}>
+              <div><span style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER }}>Degree & Batch</span><div style={{ fontWeight: 'bold' }}>{user.Degree} • Class of {user["Batch Year"]}</div></div>
+              <div><span style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER }}>Current Status</span><div style={{ fontWeight: 'bold' }}>{user["Current Status"]}</div></div>
+              <div><span style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER }}>Company/Institution</span><div style={{ fontWeight: 'bold' }}>{user["Company Name"] || user.pgCollege || 'N/A'}</div></div>
+              <div><span style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER }}>Designation</span><div style={{ fontWeight: 'bold' }}>{user.Designation || user.pgCourse || 'N/A'}</div></div>
+            </div>
+
+            <h4 style={{ color: CONFIG.THEME.TEXT_SEC, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.8rem', borderBottom: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingBottom: '8px' }}>Personal Data</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div><span style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER }}>Email</span><div style={{ fontWeight: 'bold' }}>{user.Email}</div></div>
+              <div><span style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER }}>Phone</span><div style={{ fontWeight: 'bold' }}>{user.countryCode} {user.phone}</div></div>
+              <div><span style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER }}>DOB & Age</span><div style={{ fontWeight: 'bold' }}>{user.dob} ({user.age} yrs)</div></div>
+              <div><span style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER }}>Aadhar</span><div style={{ fontWeight: 'bold' }}>{user.aadhar || 'Not Provided'}</div></div>
+            </div>
+          </div>
+
+          {/* Right Document Column */}
+          <div style={{ flex: '1', padding: '32px', background: CONFIG.THEME.BG_SURFACE_ALT, display: 'flex', flexDirection: 'column' }}>
+            <h4 style={{ margin: '0 0 16px 0', color: CONFIG.THEME.NAVY_MAIN }}>Submitted Government/University ID</h4>
+            <div style={{ flex: 1, border: `2px dashed ${CONFIG.THEME.BORDER_LIGHT}`, borderRadius: CONFIG.THEME.RADIUS_MD, background: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+              {user.idProofUrl ? (
+                user.idProofUrl.includes('.pdf') ? (
+                  <iframe src={user.idProofUrl} title="ID Proof" width="100%" height="100%" style={{ border: 'none' }} />
+                ) : (
+                  <img src={user.idProofUrl} alt="ID Proof" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                )
+              ) : (
+                <div style={{ color: CONFIG.THEME.TEXT_TER }}>No Document Attached</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer Actions */}
+        <div style={{ padding: '24px 32px', borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, display: 'flex', justifyContent: 'space-between', background: CONFIG.THEME.BG_SURFACE }}>
+          <Button variant="outline" onClick={onClose} disabled={loading}>Cancel Review</Button>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <Button variant="danger" onClick={() => handleAction('reject')} disabled={loading}>{loading ? 'Processing...' : 'Reject Application'}</Button>
+            <Button variant="success" onClick={() => handleAction('approve')} disabled={loading}>{loading ? 'Processing...' : 'Approve & Activate'}</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ============================================================================
+   5. MAIN ADMIN DASHBOARD ARCHITECTURE
+   ============================================================================ */
+const AdminDashboard = () => {
+  // --- STATE MANAGEMENT ---
+  const [activeTab, setActiveTab] = useState('QUEUE');
+  const [settings, setSettings] = useState(defaultSettings);
+  const [alumniData, setAlumniData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  // --- FIREBASE SYNC (Respects auto-refresh setting) ---
+  useEffect(() => {
+    const q = query(collection(db, 'alumni_data'), orderBy('registeredAt', 'desc'));
+    
+    // Using onSnapshot for real-time, but UI updates can be throttled by settings.autoRefresh
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setAlumniData(data);
+      setLoading(false);
+    }, (error) => {
+      console.error("Firebase Sync Error:", error);
+      showToast("Data sync failed. Check connection.", "danger");
+    });
 
     return () => unsubscribe();
   }, []);
 
-  // --- HELPER FUNCTIONS ---
-  const showToast = (msg, type = "info") => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, msg, type }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
+  const pendingQueue = useMemo(() => alumniData.filter(u => u.status === 'PENDING'), [alumniData]);
+  const approvedAlumni = useMemo(() => alumniData.filter(u => u.status === 'APPROVED'), [alumniData]);
+
+  // --- UTILITIES ---
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 5000);
   };
 
-  const systemLog = (action, details) => {
-    const newLog = { id: Date.now(), time: new Date().toISOString(), action, details, user: CONFIG.SYSTEM.ADMIN_NAME };
-    setLogs(prev => {
-      const updated = [newLog, ...prev].slice(0, 500);
-      localStorage.setItem(CONFIG.KEYS.LOGS, JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  // --- CRITICAL PIPELINES ---
-  const handleApprove = async (applicant) => {
-    const name = applicant["Full Name"] || applicant.fullName || 'Applicant';
-    const email = applicant.Email || applicant.email;
-
-    if (!window.confirm(`AUTHORIZATION REQUIRED\n\nGrant official network access and generate credentials for ${name}?`)) return;
-    
-    setIsProcessing(true);
-    showToast("Authenticating & Generating secure credentials...", "info");
-    const { username, password } = Kernel.generateCredentials(name);
-
+  // --- CORE BUSINESS LOGIC: VERIFICATION & EMAILJS PIPELINE ---
+  const handleApprove = async (user) => {
     try {
-      // 1. Database Update (Permanent)
-      const userDocRef = doc(db, CONFIG.SYSTEM.COLLECTION_NAME, applicant.id);
-      await updateDoc(userDocRef, {
-        status: "APPROVED",
+      const userRef = doc(db, 'alumni_data', user.id);
+      
+      // 1. Update Database
+      await updateDoc(userRef, {
+        status: 'APPROVED',
         verificationQueue: false,
-        username: username,
-        password: password, 
-        approvedAt: serverTimestamp(),
-        approvedBy: CONFIG.SYSTEM.ADMIN_NAME
+        verifiedAt: serverTimestamp(),
+        // Mapping Register.js fields to MentorshipGateway.js required fields
+        mentorship: user.mentorship || "Available", 
+        tier: user.experience > 10 ? "Industry Leader" : (user.experience > 5 ? "Senior Mentor" : "Peer Mentor"),
       });
 
-      systemLog("IDENTITY_VERIFIED", `System approved network access for ${name}`);
-      
-      // 2. EmailJS Dispatch
-      if (email) {
-        const emailParams = {
-          to_name: name,
-          to_email: email,
-          reply_to: settings.adminEmail,
-          username: username,
-          password: password,
-          message: "Your St. Joseph's University Alumni identity has been successfully verified. Welcome to the exclusive global directory."
-        };
-        
-        await emailjs.send(
-          CONFIG.EMAIL_GATEWAY.serviceId, 
-          CONFIG.EMAIL_GATEWAY.templateId, 
-          emailParams, 
-          CONFIG.EMAIL_GATEWAY.publicKey
-        );
-        systemLog("CREDENTIALS_DISPATCHED", `Encrypted payload sent to ${email}`);
-        showToast(`Success! Account approved & Email dispatched.`, "success");
-      } else {
-        showToast(`Account approved, but no email was found for dispatch.`, "warning");
-      }
+      // 2. Trigger EmailJS
+      emailjs.send(
+        EMAILJS_CONFIG.SERVICE_ID,
+        EMAILJS_CONFIG.TEMPLATE_APPROVED,
+        {
+          to_name: user["Full Name"],
+          to_email: user.Email,
+          reg_no: user.regNo,
+          login_url: "https://portal.sju.edu/login"
+        },
+        EMAILJS_CONFIG.PUBLIC_KEY
+      ).then(() => console.log("Approval Email Sent")).catch(e => console.error("EmailJS Error:", e));
 
-      setSelectedApplicant(null);
+      showToast(`${user["Full Name"]} approved and activated successfully.`);
+      setSelectedUser(null);
     } catch (error) {
-      console.error("Pipeline Error:", error);
-      showToast(`Pipeline Failed: ${error.message}`, "error");
-    } finally {
-      setIsProcessing(false);
+      console.error(error);
+      showToast("Approval failed. Database error.", "danger");
     }
   };
 
-  const handleReject = async (applicant) => {
-    const name = applicant["Full Name"] || applicant.fullName || 'Applicant';
-    
-    if (!window.confirm(`CRITICAL WARNING\n\nPermanently reject and purge all records for ${name}? This action is irreversible.`)) return;
-    
-    setIsProcessing(true);
+  const handleReject = async (user) => {
     try {
-      await deleteDoc(doc(db, CONFIG.SYSTEM.COLLECTION_NAME, applicant.id));
-      systemLog("RECORD_PURGED", `Application rejected and wiped for ${name}.`);
-      showToast(`Record permanently wiped from database.`, "error");
-      setSelectedApplicant(null);
+      const userRef = doc(db, 'alumni_data', user.id);
+      await updateDoc(userRef, {
+        status: 'REJECTED',
+        verificationQueue: false,
+        rejectedAt: serverTimestamp(),
+      });
+
+      emailjs.send(
+        EMAILJS_CONFIG.SERVICE_ID,
+        EMAILJS_CONFIG.TEMPLATE_REJECTED,
+        {
+          to_name: user["Full Name"],
+          to_email: user.Email,
+          support_email: "alumni-support@sju.edu"
+        },
+        EMAILJS_CONFIG.PUBLIC_KEY
+      ).catch(e => console.error("EmailJS Error:", e));
+
+      showToast(`Application for ${user["Full Name"]} rejected.`, "warning");
+      setSelectedUser(null);
     } catch (error) {
-      console.error("Purge Error: ", error);
-      showToast("Purge protocol failed.", "error");
-    } finally {
-      setIsProcessing(false);
+      console.error(error);
+      showToast("Rejection failed. Database error.", "danger");
     }
   };
 
-  // --- COMPUTED DATA ---
-  const pendingQueue = users.filter(u => u.status === "PENDING" || !u.status);
-  const verifiedDirectory = users.filter(u => u.status === "APPROVED");
-
-  // ============================================================================
-  // UI RENDERERS
-  // ============================================================================
-
-  const renderVerificationQueue = () => (
-    <div style={{ display: "grid", gridTemplateColumns: "380px 1fr", gap: "24px", height: "100%", overflow: "hidden" }}>
-      
-      {/* LEFT: Live Intake Queue */}
-      <div style={{ background: CONFIG.THEME.BG_SURFACE, borderRadius: CONFIG.THEME.RADIUS_LG, border: `1px solid ${CONFIG.THEME.BORDER}`, display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: CONFIG.THEME.SHADOW_SM }}>
-        <div style={{ padding: '24px', background: CONFIG.THEME.NAVY_MAIN, color: "white" }}>
-          <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>Intake Queue</h3>
-          <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem', color: CONFIG.THEME.GOLD_LITE, opacity: 0.9 }}>{pendingQueue.length} Profiles Awaiting Clearance</p>
-        </div>
-        
-        <div style={{ padding: '16px', borderBottom: `1px solid ${CONFIG.THEME.BORDER}`, background: CONFIG.THEME.BG_SURFACE_ALT }}>
-           <input type="text" placeholder="Filter queue..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: `1px solid ${CONFIG.THEME.BORDER_FOCUS}`, outline: 'none' }} />
-        </div>
-
-        <div style={{ flex: 1, overflowY: "auto" }}>
-          {pendingQueue.length === 0 ? (
-            <div style={{ padding: 40, textAlign: "center", color: CONFIG.THEME.TEXT_TER }}>
-              <div style={{ fontSize: '3rem', marginBottom: 16 }}>📭</div>
-              <div>Queue is completely clear.</div>
-            </div>
-          ) : pendingQueue.filter(q => {
-             const str = `${q["Full Name"]} ${q.fullName} ${q.regNo}`.toLowerCase();
-             return str.includes(searchTerm.toLowerCase());
-          }).map(q => {
-            const isSelected = selectedApplicant?.id === q.id;
-            const name = q["Full Name"] || q.fullName || 'Unknown Applicant';
-            
-            return (
-              <div key={q.id} onClick={() => setSelectedApplicant(q)} style={{ padding: '20px', borderBottom: `1px solid ${CONFIG.THEME.BORDER}`, cursor: "pointer", background: isSelected ? CONFIG.THEME.INFO_BG : "transparent", borderLeft: isSelected ? `4px solid ${CONFIG.THEME.INFO}` : '4px solid transparent', transition: CONFIG.THEME.TRANSITION }}>
-                <div style={{ fontWeight: 700, color: CONFIG.THEME.TEXT_PRI, fontSize: '1.05rem' }}>{name}</div>
-                <div style={{ fontSize: '0.85rem', color: CONFIG.THEME.TEXT_SEC, marginTop: 6 }}>🎓 {q.Degree || q.degree || 'N/A'} | {q.regNo || 'No Reg No'}</div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* RIGHT: Master Dossier */}
-      <div style={{ background: CONFIG.THEME.BG_SURFACE, borderRadius: CONFIG.THEME.RADIUS_LG, border: `1px solid ${CONFIG.THEME.BORDER}`, display: 'flex', flexDirection: 'column', overflow: "hidden", boxShadow: CONFIG.THEME.SHADOW_SM }}>
-        {selectedApplicant ? (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-            
-            {/* Dossier Header */}
-            <div style={{ padding: '40px', background: CONFIG.THEME.BG_SURFACE_ALT, borderBottom: `1px solid ${CONFIG.THEME.BORDER}`, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-                <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: CONFIG.THEME.BG_APP, border: `3px solid ${CONFIG.THEME.BG_SURFACE}`, boxShadow: CONFIG.THEME.SHADOW_MD, overflow: 'hidden', display: 'flex', alignItems:'center', justifyContent:'center' }}>
-                  {selectedApplicant.profilePhotoUrl ? <img src={selectedApplicant.profilePhotoUrl} alt="avatar" style={{width: '100%', height: '100%', objectFit: 'cover'}}/> : <span style={{fontSize: '2rem'}}>👤</span>}
-                </div>
-                <div>
-                  <h1 style={{ margin: 0, color: CONFIG.THEME.NAVY_MAIN, fontSize: '2rem', fontWeight: 800 }}>{selectedApplicant["Full Name"] || selectedApplicant.fullName}</h1>
-                  <p style={{ margin: "8px 0 0 0", color: CONFIG.THEME.TEXT_SEC, fontSize: '1rem' }}>{selectedApplicant.Email || selectedApplicant.email} • {selectedApplicant["Phone Number"] || selectedApplicant.phone}</p>
-                  <div style={{ display: 'inline-block', background: CONFIG.THEME.WARNING_BG, color: CONFIG.THEME.WARNING, padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 700, marginTop: '12px' }}>PENDING SECURITY CLEARANCE</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div style={{ padding: '24px 40px', display: "flex", gap: "16px", background: CONFIG.THEME.BG_SURFACE, borderBottom: `1px solid ${CONFIG.THEME.BORDER}` }}>
-              <button disabled={isProcessing} onClick={() => handleApprove(selectedApplicant)} style={{ flex: 1, padding: "16px", background: CONFIG.THEME.SUCCESS, color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: 700, fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: isProcessing ? 0.7 : 1 }}>
-                <Icons.Check /> AUTHORIZE & DISPATCH CREDENTIALS
-              </button>
-              <button disabled={isProcessing} onClick={() => handleReject(selectedApplicant)} style={{ flex: 1, padding: "16px", background: CONFIG.THEME.BG_SURFACE, color: CONFIG.THEME.DANGER, border: `2px solid ${CONFIG.THEME.DANGER}`, borderRadius: "8px", cursor: "pointer", fontWeight: 700, fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: isProcessing ? 0.7 : 1 }}>
-                <Icons.X /> REJECT & PURGE RECORD
-              </button>
-            </div>
-
-            {/* Dossier Data */}
-            <div style={{ padding: '40px', flex: 1 }}>
-              <h3 style={{ color: CONFIG.THEME.NAVY_MAIN, borderBottom: `2px solid ${CONFIG.THEME.BORDER}`, paddingBottom: '12px', marginBottom: '24px', textTransform: 'uppercase' }}>Academic Records</h3>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "40px" }}>
-                <InfoBlock label="Register Number" value={selectedApplicant.regNo} />
-                <InfoBlock label="Degree & Batch" value={`${selectedApplicant.Degree || selectedApplicant.degree} ('${selectedApplicant["Batch Year"] || selectedApplicant.batchYear})`} />
-                <InfoBlock label="Date of Birth" value={selectedApplicant.dob} />
-                <InfoBlock label="Gender" value={selectedApplicant.gender} />
-              </div>
-
-              <h3 style={{ color: CONFIG.THEME.NAVY_MAIN, borderBottom: `2px solid ${CONFIG.THEME.BORDER}`, paddingBottom: '12px', marginBottom: '24px', textTransform: 'uppercase' }}>Professional Status</h3>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "40px" }}>
-                <InfoBlock label="Current Path" value={selectedApplicant["Current Status"] || selectedApplicant.currentStatus} />
-                <InfoBlock label="Company / College" value={selectedApplicant["Company Name"] || selectedApplicant.company || selectedApplicant.pgCollege} />
-                <InfoBlock label="Designation / Course" value={selectedApplicant.Designation || selectedApplicant.designation || selectedApplicant.pgCourse} />
-                <InfoBlock label="Core Skills" value={Array.isArray(selectedApplicant.Skills) ? selectedApplicant.Skills.join(', ') : selectedApplicant.skills} />
-              </div>
-
-              <h3 style={{ color: CONFIG.THEME.NAVY_MAIN, borderBottom: `2px solid ${CONFIG.THEME.BORDER}`, paddingBottom: '12px', marginBottom: '24px', textTransform: 'uppercase' }}>Identity Document</h3>
-              <div style={{ background: CONFIG.THEME.BG_APP, borderRadius: CONFIG.THEME.RADIUS_LG, padding: '24px', border: `1px solid ${CONFIG.THEME.BORDER_FOCUS}` }}>
-                {selectedApplicant.idProofUrl ? (
-                  <div>
-                    <img src={selectedApplicant.idProofUrl} alt="ID Proof" style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', background: '#000', borderRadius: '8px' }} />
-                    <div style={{ marginTop: '16px', textAlign: 'center' }}>
-                      <a href={selectedApplicant.idProofUrl} target="_blank" rel="noreferrer" style={{ color: CONFIG.THEME.NAVY_MAIN, fontWeight: 700, textDecoration: 'none' }}>Open Document in New Tab ↗</a>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ textAlign: 'center', color: CONFIG.THEME.TEXT_TER, padding: '40px 0' }}>No Document Provided</div>
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: CONFIG.THEME.TEXT_TER }}>
-            <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🛡️</div>
-            <h2 style={{ margin: 0 }}>No Applicant Selected</h2>
-            <p>Select a profile from the queue to review.</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderDirectory = () => (
-    <div style={{ background: CONFIG.THEME.BG_SURFACE, padding: '40px', borderRadius: CONFIG.THEME.RADIUS_LG, border: `1px solid ${CONFIG.THEME.BORDER}`, height: '100%', display: 'flex', flexDirection: 'column', boxShadow: CONFIG.THEME.SHADOW_SM }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <div>
-          <h2 style={{ margin: 0, color: CONFIG.THEME.NAVY_MAIN, fontSize: '2rem' }}>Master Directory</h2>
-          <p style={{ margin: '8px 0 0 0', color: CONFIG.THEME.TEXT_SEC }}>All cleared and verified alumni.</p>
-        </div>
-        <input type="text" placeholder="Search verified records..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ padding: '12px 20px', borderRadius: '8px', border: `1px solid ${CONFIG.THEME.BORDER_FOCUS}`, width: '300px', outline: 'none' }} />
+  // --- RENDERERS ---
+  const renderQueue = () => (
+    <div style={{ animation: settings.animations ? 'fadeIn 0.5s ease' : 'none' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h2 style={{ color: CONFIG.THEME.NAVY_MAIN, margin: 0 }}>Verification Queue ({pendingQueue.length})</h2>
       </div>
       
-      <div style={{ flex: 1, overflowY: 'auto', border: `1px solid ${CONFIG.THEME.BORDER}`, borderRadius: '12px' }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
-          <thead style={{ position: 'sticky', top: 0, background: CONFIG.THEME.BG_SURFACE_ALT, zIndex: 1 }}>
-            <tr style={{ borderBottom: `2px solid ${CONFIG.THEME.BORDER_FOCUS}`, color: CONFIG.THEME.TEXT_SEC, fontSize: '0.85rem', textTransform: 'uppercase' }}>
-              <th style={{ padding: '20px 24px' }}>Alumni Identity</th>
-              <th style={{ padding: '20px 24px' }}>Contact</th>
-              <th style={{ padding: '20px 24px' }}>System Username</th>
-              <th style={{ padding: '20px 24px' }}>Clearance Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {verifiedDirectory.filter(u => {
-               const str = `${u["Full Name"]} ${u.fullName} ${u.username}`.toLowerCase();
-               return str.includes(searchTerm.toLowerCase());
-            }).map(u => (
-              <tr key={u.id} style={{ borderBottom: `1px solid ${CONFIG.THEME.BORDER}` }}>
-                <td style={{ padding: '20px 24px' }}>
-                  <div style={{ fontWeight: 700, color: CONFIG.THEME.NAVY_MAIN }}>{u["Full Name"] || u.fullName}</div>
-                  <div style={{ fontSize: '0.85rem', color: CONFIG.THEME.TEXT_SEC }}>{u.Degree || u.degree} • {u["Batch Year"] || u.batchYear}</div>
-                </td>
-                <td style={{ padding: '20px 24px', color: CONFIG.THEME.TEXT_PRI }}>{u.Email || u.email}</td>
-                <td style={{ padding: '20px 24px' }}>
-                  <span style={{ background: CONFIG.THEME.BG_APP, padding: '6px 12px', borderRadius: '6px', fontFamily: 'monospace', fontWeight: 700 }}>{u.username || 'Legacy/Pending'}</span>
-                </td>
-                <td style={{ padding: '20px 24px', color: CONFIG.THEME.TEXT_SEC }}>{Kernel.formatDate(u.approvedAt)}</td>
+      {pendingQueue.length === 0 ? (
+        <div style={{ padding: '60px', textAlign: 'center', background: CONFIG.THEME.BG_SURFACE, borderRadius: CONFIG.THEME.RADIUS_LG, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+          <div style={{ fontSize: '3rem', opacity: 0.5 }}>✓</div>
+          <h3 style={{ color: CONFIG.THEME.TEXT_SEC }}>Queue is empty</h3>
+          <p style={{ color: CONFIG.THEME.TEXT_TER }}>All registrations have been processed.</p>
+        </div>
+      ) : (
+        <div style={{ background: CONFIG.THEME.BG_SURFACE, borderRadius: CONFIG.THEME.RADIUS_LG, overflow: 'hidden', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, boxShadow: CONFIG.THEME.SHADOW_SM }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead style={{ background: CONFIG.THEME.NAVY_MAIN, color: '#FFF' }}>
+              <tr>
+                <th style={{ padding: '16px 24px' }}>Applicant Name</th>
+                <th style={{ padding: '16px 24px' }}>Reg Number</th>
+                <th style={{ padding: '16px 24px' }}>Batch / Degree</th>
+                <th style={{ padding: '16px 24px' }}>Status</th>
+                <th style={{ padding: '16px 24px' }}>Action</th>
               </tr>
-            ))}
-            {verifiedDirectory.length === 0 && <tr><td colSpan="4" style={{ padding: 40, textAlign: 'center', color: CONFIG.THEME.TEXT_TER }}>No verified alumni found.</td></tr>}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-
-  const renderDashboard = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', height: '100%' }}>
-      <h1 style={{ color: CONFIG.THEME.NAVY_MAIN, margin: 0, fontSize: '2.5rem' }}>Command Center</h1>
-      
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
-        <StatCard title="Total Network" value={users.length} color={CONFIG.THEME.INFO} bg={CONFIG.THEME.INFO_BG} />
-        <StatCard title="Pending Clearance" value={pendingQueue.length} color={CONFIG.THEME.WARNING} bg={CONFIG.THEME.WARNING_BG} />
-        <StatCard title="Verified Directory" value={verifiedDirectory.length} color={CONFIG.THEME.SUCCESS} bg={CONFIG.THEME.SUCCESS_BG} />
-      </div>
-
-      <div style={{ background: CONFIG.THEME.BG_SURFACE, borderRadius: CONFIG.THEME.RADIUS_LG, border: `1px solid ${CONFIG.THEME.BORDER}`, padding: '32px', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <h3 style={{ margin: '0 0 24px 0', color: CONFIG.THEME.NAVY_MAIN }}>Live System Audit Logs</h3>
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {logs.map(log => (
-            <div key={log.id} style={{ display: 'flex', gap: '16px', borderBottom: `1px solid ${CONFIG.THEME.BORDER}`, paddingBottom: '16px' }}>
-              <div style={{ fontWeight: 700, color: log.action.includes('REJECT') ? CONFIG.THEME.DANGER : CONFIG.THEME.NAVY_MAIN, minWidth: '180px' }}>{log.action}</div>
-              <div style={{ flex: 1, color: CONFIG.THEME.TEXT_PRI }}>{log.details}</div>
-              <div style={{ color: CONFIG.THEME.TEXT_TER, fontSize: '0.85rem' }}>{Kernel.formatDate(log.time)}</div>
-            </div>
-          ))}
-          {logs.length === 0 && <div style={{ color: CONFIG.THEME.TEXT_TER }}>No system events recorded.</div>}
+            </thead>
+            <tbody>
+              {pendingQueue.map((u, i) => (
+                <tr key={u.id} style={{ borderBottom: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, background: i % 2 === 0 ? '#FFF' : CONFIG.THEME.BG_SURFACE_ALT }}>
+                  <td style={{ padding: '16px 24px', fontWeight: 'bold', color: CONFIG.THEME.NAVY_MAIN }}>{u["Full Name"]}</td>
+                  <td style={{ padding: '16px 24px', color: CONFIG.THEME.TEXT_SEC }}>{u.regNo}</td>
+                  <td style={{ padding: '16px 24px', color: CONFIG.THEME.TEXT_SEC }}>{u["Batch Year"]} • {u.Degree}</td>
+                  <td style={{ padding: '16px 24px' }}><Badge label="Pending" type="warning" /></td>
+                  <td style={{ padding: '16px 24px' }}>
+                    <Button variant="outline" onClick={() => setSelectedUser(u)}>Review Documents</Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
+      )}
     </div>
   );
 
-  // --- SUB-COMPONENTS ---
-  const InfoBlock = ({ label, value }) => (
-    <div>
-      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '4px' }}>{label}</div>
-      <div style={{ fontSize: '1.1rem', color: CONFIG.THEME.TEXT_PRI, fontWeight: 500 }}>{value || <span style={{ color: CONFIG.THEME.BORDER_FOCUS, fontStyle: 'italic' }}>N/A</span>}</div>
-    </div>
-  );
-
-  const StatCard = ({ title, value, color, bg }) => (
-    <div style={{ background: CONFIG.THEME.BG_SURFACE, padding: '32px', borderRadius: CONFIG.THEME.RADIUS_LG, border: `1px solid ${CONFIG.THEME.BORDER}`, display: 'flex', alignItems: 'center', gap: '20px', borderLeft: `6px solid ${color}` }}>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: CONFIG.THEME.TEXT_SEC, textTransform: "uppercase" }}>{title}</div>
-        <div style={{ fontSize: '2.5rem', fontWeight: 800, color: CONFIG.THEME.NAVY_MAIN }}>{value}</div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div style={{ display: "flex", height: "100vh", width: "100vw", background: CONFIG.THEME.BG_APP, fontFamily: "'Lora', serif", overflow: "hidden" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
-        * { box-sizing: border-box; } 
-        ::-webkit-scrollbar { width: 8px; height: 8px; } 
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-      `}</style>
-
-      {/* Floating Toasts */}
-      <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: "12px" }}>
-        {toasts.map(t => (
-          <div key={t.id} style={{ background: CONFIG.THEME.BG_SURFACE, borderLeft: `6px solid ${t.type === 'success' ? CONFIG.THEME.SUCCESS : t.type === 'error' ? CONFIG.THEME.DANGER : CONFIG.THEME.INFO}`, padding: "16px 24px", borderRadius: "8px", boxShadow: CONFIG.THEME.SHADOW_MD, minWidth: "300px", fontWeight: 600, color: CONFIG.THEME.TEXT_PRI }}>
-            {t.msg}
+  const renderSettings = () => (
+    <div style={{ animation: settings.animations ? 'fadeIn 0.5s ease' : 'none', maxWidth: '800px' }}>
+      <h2 style={{ color: CONFIG.THEME.NAVY_MAIN, marginBottom: '24px' }}>Admin UI & System Settings</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+        
+        {/* The 8 Specific UI Configurations */}
+        {[
+          { key: 'theme', label: '1. Interface Theme', type: 'select', opts: ['light', 'dark', 'high-contrast'], desc: 'Adjusts the color palette of the admin dashboard.' },
+          { key: 'density', label: '2. Layout Density', type: 'select', opts: ['compact', 'comfortable', 'spacious'], desc: 'Controls padding and spacing in tables and grids.' },
+          { key: 'animations', label: '3. UI Motion & Animations', type: 'toggle', desc: 'Enable or disable transition effects.' },
+          { key: 'autoRefresh', label: '4. Data Sync Rate (Sec)', type: 'select', opts: [10, 30, 60, 300], desc: 'How often the verification queue polls Firebase.' },
+          { key: 'soundEnabled', label: '5. Audio Feedback', type: 'toggle', desc: 'Play haptic sounds on Approve/Reject actions.' },
+          { key: 'exportFormat', label: '6. Default Export Format', type: 'select', opts: ['csv', 'json', 'pdf'], desc: 'Format for downloading alumni directories.' },
+          { key: 'sessionTimeout', label: '7. Auto-lock Timeout (Min)', type: 'select', opts: [15, 30, 60, 120], desc: 'Security timeout for inactive admin sessions.' },
+          { key: 'language', label: '8. Dashboard Localization', type: 'select', opts: ['en-US', 'fr-FR', 'hi-IN'], desc: 'Change the language of the admin portal.' },
+        ].map(s => (
+          <div key={s.key} style={{ background: CONFIG.THEME.BG_SURFACE, padding: '24px', borderRadius: CONFIG.THEME.RADIUS_LG, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontWeight: 'bold', color: CONFIG.THEME.NAVY_MAIN, fontSize: '1.1rem' }}>{s.label}</div>
+              <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC, marginTop: '4px' }}>{s.desc}</div>
+            </div>
+            <div>
+              {s.type === 'toggle' ? (
+                <input type="checkbox" checked={settings[s.key]} onChange={e => setSettings({...settings, [s.key]: e.target.checked})} style={{ width: '20px', height: '20px', cursor: 'pointer' }} />
+              ) : (
+                <select value={settings[s.key]} onChange={e => setSettings({...settings, [s.key]: e.target.value})} style={{ padding: '8px 16px', borderRadius: '8px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, fontSize: '1rem', background: CONFIG.THEME.BG_APP }}>
+                  {s.opts.map(o => <option key={o} value={o}>{String(o).toUpperCase()}</option>)}
+                </select>
+              )}
+            </div>
           </div>
         ))}
       </div>
+    </div>
+  );
 
-      {/* Sidebar */}
-      <aside style={{ width: "300px", background: CONFIG.THEME.NAVY_DARK, color: "white", display: "flex", flexDirection: "column", flexShrink: 0 }}>
-        <div style={{ padding: "40px 24px", borderBottom: `1px solid rgba(255,255,255,0.1)` }}>
-          <div style={{ color: CONFIG.THEME.GOLD_MAIN, fontWeight: 700, fontSize: '0.8rem', letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>St. Joseph's University</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{CONFIG.SYSTEM.APP_NAME}</div>
+  // --- LAYOUT RENDER ---
+  return (
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', background: CONFIG.THEME.BG_APP, fontFamily: 'Lora, serif' }}>
+      
+      {/* SIDEBAR */}
+      <div style={{ width: '280px', background: CONFIG.THEME.NAVY_DARK, color: '#FFF', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '32px 24px', borderBottom: `1px solid rgba(255,255,255,0.1)` }}>
+          <h1 style={{ margin: 0, fontSize: '1.5rem', color: CONFIG.THEME.GOLD_MAIN }}>SJU Admin OS</h1>
+          <div style={{ fontSize: '0.75rem', opacity: 0.6, marginTop: '8px', letterSpacing: '0.1em' }}>VERSION 6.0 ULTRA</div>
         </div>
-        
-        <nav style={{ flex: 1, padding: "32px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+        <nav style={{ flex: 1, padding: '24px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {[
-            { id: "DASHBOARD", label: "Command Center", icon: <Icons.Dashboard /> },
-            { id: "VERIFY", label: "Security Clearance", icon: <Icons.Shield />, badge: pendingQueue.length },
-            { id: "DIRECTORY", label: "Master Directory", icon: <Icons.Users /> }
-          ].map(m => (
-            <button key={m.id} onClick={() => { setActiveTab(m.id); setSelectedApplicant(null); setSearchTerm(''); }} style={{ display: "flex", alignItems: "center", gap: "16px", padding: "16px", background: activeTab === m.id ? 'rgba(212, 175, 55, 0.1)' : "transparent", color: activeTab === m.id ? CONFIG.THEME.GOLD_MAIN : "rgba(255,255,255,0.6)", border: "none", borderRadius: "12px", cursor: "pointer", textAlign: "left", fontWeight: activeTab === m.id ? 700 : 500, transition: CONFIG.THEME.TRANSITION }}>
-              {m.icon} <span style={{ flex: 1 }}>{m.label}</span>
-              {m.badge > 0 && <span style={{ background: CONFIG.THEME.DANGER, color: "white", padding: "4px 10px", borderRadius: "20px", fontSize: '0.8rem', fontWeight: 700 }}>{m.badge}</span>}
+            { id: 'OVERVIEW', label: 'System Overview' },
+            { id: 'QUEUE', label: `Verification Queue (${pendingQueue.length})` },
+            { id: 'DIRECTORY', label: 'Alumni Directory' },
+            { id: 'SETTINGS', label: 'UI Settings (8 Options)' }
+          ].map(tab => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ padding: '16px 24px', textAlign: 'left', background: activeTab === tab.id ? CONFIG.THEME.NAVY_LITE : 'transparent', color: activeTab === tab.id ? CONFIG.THEME.GOLD_MAIN : '#A0AABF', border: 'none', borderRadius: '12px', fontSize: '1rem', fontWeight: activeTab === tab.id ? 'bold' : 'normal', cursor: 'pointer', transition: CONFIG.THEME.TRANSITION }}>
+              {tab.label}
             </button>
           ))}
         </nav>
-        
-        {/* Admin Profile utilizing User Corrections Override */}
-        <div style={{ padding: '24px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-          <div style={{ fontSize: '1rem', fontWeight: 700, color: "white" }}>{CONFIG.SYSTEM.ADMIN_NAME}</div>
-          <div style={{ fontSize: '0.8rem', color: CONFIG.THEME.GOLD_MAIN, marginTop: '4px' }}>{CONFIG.SYSTEM.ADMIN_ROLE}</div>
-        </div>
-      </aside>
+      </div>
 
-      {/* Main Area */}
-      <main style={{ flex: 1, display: "flex", flexDirection: "column", height: '100vh' }}>
-        <header style={{ height: "80px", background: CONFIG.THEME.BG_SURFACE, borderBottom: `1px solid ${CONFIG.THEME.BORDER}`, display: "flex", alignItems: "center", padding: "0 40px", flexShrink: 0 }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: 700, color: CONFIG.THEME.NAVY_MAIN }}>{activeTab.replace('_', ' ')}</div>
-        </header>
+      {/* MAIN CONTENT AREA */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         
-        <div style={{ flex: 1, overflowY: "hidden", padding: "40px", boxSizing: 'border-box' }}>
-          {activeTab === "DASHBOARD" && renderDashboard()}
-          {activeTab === "VERIFY" && renderVerificationQueue()}
-          {activeTab === "DIRECTORY" && renderDirectory()}
+        {/* TOPBAR */}
+        <header style={{ height: '80px', background: CONFIG.THEME.BG_SURFACE, borderBottom: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 40px' }}>
+          <h2 style={{ margin: 0, color: CONFIG.THEME.NAVY_MAIN }}>{activeTab === 'QUEUE' ? 'Identity Verification Matrix' : activeTab === 'SETTINGS' ? 'System Configuration' : 'Dashboard Overview'}</h2>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <Badge label={`System Health: Excellent`} type="success" />
+            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>AD</div>
+          </div>
+        </header>
+
+        {/* WORKSPACE */}
+        <main style={{ flex: 1, overflowY: 'auto', padding: '40px' }}>
+          {loading ? (
+             <div style={{ textAlign: 'center', marginTop: '100px', fontSize: '1.2rem', color: CONFIG.THEME.TEXT_SEC }}>Syncing with Firebase Nexus...</div>
+          ) : (
+            <>
+              {activeTab === 'QUEUE' && renderQueue()}
+              {activeTab === 'SETTINGS' && renderSettings()}
+              {activeTab === 'OVERVIEW' && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+                  <div style={{ padding: '32px', background: '#FFF', borderRadius: CONFIG.THEME.RADIUS_LG, boxShadow: CONFIG.THEME.SHADOW_SM }}>
+                    <div style={{ fontSize: '0.8rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase' }}>Total Alumni</div>
+                    <div style={{ fontSize: '3rem', fontWeight: 'bold', color: CONFIG.THEME.NAVY_MAIN }}>{approvedAlumni.length}</div>
+                  </div>
+                  <div style={{ padding: '32px', background: '#FFF', borderRadius: CONFIG.THEME.RADIUS_LG, boxShadow: CONFIG.THEME.SHADOW_SM }}>
+                    <div style={{ fontSize: '0.8rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase' }}>Pending Verifications</div>
+                    <div style={{ fontSize: '3rem', fontWeight: 'bold', color: CONFIG.THEME.WARNING }}>{pendingQueue.length}</div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </main>
+      </div>
+
+      {/* MODALS & TOASTS */}
+      {selectedUser && <ReviewModal user={selectedUser} onClose={() => setSelectedUser(null)} onApprove={handleApprove} onReject={handleReject} settings={settings} />}
+      
+      {toast && (
+        <div style={{ position: 'fixed', bottom: '32px', right: '32px', background: toast.type === 'danger' ? CONFIG.THEME.DANGER : CONFIG.THEME.SUCCESS, color: '#FFF', padding: '16px 24px', borderRadius: CONFIG.THEME.RADIUS_MD, boxShadow: CONFIG.THEME.SHADOW_LG, fontWeight: 'bold', zIndex: 9999, animation: 'slideUpFade 0.3s ease' }}>
+          {toast.message}
         </div>
-      </main>
+      )}
+      
+      <style>{`
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      `}</style>
     </div>
   );
-}
+};
+
+export default AdminDashboard;

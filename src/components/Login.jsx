@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom';
 
 /**
  * ==================================================================================
- * SJU ENTERPRISE ACCESS GATEWAY - OMEGA PRESTIGE EDITION (v23.0)
+ * SJU ENTERPRISE ACCESS GATEWAY - OMEGA PRESTIGE EDITION (v23.1)
  * ==================================================================================
  * ARCHITECTURE & ENHANCEMENTS:
  * - Layout Integrity: Replaced fixed viewport heights with fluid min-heights and 
  * isolated scroll zones to permanently eliminate DOM overlap and clipping.
- * - Removed Elements: Eradicated the global footer/ticker, SSL badge, and register 
- * links for a hyper-focused, distraction-free authentication viewport.
+ * - Routing Added: Re-introduced the registration node for new user onboarding.
  * - Visual Fidelity: Multi-layered glassmorphism, dynamic ambient lighting, and 
  * sub-pixel typography adjustments.
  * - Component Modularization: Extracted inputs and modals into high-performance 
@@ -21,7 +20,7 @@ import { useNavigate } from 'react-router-dom';
 
 const SYSTEM_CONFIG = {
   INSTITUTION_NAME: "St. Joseph's University",
-  VERSION: "v23.0.0-Omega-Refined",
+  VERSION: "v23.1.0-Omega-Refined",
   API_URL: "http://localhost:8081/api/auth/login",
   SIMULATED_DELAY: 1200,
   ANIMATION_SPEED: "0.4s"
@@ -65,6 +64,16 @@ const THEME = {
 /**
  * Enhanced Floating Label Input 
  * Features: CapsLock detection, dynamic label morphing, embedded icon management.
+ * * @param {Object} props - Component properties
+ * @param {string} props.label - Floating label text
+ * @param {string} props.type - Input type (text, password, email, etc.)
+ * @param {string} props.name - Input name attribute
+ * @param {string} props.value - Controlled value
+ * @param {Function} props.onChange - Change handler
+ * @param {string} props.icon - Bootstrap icon class (e.g., 'bi-envelope')
+ * @param {string} [props.error] - Error message to display
+ * @param {boolean} [props.isPassword] - Flag indicating if this is a password field
+ * @param {Function} [props.onTogglePass] - Handler for visibility toggle
  */
 const FloatingInput = ({ 
   label, type, name, value, onChange, icon, error, isPassword, onTogglePass 
@@ -312,7 +321,7 @@ const Login = () => {
     // Simulated Authentication Flow
     setTimeout(async () => {
       // 1. MASTER KEY BYPASS (For Demonstration)
-      if (activeTab === 'admin' && creds.identifier === 'ADMIN01' && creds.password === 'omega23') {
+      if (activeTab === 'admin' && creds.identifier === 'ADMIN01' && creds.password === 'admin123') {
         executeLoginSuccess({ id: 999, role: 'admin', name: 'System Administrator', reg_no: 'ADMIN01' });
         return;
       }
@@ -624,7 +633,27 @@ const Login = () => {
                 )}
               </div>
             </form>
-            {/* Note: Registration footer link successfully removed per instructions */}
+
+            {/* Registration Footer Router Link */}
+            {activeTab === 'alumni' && (
+              <div style={{ textAlign: 'center', marginTop: '35px', animation: 'fadeIn 0.6s' }}>
+                <span style={{ color: THEME.colors.muted, fontSize: '1.05rem' }}>Don't have an account? </span>
+                <button
+                  type="button"
+                  onClick={() => navigate('/register')}
+                  style={{
+                    background: 'none', border: 'none', color: THEME.colors.primary, fontWeight: '700', fontSize: '1.05rem',
+                    textDecoration: 'underline', textDecorationColor: 'transparent', transition: 'all 0.3s', cursor: 'pointer',
+                    fontFamily: THEME.fonts.main, padding: '0 5px'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.textDecorationColor = THEME.colors.primary}
+                  onMouseOut={(e) => e.currentTarget.style.textDecorationColor = 'transparent'}
+                >
+                  Create Account
+                </button>
+              </div>
+            )}
+            
           </div> 
         </div>
       </div>
