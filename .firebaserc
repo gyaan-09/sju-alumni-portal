@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "sju-alumni-portal"
-  }
+    "default": "sju-alumni-portal",
+    "ainp": "ainp-dc8dd"
+  },
+  "targets": {},
+  "etags": {}
 }
