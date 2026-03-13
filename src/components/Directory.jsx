@@ -1,25 +1,9 @@
 // src/Directory.jsx
 import React, { useState, useEffect, useMemo, useRef, useCallback, Component } from 'react';
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, collection, query, limit, onSnapshot } from 'firebase/firestore';
 
 // ============================================================================
 // 1. ENTERPRISE CONFIGURATION & GATEWAYS
 // ============================================================================
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBP7hgY39bMxLX41Zxg5WD5kQ5iLxabjIU",
-  authDomain: "ainp-dc8dd.firebaseapp.com",
-  projectId: "ainp-dc8dd",
-  storageBucket: "ainp-dc8dd.firebasestorage.app",
-  messagingSenderId: "239428629866",
-  appId: "1:239428629866:web:e56f81d7252892bc676113",
-  measurementId: "G-7T9GHG2P1F"
-};
-
-// Zero-crash initialization: Prevents "Firebase App already exists" during HMR
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app, "ainp");
 
 const CONFIG = {
   SYSTEM: {
@@ -144,6 +128,64 @@ const GlobalStyles = () => (
 
     .sju-input { width: 100%; padding: 18px 24px 18px 56px; border-radius: ${CONFIG.THEME.RADIUS_FULL}; border: 1px solid ${CONFIG.THEME.BORDER_LIGHT}; font-size: 1.05rem; background: ${CONFIG.THEME.BG_SURFACE}; transition: all 0.3s ease; color: ${CONFIG.THEME.TEXT_PRI}; box-shadow: ${CONFIG.THEME.SHADOW_INNER}; }
     .sju-input:focus { border-color: ${CONFIG.THEME.NAVY_MAIN}; box-shadow: 0 0 0 4px rgba(12, 35, 64, 0.1); outline: none; background: #FFF; }
+
+    @media (max-width: 1024px) {
+      .directory-workspace {
+        grid-template-columns: 1fr !important;
+        padding: 0 24px !important;
+        margin-top: -30px !important;
+        gap: 32px !important;
+      }
+      .directory-sidebar {
+        height: auto !important;
+        position: relative !important;
+        top: 0 !important;
+      }
+      .directory-controls {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 16px !important;
+      }
+      .directory-search-input-wrapper {
+        width: 100% !important;
+      }
+      .directory-view-buttons {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+      .directory-header {
+        padding: 80px 0 100px 0 !important;
+      }
+      .directory-title {
+        font-size: 3rem !important;
+      }
+    }
+    @media (max-width: 600px) {
+      .directory-workspace {
+        padding: 0 16px !important;
+      }
+      .directory-header {
+        padding: 60px 0 80px 0 !important;
+      }
+      .directory-title {
+        font-size: 2.2rem !important;
+      }
+      .directory-card-grid {
+        grid-template-columns: 1fr !important;
+        min-width: 0 !important;
+      }
+      .directory-sidebar .glass-panel {
+        padding: 20px !important;
+      }
+      .directory-controls {
+        padding: 24px 16px !important;
+      }
+      .directory-view-buttons button {
+        padding: 8px 12px !important;
+        flex: 1 1 calc(50% - 8px) !important;
+        justify-content: center !important;
+      }
+    }
   `}</style>
 );
 
@@ -315,10 +357,10 @@ const GridView = ({ data, onSelect }) => {
           <div key={u.id} className="animated-card" style={{ animation: `slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards ${Math.min(i * 0.05, 0.5)}s`, opacity: 0 }} onClick={() => onSelect(u)}>
             <div style={{ padding: '40px 32px' }}>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px', position: 'relative' }}>
-                <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: Utils.generateAvatarGradient(u.name), color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', fontWeight: '700', boxShadow: CONFIG.THEME.SHADOW_MD, border: `4px solid ${CONFIG.THEME.BG_SURFACE}` }}>
+                <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: Utils.generateAvatarGradient(u.name), color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', fontWeight: '700', boxShadow: CONFIG.THEME.SHADOW_MD, border: `4px solid ${CONFIG.THEME.BG_SURFACE}`, overflow: 'hidden' }}>
                   {u.profilePhotoUrl ? <img src={u.profilePhotoUrl} alt={u.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : u.initials}
                 </div>
-                {u.verified && <div style={{ position: 'absolute', bottom: 0, right: '50%', transform: 'translate(35px, 0)', background: CONFIG.THEME.SUCCESS, color: 'white', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', border: `3px solid ${CONFIG.THEME.BG_SURFACE}`, boxShadow: CONFIG.THEME.SHADOW_SM }} title="Verified Active Member"><Icons.CheckCircle /></div>}
+                {u.verified && <div style={{ position: 'absolute', bottom: 0, right: '50%', transform: 'translate(44px, 0)', background: CONFIG.THEME.SUCCESS, color: 'white', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', border: `3px solid ${CONFIG.THEME.BG_SURFACE}`, boxShadow: CONFIG.THEME.SHADOW_SM }} title="Verified Active Member"><Icons.CheckCircle /></div>}
               </div>
               <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                 <h3 style={{ margin: '0 0 12px', fontSize: '1.4rem', color: CONFIG.THEME.NAVY_MAIN, fontWeight: '800', letterSpacing: '-0.01em' }}>{u.name}</h3>
@@ -348,7 +390,7 @@ const ListView = ({ data, onSelect }) => {
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1000px' }}>
           <thead style={{ background: CONFIG.THEME.BG_SURFACE_ALT, color: CONFIG.THEME.NAVY_MAIN }}>
-            <tr>{['Alumni Profile', 'Professional Designation', 'Academic Background', 'Location', 'Current Status'].map((h) => (<th key={h} style={{ padding: '24px 32px', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '800', borderBottom: `2px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>{h}</th>))}</tr>
+            <tr>{['Member Details', 'Professional Designation', 'Academic Background', 'Location', 'Current Status'].map((h) => (<th key={h} style={{ padding: '24px 32px', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '800', borderBottom: `2px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>{h}</th>))}</tr>
           </thead>
           <tbody>
             {data.map((u, i) => {
@@ -493,20 +535,35 @@ const MentorshipView = ({ data, onSelect }) => {
   const mentors = data.filter(u => u.mentorship === 'Available');
   if (mentors.length === 0) return <EmptyState msg="No mentors available matching your current filter criteria." />;
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(460px, 1fr))', gap: '40px' }}>
+    <div className="directory-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px', minWidth: 0 }}>
       {mentors.map((u, i) => (
-        <div key={u.id} className="animated-card" style={{ padding: '40px', display: 'flex', gap: '32px', alignItems: 'center', animation: `slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards ${Math.min(i * 0.05, 0.5)}s`, opacity: 0 }} onClick={() => onSelect(u)}>
-          <div style={{ position: 'relative' }}>
-             <div style={{ width: '110px', height: '110px', borderRadius: '50%', background: Utils.generateAvatarGradient(u.name), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', fontWeight: '800', flexShrink: 0, boxShadow: '0 0 30px rgba(123, 44, 191, 0.25)', border: `4px solid ${CONFIG.THEME.BG_SURFACE}` }}>
+        <div 
+          key={u.id} 
+          className="animated-card" 
+          style={{ 
+            padding: '32px', 
+            display: 'flex', 
+            gap: '24px', 
+            flexDirection: window.innerWidth <= 1200 ? 'column' : 'row',
+            alignItems: window.innerWidth <= 1200 ? 'center' : 'flex-start',
+            textAlign: window.innerWidth <= 1200 ? 'center' : 'left',
+            animation: `slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards ${Math.min(i * 0.05, 0.5)}s`, 
+            opacity: 0,
+            minHeight: '280px'
+          }} 
+          onClick={() => onSelect(u)}
+        >
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+             <div style={{ width: '90px', height: '90px', borderRadius: '50%', background: Utils.generateAvatarGradient(u.name), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: '800', boxShadow: '0 0 30px rgba(123, 44, 191, 0.2)', border: `4px solid ${CONFIG.THEME.BG_SURFACE}`, overflow: 'hidden' }}>
                 {u.profilePhotoUrl ? <img src={u.profilePhotoUrl} alt={u.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : u.initials}
              </div>
-             <div style={{ position: 'absolute', bottom: 4, right: 4, width: '24px', height: '24px', borderRadius: '50%', background: CONFIG.THEME.ACCENT_PURPLE, border: `4px solid ${CONFIG.THEME.BG_SURFACE}`, animation: 'pulseGlow 2s infinite' }} title="Active Mentor" />
+             <div style={{ position: 'absolute', bottom: -2, right: -2, width: '24px', height: '24px', borderRadius: '50%', background: CONFIG.THEME.ACCENT_PURPLE, border: `3px solid ${CONFIG.THEME.BG_SURFACE}`, animation: 'pulseGlow 2s infinite', boxShadow: CONFIG.THEME.SHADOW_SM }} title="Active Mentor" />
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: '800', color: CONFIG.THEME.ACCENT_PURPLE, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '10px' }}>Mentorship Open</div>
-            <h3 style={{ margin: '0 0 8px', fontSize: '1.4rem', color: CONFIG.THEME.TEXT_PRI, fontWeight: '800', letterSpacing: '-0.01em' }}>{u.name}</h3>
-            <div style={{ fontSize: '0.95rem', color: CONFIG.THEME.TEXT_SEC, fontWeight: '600', lineHeight: 1.5 }}>{u.role} <br/><span style={{color: CONFIG.THEME.NAVY_MAIN}}>@ {u.company}</span></div>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '24px' }}>
+          <div style={{ flex: 1, minWidth: 0, width: '100%' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: '800', color: CONFIG.THEME.ACCENT_PURPLE, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '8px' }}>Mentorship Open</div>
+            <h3 style={{ margin: '0 0 8px', fontSize: '1.35rem', color: CONFIG.THEME.TEXT_PRI, fontWeight: '800', letterSpacing: '-0.01em', lineHeight: 1.2 }}>{u.name}</h3>
+            <div style={{ fontSize: '0.9rem', color: CONFIG.THEME.TEXT_SEC, fontWeight: '600', lineHeight: 1.4 }}>{u.role} <br/><span style={{color: CONFIG.THEME.NAVY_MAIN}}>@ {u.company}</span></div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '20px', justifyContent: window.innerWidth <= 1200 ? 'center' : 'flex-start' }}>
               {u.skills.slice(0, 2).map(s => <Badge key={s} label={s} color={CONFIG.THEME.NAVY_MAIN} bg={CONFIG.THEME.BG_SURFACE_ALT} />)}
               {u.skills.length > 2 && <Badge label={`+${u.skills.length - 2}`} color={CONFIG.THEME.TEXT_TER} outline />}
             </div>
@@ -561,77 +618,80 @@ const EmptyState = ({ msg = "No records found matching your current filter crite
 // ============================================================================
 
 const DossierModal = ({ user, onClose }) => {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState('overview');
   
   // Close on Escape
   useEffect(() => {
+    if (!user) return;
     const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handleEsc);
     document.body.style.overflow = 'hidden';
     return () => { window.removeEventListener('keydown', handleEsc); document.body.style.overflow = 'unset'; };
-  }, [onClose]);
+  }, [user, onClose]);
 
   if (!user) return null;
 
   return (
-    <div role="dialog" aria-modal="true" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(2, 11, 23, 0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '40px' }} onClick={onClose}>
+    <div role="dialog" aria-modal="true" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(2, 11, 23, 0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: window.innerWidth <= 800 ? '10px' : '40px' }} onClick={onClose}>
       <div style={{ background: CONFIG.THEME.BG_SURFACE, width: '100%', maxWidth: '1100px', maxHeight: '90vh', borderRadius: CONFIG.THEME.RADIUS_XL, position: 'relative', animation: 'scaleInModal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards', boxShadow: CONFIG.THEME.SHADOW_LG, border: `1px solid rgba(255,255,255,0.1)`, display: 'flex', flexDirection: 'column', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
         
-        {/* Header Action Bar */}
-        <div style={{ position: 'absolute', top: '24px', right: '24px', zIndex: 100, display: 'flex', gap: '16px' }}>
-          <button style={{ padding: '10px 20px', background: CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN, border: 'none', borderRadius: CONFIG.THEME.RADIUS_FULL, fontWeight: '700', cursor: 'pointer', boxShadow: CONFIG.THEME.SHADOW_SM, display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => alert("Direct messaging initiated.")}><Icons.Mail /> Message</button>
-          <button onClick={onClose} style={{ background: CONFIG.THEME.BG_APP, border: 'none', width: '44px', height: '44px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: CONFIG.THEME.TEXT_SEC, transition: CONFIG.THEME.TRANSITION_FAST }} onMouseEnter={(e) => { e.currentTarget.style.background = CONFIG.THEME.DANGER_BG; e.currentTarget.style.color = CONFIG.THEME.DANGER; }} onMouseLeave={(e) => { e.currentTarget.style.background = CONFIG.THEME.BG_APP; e.currentTarget.style.color = CONFIG.THEME.TEXT_SEC; }}><Icons.Close /></button>
-        </div>
+        {/* Close Button - ELEGANT TOP RIGHT POSITIONING */}
+        <button onClick={onClose} style={{ position: 'absolute', top: window.innerWidth <= 800 ? '12px' : '24px', right: window.innerWidth <= 800 ? '12px' : '24px', background: CONFIG.THEME.BG_APP, border: 'none', width: window.innerWidth <= 800 ? '32px' : '44px', height: window.innerWidth <= 800 ? '32px' : '44px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: CONFIG.THEME.TEXT_SEC, transition: CONFIG.THEME.TRANSITION_FAST, zIndex: 200, boxShadow: CONFIG.THEME.SHADOW_SM }} onMouseEnter={(e) => { e.currentTarget.style.background = CONFIG.THEME.DANGER_BG; e.currentTarget.style.color = CONFIG.THEME.DANGER; }} onMouseLeave={(e) => { e.currentTarget.style.background = CONFIG.THEME.BG_APP; e.currentTarget.style.color = CONFIG.THEME.TEXT_SEC; }}><Icons.Close /></button>
 
         {/* Dossier Content Area */}
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden', flexDirection: window.innerWidth <= 800 ? 'column' : 'row' }}>
           
           {/* Left Sidebar (Summary) */}
-          <div style={{ width: '380px', background: CONFIG.THEME.BG_SURFACE_ALT, padding: '48px 40px', borderRight: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-             <div style={{ position: 'relative', marginBottom: '32px' }}>
-                <div style={{ width: '180px', height: '180px', borderRadius: '50%', background: Utils.generateAvatarGradient(user.name), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '4.5rem', fontWeight: '800', boxShadow: CONFIG.THEME.SHADOW_MD, border: `6px solid ${CONFIG.THEME.BG_SURFACE}` }}>
+          <div style={{ width: window.innerWidth <= 800 ? '100%' : '380px', background: CONFIG.THEME.BG_SURFACE_ALT, padding: window.innerWidth <= 800 ? '40px 24px' : '48px 40px', borderRight: window.innerWidth <= 800 ? 'none' : `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, borderBottom: window.innerWidth <= 800 ? `1px solid ${CONFIG.THEME.BORDER_LIGHT}` : 'none', overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+             <div style={{ position: 'relative', marginBottom: window.innerWidth <= 800 ? '20px' : '32px' }}>
+                <div style={{ width: window.innerWidth <= 800 ? '120px' : '180px', height: window.innerWidth <= 800 ? '120px' : '180px', borderRadius: '50%', background: Utils.generateAvatarGradient(user.name), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: window.innerWidth <= 800 ? '3rem' : '4.5rem', fontWeight: '800', boxShadow: CONFIG.THEME.SHADOW_MD, border: `6px solid ${CONFIG.THEME.BG_SURFACE}` }}>
                   {user.profilePhotoUrl ? <img src={user.profilePhotoUrl} alt={user.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : user.initials}
                 </div>
                 {user.verified && <div style={{ position: 'absolute', bottom: 5, right: 15, background: CONFIG.THEME.SUCCESS, color: 'white', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', border: `4px solid ${CONFIG.THEME.BG_SURFACE}`, boxShadow: CONFIG.THEME.SHADOW_SM }} title="Verified Identity"><Icons.CheckCircle /></div>}
              </div>
              
-             <h2 style={{ fontSize: '2rem', color: CONFIG.THEME.NAVY_MAIN, margin: '0 0 12px 0', fontWeight: '800', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{user.name}</h2>
-             <div style={{ fontSize: '1.1rem', color: CONFIG.THEME.TEXT_PRI, fontWeight: '600', marginBottom: '8px' }}>{user.role}</div>
-             <div style={{ fontSize: '1rem', color: CONFIG.THEME.TEXT_SEC, marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}><Icons.Briefcase /> {user.company}</div>
+             <h2 style={{ fontSize: window.innerWidth <= 800 ? '1.5rem' : '2rem', color: CONFIG.THEME.NAVY_MAIN, margin: '0 0 12px 0', fontWeight: '800', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{user.name}</h2>
+             <div style={{ fontSize: window.innerWidth <= 800 ? '0.95rem' : '1.1rem', color: CONFIG.THEME.TEXT_PRI, fontWeight: '600', marginBottom: '8px' }}>{user.role}</div>
+             <div style={{ fontSize: window.innerWidth <= 800 ? '0.85rem' : '1rem', color: CONFIG.THEME.TEXT_SEC, marginBottom: window.innerWidth <= 800 ? '15px' : '32px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}><Icons.Briefcase /> {user.company}</div>
              
-             <div style={{ width: '100%', height: '1px', background: CONFIG.THEME.BORDER_LIGHT, marginBottom: '32px' }} />
+             <div style={{ width: '100%', height: '1px', background: CONFIG.THEME.BORDER_LIGHT, marginBottom: window.innerWidth <= 800 ? '15px' : '32px' }} />
              
-             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%', textAlign: 'left' }}>
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.1em', marginBottom: '6px' }}>Status</div>
+             <div style={{ display: 'flex', flexDirection: window.innerWidth <= 800 ? 'row' : 'column', gap: '20px', width: '100%', textAlign: 'left', flexWrap: 'wrap', justifyContent: window.innerWidth <= 800 ? 'center' : 'flex-start', marginBottom: window.innerWidth <= 800 ? '24px' : '0' }}>
+                <div style={{ minWidth: '120px' }}>
+                  <div style={{ fontSize: '0.7rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.1em', marginBottom: '6px' }}>Status</div>
                   <Badge label={user.status} color={Utils.getStatusStyle(user.status).color} bg={Utils.getStatusStyle(user.status).bg} />
                 </div>
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.1em', marginBottom: '6px' }}>Location</div>
-                  <div style={{ fontWeight: '600', color: CONFIG.THEME.TEXT_PRI, fontSize: '0.95rem' }}>{user.location}</div>
+                <div style={{ minWidth: '120px' }}>
+                  <div style={{ fontSize: '0.7rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.1em', marginBottom: '6px' }}>Location</div>
+                  <div style={{ fontWeight: '600', color: CONFIG.THEME.TEXT_PRI, fontSize: '0.9rem' }}>{user.location}</div>
                 </div>
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.1em', marginBottom: '6px' }}>Network Connections</div>
-                  <div style={{ fontWeight: '600', color: CONFIG.THEME.TEXT_PRI, fontSize: '0.95rem' }}>{user.connections} Alumni</div>
+                <div style={{ minWidth: '120px' }}>
+                  <div style={{ fontSize: '0.7rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.1em', marginBottom: '6px' }}>Network</div>
+                  <div style={{ fontWeight: '600', color: CONFIG.THEME.TEXT_PRI, fontSize: '0.9rem' }}>{user.connections} Alumni</div>
                 </div>
              </div>
+
+             {/* Integrated Message Button - Mirroring Mentorship style */}
+             <button style={{ marginTop: 'auto', width: '100%', maxWidth: window.innerWidth <= 800 ? '240px' : '100%', padding: '12px 24px', background: CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN, border: 'none', borderRadius: CONFIG.THEME.RADIUS_MD, fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.9rem', transition: CONFIG.THEME.TRANSITION_FAST }} onClick={() => alert("Direct messaging initiated.")} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+                <Icons.Mail /> Message Member
+             </button>
           </div>
 
           {/* Right Main Content */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', borderBottom: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, padding: '0 48px', paddingTop: '40px' }}>
-               {['profile', 'academics', 'mentorship'].map(tab => (
-                 <div key={tab} onClick={() => setActiveTab(tab)} style={{ padding: '16px 24px', cursor: 'pointer', fontWeight: '700', fontSize: '1rem', textTransform: 'capitalize', color: activeTab === tab ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.TEXT_TER, borderBottom: `3px solid ${activeTab === tab ? CONFIG.THEME.GOLD_MAIN : 'transparent'}`, transition: CONFIG.THEME.TRANSITION_FAST, transform: activeTab === tab ? 'translateY(1px)' : 'none' }}>
+            <div style={{ display: 'flex', borderBottom: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, padding: window.innerWidth <= 800 ? '0 15px' : '0 48px', paddingTop: window.innerWidth <= 800 ? '10px' : '40px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+               {['overview', 'academics', 'mentorship'].map(tab => (
+                 <div key={tab} onClick={() => setActiveTab(tab)} style={{ padding: window.innerWidth <= 800 ? '12px 16px' : '16px 24px', cursor: 'pointer', fontWeight: '700', fontSize: window.innerWidth <= 800 ? '0.85rem' : '1rem', textTransform: 'capitalize', color: activeTab === tab ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.TEXT_TER, borderBottom: `3px solid ${activeTab === tab ? CONFIG.THEME.GOLD_MAIN : 'transparent'}`, transition: CONFIG.THEME.TRANSITION_FAST, transform: activeTab === tab ? 'translateY(1px)' : 'none', whiteSpace: 'nowrap' }}>
                     {tab}
                  </div>
                ))}
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '48px' }}>
-               {activeTab === 'profile' && (
+            <div style={{ flex: 1, overflowY: 'auto', padding: window.innerWidth <= 800 ? '24px' : '48px' }}>
+               {activeTab === 'overview' && (
                  <div style={{ animation: 'slideRightFade 0.4s ease' }}>
                     <h4 style={{ fontSize: '0.9rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', marginTop: 0, fontWeight: '800' }}>Executive Summary</h4>
-                    <p style={{ margin: '0 0 48px 0', lineHeight: 1.9, color: CONFIG.THEME.TEXT_PRI, fontSize: '1.15rem' }}>{user.bio}</p>
+                    <p style={{ margin: '0 0 48px 0', lineHeight: 1.9, color: CONFIG.THEME.TEXT_PRI, fontSize: window.innerWidth <= 800 ? '1rem' : '1.15rem' }}>{user.bio}</p>
                     
                     <h4 style={{ fontSize: '0.9rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '24px', fontWeight: '800' }}>Core Competencies</h4>
                     <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
@@ -642,13 +702,13 @@ const DossierModal = ({ user, onClose }) => {
 
                {activeTab === 'academics' && (
                  <div style={{ animation: 'slideRightFade 0.4s ease' }}>
-                    <div style={{ background: CONFIG.THEME.BG_APP, borderRadius: CONFIG.THEME.RADIUS_LG, padding: '32px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, marginBottom: '32px' }}>
+                    <div style={{ background: CONFIG.THEME.BG_APP, borderRadius: CONFIG.THEME.RADIUS_LG, padding: window.innerWidth <= 800 ? '24px 20px' : '32px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, marginBottom: '32px' }}>
                       <div style={{ fontSize: '0.8rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '8px', fontWeight: '800', letterSpacing: '0.1em' }}>St. Joseph's University Record</div>
                       <div style={{ fontWeight: '800', color: CONFIG.THEME.NAVY_MAIN, fontSize: '1.3rem', marginBottom: '8px' }}>{user.degree}</div>
                       <div style={{ fontSize: '1.05rem', color: CONFIG.THEME.TEXT_PRI, fontWeight: '600' }}>Class of {user.batch}</div>
                       <div style={{ fontSize: '0.9rem', color: CONFIG.THEME.TEXT_SEC, marginTop: '8px' }}>{user.school}</div>
                     </div>
-                    <div style={{ background: CONFIG.THEME.BG_APP, borderRadius: CONFIG.THEME.RADIUS_LG, padding: '32px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+                    <div style={{ background: CONFIG.THEME.BG_APP, borderRadius: CONFIG.THEME.RADIUS_LG, padding: window.innerWidth <= 800 ? '24px 20px' : '32px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
                       <div style={{ fontSize: '0.8rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '8px', fontWeight: '800', letterSpacing: '0.1em' }}>Verification Status</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: CONFIG.THEME.SUCCESS, fontWeight: '700', fontSize: '1.1rem' }}>
                          <Icons.CheckCircle /> Officially Cleared & Authenticated
@@ -662,14 +722,14 @@ const DossierModal = ({ user, onClose }) => {
                  <div style={{ animation: 'slideRightFade 0.4s ease' }}>
                     {user.mentorship === 'Available' ? (
                       <div>
-                        <div style={{ padding: '32px', background: 'rgba(123, 44, 191, 0.05)', border: `1px solid rgba(123, 44, 191, 0.2)`, borderRadius: CONFIG.THEME.RADIUS_LG, marginBottom: '32px' }}>
+                        <div style={{ padding: window.innerWidth <= 800 ? '24px 20px' : '32px', background: 'rgba(123, 44, 191, 0.05)', border: `1px solid rgba(123, 44, 191, 0.2)`, borderRadius: CONFIG.THEME.RADIUS_LG, marginBottom: '32px' }}>
                            <h3 style={{ margin: '0 0 12px 0', color: CONFIG.THEME.ACCENT_PURPLE, fontSize: '1.3rem', fontWeight: '800' }}>Mentorship Program Active</h3>
                            <p style={{ color: CONFIG.THEME.TEXT_PRI, fontSize: '1.05rem', lineHeight: 1.6, margin: 0 }}>{user.name} is currently accepting requests for 1:1 career guidance, portfolio reviews, and industry insights.</p>
                         </div>
                         <Button size="lg" icon={<Icons.Chart />}>Request Mentorship Session</Button>
                       </div>
                     ) : (
-                      <div style={{ padding: '48px', textAlign: 'center', border: `2px dashed ${CONFIG.THEME.BORDER_LIGHT}`, borderRadius: CONFIG.THEME.RADIUS_LG }}>
+                      <div style={{ padding: window.innerWidth <= 800 ? '32px 20px' : '48px', textAlign: 'center', border: `2px dashed ${CONFIG.THEME.BORDER_LIGHT}`, borderRadius: CONFIG.THEME.RADIUS_LG }}>
                          <div style={{ fontSize: '3rem', opacity: 0.2, marginBottom: '16px' }}>⏳</div>
                          <h3 style={{ color: CONFIG.THEME.TEXT_PRI, fontSize: '1.2rem', margin: '0 0 8px 0' }}>Currently Unavailable</h3>
                          <p style={{ color: CONFIG.THEME.TEXT_SEC, fontSize: '1rem', margin: 0 }}>This alumnus is not accepting mentorship requests at this time.</p>
@@ -705,79 +765,86 @@ const DirectoryInner = () => {
   const [filters, setFilters] = useState({ status: null, location: null, degreeLevel: null, batchDecade: null, role: null, skills: null, companyTier: null, mentorship: null });
   const scrollRef = useRef(null);
 
-  // Core Data Synchronization (Firebase Real-time)
+  // Core Data Synchronization (API Fetch)
   useEffect(() => {
-    let unsubscribe;
-    try {
-      // Pointing precisely to 'alumni-data' as defined in AdminDashboard.jsx
-      // We pull everything, and only filter locally for status === "APPROVED" to ensure we bypass any missing Firestore index errors.
-      const alumniRef = collection(db, 'alumni-data'); 
-      const q = query(alumniRef, limit(CONFIG.DATA.MAX_LIMIT)); 
+    let isActive = true;
 
-      unsubscribe = onSnapshot(q, (snapshot) => {
-        if (snapshot.empty) { 
-          setData([]); 
+    const fetchAlumni = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/alumni');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const backendData = await response.json();
+
+        if (!isActive) return;
+
+        if (!backendData || backendData.length === 0) {
+          setData([]);
           setLoading(false);
-          return; 
+          return;
         }
 
-        const firestoreData = [];
-        snapshot.docs.forEach(doc => {
-          const d = doc.data();
-          
-          // CRITICAL: We only want APPROVED users in the directory as per requirements
-          if(d.status !== "APPROVED") return; 
-
+        const mappedData = [];
+        backendData.forEach(d => {
+          // Assuming the backend returns data similar to the CSV structure
+          // Map MongoDB _id to id, and use appropriate fields
           const clean = (val, fb = "N/A") => (!val || String(val).toLowerCase().includes("not applicable") || String(val).toLowerCase() === "none") ? fb : val;
           
-          const dispName = clean(d["Full Name"] || d.fullName || d.Name, "SJU Alumni");
-          const dispBatch = clean(d["Batch Year"] || d.batchYear || d.GraduationYear, "2024");
-          const dispDegree = clean(d.Degree || d.degree, "SJU Graduate");
+          const dispName = clean(d.fullName || d["Full Name"] || d.Name, "SJU Alumni");
+          const dispBatch = clean(d.batchYear || d["Batch Year"] || d.GraduationYear, "2024");
+          const dispDegree = clean(d.degree || d.Degree, "SJU Graduate");
 
           let parsedSkills = ["SJU Alumni"];
-          const rawSkills = clean(d.Skills || d.skills, null);
+          const rawSkills = clean(d.skills || d.Skills, null);
           if (Array.isArray(rawSkills)) parsedSkills = rawSkills;
           else if (typeof rawSkills === 'string') parsedSkills = rawSkills.split(',').map(s => s.trim()).filter(s => s !== "" && !s.toLowerCase().includes("not applicable"));
 
-          firestoreData.push({
-            id: doc.id,
+          // Only add approved users (if status exists and isn't "APPROVED", skip. If it doesn't exist, assume approved for now or adapt as needed.)
+          // If you have an approval system in MongoDB, adjust this check.
+          // For now, we'll map all data and assume it's valid alumni data if it's in the DB.
+          
+          const currentStatus = clean(d.currentStatus || d["Current Status"] || d.Status, "Working Professional");
+
+          mappedData.push({
+            id: d._id || d.id || Math.random().toString(36).substr(2, 9),
             name: dispName,
-            email: clean(d.Email || d.email, "Confidential"),
+            email: clean(d.email || d.Email, "Confidential"),
             batch: parseInt(dispBatch) || 2024,
             degree: dispDegree,
-            school: clean(d["PG College"] || d.school, "St. Joseph's University"), 
-            status: clean(d["Current Status"] || d.currentStatus || d.Status, "Working Professional"),
-            company: clean(d["Company Name"] || d.company || d.Company, "Independent"),
-            role: clean(d.Designation || d.designation || d.Role, "Professional"),
+            school: clean(d.school || d["PG College"], "St. Joseph's University"), 
+            status: currentStatus,
+            company: clean(d.company || d["Company Name"] || d.Company, "Independent"),
+            role: clean(d.designation || d.Designation || d.Role, "Professional"),
             skills: parsedSkills.length > 0 ? parsedSkills : ["SJU Alumni"],
-            location: clean(d.Location || d.location, "Bangalore, IN"),
-            bio: clean(d.Reviews || d.reviews || d.bio, `A verified alumnus of St. Joseph's University with a background in ${dispDegree}. Dedicated to excellence and lifelong learning.`),
+            location: clean(d.location || d.Location, "Bangalore, IN"),
+            bio: clean(d.reviews || d.Reviews || d.bio, `A verified alumnus of St. Joseph's University with a background in ${dispDegree}. Dedicated to excellence and lifelong learning.`),
             initials: Utils.extractInitials(dispName),
             batchDecade: `${Math.floor((parseInt(dispBatch) || 2020) / 10) * 10}s`,
-            mentorship: (d.Mentorship === "Available" || String(d["Current Status"] || d.Status || "").includes("Working") || d.status === "Employed") ? "Available" : "Unavailable",
-            verified: true, // They are approved, so verified is true by definition here
-            connections: d.connections || Math.floor(Math.random() * 500) + 50, // Visual representation
+            mentorship: (d.mentorship || d.Mentorship === "Available" || String(currentStatus).toLowerCase().includes("working") || String(currentStatus).toLowerCase().includes("employ")) ? "Available" : "Unavailable",
+            verified: true,
+            connections: d.connections || Math.floor(Math.random() * 500) + 50,
             degreeLevel: dispDegree.includes("M") || dispDegree.includes("PG") || dispDegree.includes("Master") ? "Masters" : "Bachelors",
             companyTier: clean(d.companyTier || d.CompanyTier, "Corporate"),
             profilePhotoUrl: d.profilePhotoUrl || null
           });
         });
-        
-        setData(firestoreData);
+
+        setData(mappedData);
         setLoading(false);
-      }, (err) => {
-        console.error("🔥 Firestore Listen Error:", err);
-        setError("Failed to synchronize with the alumni database. Please check your connection.");
+      } catch (err) {
+        if (!isActive) return;
+        console.error("🔥 API Fetch Error:", err);
+        setError("Failed to synchronize with the alumni database. Please check your backend connection.");
         setLoading(false);
-      });
-      
-    } catch (err) {
-      console.error("🔥 Firebase Initialization Error:", err);
-      setError("Database engine synchronization fault.");
-      setLoading(false);
-    }
-    
-    return () => { if(unsubscribe) unsubscribe(); };
+      }
+    };
+
+    fetchAlumni();
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   // Computation Engine: Search, Filter, and Aggregation
@@ -844,22 +911,22 @@ const DirectoryInner = () => {
     <div style={{ position: 'relative', minHeight: '100vh', paddingBottom: '100px' }}>
       <GlobalStyles />
       
-      {/* Massive Header */}
-      <header style={{ background: CONFIG.THEME.NAVY_MAIN, padding: '100px 0 140px 0', textAlign: 'center', position: 'relative', overflow: 'hidden', borderBottom: `6px solid ${CONFIG.THEME.GOLD_MAIN}` }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.05, backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px', animation: 'shimmer 10s infinite linear' }} />
-        <div style={{ position: 'absolute', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%)', top: '-300px', left: '50%', transform: 'translateX(-50%)', borderRadius: '50%' }} />
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: '1000px', margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'inline-block', padding: '8px 20px', background: 'rgba(255,255,255,0.1)', borderRadius: CONFIG.THEME.RADIUS_FULL, color: CONFIG.THEME.GOLD_MAIN, fontSize: '0.85rem', fontWeight: '800', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px', border: `1px solid rgba(212,175,55,0.3)` }}>Network Gateway</div>
-          <h1 style={{ color: 'white', fontSize: '4.5rem', fontWeight: '800', margin: '0 0 24px 0', letterSpacing: '-0.02em', lineHeight: 1.1 }}>{CONFIG.SYSTEM.APP_NAME}</h1>
-          <p style={{ color: CONFIG.THEME.TEXT_TER, fontSize: '1.4rem', margin: 0, fontWeight: '500', lineHeight: 1.6, maxWidth: '800px', marginInline: 'auto' }}>Connect instantly with {loading ? '...' : <strong style={{color: '#FFF'}}>{Utils.formatNumber(data.length)}</strong>} strictly verified professionals and leaders across {Object.keys(facets.location).length || 0} international territories.</p>
+      {/* Page Header */}
+      <header style={{ background: `linear-gradient(135deg, #061121 0%, ${CONFIG.THEME.NAVY_MAIN} 100%)`, padding: '56px 24px 100px', textAlign: 'center', position: 'relative', overflow: 'hidden', borderBottom: `4px solid ${CONFIG.THEME.GOLD_MAIN}` }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.04, backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', margin: '0 auto' }}>
+          <h1 style={{ color: 'white', fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: '900', margin: '0 0 14px 0', letterSpacing: '-0.5px', lineHeight: 1.1 }}>SJU Alumni Directory</h1>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.05rem', margin: 0, lineHeight: 1.6 }}>
+            {loading ? 'Loading…' : <><strong style={{color: '#FFF'}}>{Utils.formatNumber(data.length)}</strong> verified alumni profiles</>}
+          </p>
         </div>
       </header>
 
       {/* Core Interface Shell */}
-      <div style={{ maxWidth: '1700px', margin: '0 auto', padding: '0 40px', display: 'grid', gridTemplateColumns: '360px 1fr', gap: '48px', position: 'relative', zIndex: 10, marginTop: '-60px' }}>
+      <div className="directory-workspace" style={{ maxWidth: '100vw', boxSizing: 'border-box', margin: '0 auto', padding: '0 40px', display: 'grid', gridTemplateColumns: 'minmax(300px, 360px) minmax(0, 1fr)', gap: '48px', position: 'relative', zIndex: 10, marginTop: '-60px' }}>
         
         {/* Left Nav / Facet Sidebar */}
-        <aside style={{ height: 'calc(100vh - 40px)', position: 'sticky', top: '20px' }}>
+        <aside className="directory-sidebar" style={{ height: 'calc(100vh - 40px)', position: 'sticky', top: '20px' }}>
           <div className="glass-panel" style={{ borderRadius: CONFIG.THEME.RADIUS_XL, padding: '40px 32px', height: '100%', overflowY: 'auto', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', paddingBottom: '20px', borderBottom: `3px solid ${CONFIG.THEME.NAVY_MAIN}` }}>
               <span style={{ fontWeight: '800', fontSize: '1.4rem', color: CONFIG.THEME.NAVY_MAIN, letterSpacing: '-0.02em' }}>Directory Filters</span>
@@ -886,13 +953,13 @@ const DirectoryInner = () => {
         <main ref={scrollRef} style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
           
           {/* Action Bar */}
-          <div className="glass-panel" style={{ padding: '24px 40px', borderRadius: CONFIG.THEME.RADIUS_XL, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
-            <div style={{ position: 'relative', width: '500px' }}>
+          <div className="glass-panel directory-controls" style={{ padding: '24px 40px', borderRadius: CONFIG.THEME.RADIUS_XL, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+            <div className="directory-search-input-wrapper" style={{ position: 'relative', width: '100%', maxWidth: '500px' }}>
               <span style={{ position: 'absolute', left: '24px', top: '50%', transform: 'translateY(-50%)', color: CONFIG.THEME.TEXT_TER }}><Icons.Search /></span>
               <input className="sju-input" placeholder="Search verified alumni by name, company, or role..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} disabled={loading} />
             </div>
             
-            <div style={{ display: 'flex', gap: '8px', background: CONFIG.THEME.BG_APP, padding: '8px', borderRadius: CONFIG.THEME.RADIUS_MD, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+            <div className="directory-view-buttons" style={{ display: 'flex', gap: '8px', background: CONFIG.THEME.BG_APP, padding: '8px', borderRadius: CONFIG.THEME.RADIUS_MD, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
               {[
                 {id: 'GRID', icon: <Icons.Grid />, label: 'Grid'}, 
                 {id: 'LIST', icon: <Icons.List />, label: 'List'}, 

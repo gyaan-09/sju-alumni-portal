@@ -1,587 +1,539 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
 
-// FIREBASE INTEGRATION
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+/* ────────────────────────────────────────────────────────── */
+/* CONFIG                                                      */
+/* ────────────────────────────────────────────────────────── */
+const API_BASE  = 'http://localhost:5000/api/alumni';
+const API_EMAIL = 'http://localhost:5000/api/send-email';
 
-/**
- * ============================================================================
- * SJU ALUMNI PORTAL - ENTERPRISE REGISTRATION SUITE (FULL-PAGE OS)
- * Build: 2026.10.X.ULTRA (Crash-Proof Edition)
- * ============================================================================
- */
-
-/* =========================================================
-   1) CONFIGURATION & THEME
-   ========================================================= */
-const CONFIG = {
-  THEME: {
-    NAVY_DARK: '#020a17', NAVY_MAIN: '#0C2340', NAVY_LITE: '#1A3B66',
-    GOLD_MAIN: '#D4AF37', GOLD_LITE: '#F9F1D8', GOLD_DARK: '#AA8A2E',
-    ACCENT_CYAN: '#00B4D8', ACCENT_PURPLE: '#7B2CBF',
-    SUCCESS: '#10B981', SUCCESS_BG: 'rgba(16, 185, 129, 0.08)',
-    WARNING: '#F59E0B', WARNING_BG: 'rgba(245, 158, 11, 0.08)',
-    DANGER: '#EF4444', DANGER_BG: 'rgba(239, 68, 68, 0.08)',
-    BG_APP: '#F4F7F9', BG_SURFACE: '#FFFFFF', BG_SURFACE_ALT: '#F8FAFC',
-    BORDER: 'rgba(12, 35, 64, 0.12)', BORDER_LIGHT: '#E2E8F0', BORDER_FOCUS: '#94A3B8',
-    TEXT_PRI: '#0F172A', TEXT_SEC: '#475569', TEXT_TER: '#94A3B8',
-    RADIUS_SM: '6px', RADIUS_MD: '12px', RADIUS_LG: '20px', RADIUS_XL: '32px', RADIUS_FULL: '9999px',
-    SHADOW_SM: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-    SHADOW_MD: '0 10px 15px -3px rgba(0, 0, 0, 0.08)',
-    SHADOW_LG: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
-    SHADOW_INNER: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.04)',
-    TRANSITION_FAST: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-    TRANSITION_BOUNCE: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
-  },
-  MAX_FILE_SIZE_MB: 5,
-  COLLECTION_NAME: 'alumni_data' // Aligned with Admin Dashboard requirements
+const T = {
+  NAVY: '#0C2340', NAVY_DARK: '#061121', NAVY_LITE: '#1A3B66',
+  GOLD: '#D4AF37', GOLD_LITE: '#FDF6DC',
+  SUCCESS: '#10B981', DANGER: '#EF4444',
+  BG: '#F0F4F8', SURFACE: '#FFFFFF', BORDER: '#E2E8F0',
+  TEXT: '#0F172A', TEXT2: '#475569', TEXT3: '#94A3B8',
 };
 
-const COUNTRIES = {
-  INDIA: { code: '+91', label: 'IN (+91)', limit: 10, placeholder: '98765 43210' },
-  USA:   { code: '+1',  label: 'US (+1)',  limit: 10, placeholder: '555 123 4567' },
-  UAE:   { code: '+971', label: 'AE (+971)', limit: 9, placeholder: '50 123 4567' },
-  UK:    { code: '+44', label: 'UK (+44)', limit: 10, placeholder: '7700 900077' }
-};
+/* ────────────────────────────────────────────────────────── */
+/* STEPS DEFINITION                                            */
+/* ────────────────────────────────────────────────────────── */
+const STEPS = [
+  { id: 0, label: 'Personal Info',  icon: 'bi-person-fill' },
+  { id: 1, label: 'Academic',       icon: 'bi-mortarboard-fill' },
+  { id: 2, label: 'Career',         icon: 'bi-briefcase-fill' },
+  { id: 3, label: 'Identity Docs',  icon: 'bi-shield-check-fill' },
+  { id: 4, label: 'Review & Submit',icon: 'bi-check-circle-fill' },
+];
 
-/* =========================================================
-   2) GLOBAL STYLES
-   ========================================================= */
-const GlobalStyles = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
-    
-    html, body, #root {
-      margin: 0; padding: 0; height: 100vh; width: 100vw;
-      background-color: ${CONFIG.THEME.BG_APP};
-      font-family: 'Lora', serif; color: ${CONFIG.THEME.TEXT_PRI};
-      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-      overflow: hidden; box-sizing: border-box;
-    }
+const COUNTRY_CODES = [
+  { code: '+91', country: 'India' },
+  { code: '+1', country: 'USA/Canada' },
+  { code: '+44', country: 'UK' },
+  { code: '+971', country: 'UAE' },
+  { code: '+61', country: 'Australia' },
+  { code: '+65', country: 'Singapore' },
+  { code: '+49', country: 'Germany' },
+  { code: '+33', country: 'France' },
+  { code: '+81', country: 'Japan' },
+  { code: '+86', country: 'China' },
+  { code: '+966', country: 'Saudi Arabia' },
+];
 
-    *, *:before, *:after { box-sizing: inherit; }
-    h1, h2, h3, h4, h5, h6, button, input, select, textarea, span, p, div { font-family: 'Lora', serif; }
-
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: ${CONFIG.THEME.BORDER_FOCUS}; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: ${CONFIG.THEME.TEXT_SEC}; }
-
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideRightFade { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-    @keyframes checkmark { 0% { stroke-dashoffset: 50; } 100% { stroke-dashoffset: 0; } }
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-
-    input:-webkit-autofill {
-      -webkit-box-shadow: 0 0 0 30px ${CONFIG.THEME.BG_SURFACE} inset !important;
-      -webkit-text-fill-color: ${CONFIG.THEME.TEXT_PRI} !important;
-      transition: background-color 5000s ease-in-out 0s;
-    }
-    textarea { resize: vertical; }
-  `}</style>
-);
-
-/* =========================================================
-   3) KERNEL LOGIC & VALIDATION
-   ========================================================= */
-const Kernel = {
-  toTitleCase: (str) => str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()),
-  maskDate: (val) => {
-    const v = val.replace(/\D/g, '').slice(0, 8);
-    if (v.length >= 5) return `${v.slice(0, 2)}-${v.slice(2, 4)}-${v.slice(4)}`;
-    if (v.length >= 3) return `${v.slice(0, 2)}-${v.slice(2)}`;
-    return v;
-  },
-  maskAadhar: (val) => {
-    const v = val.replace(/\D/g, '').slice(0, 12);
-    if (v.length >= 9) return `${v.slice(0, 4)}-${v.slice(4, 8)}-${v.slice(8)}`;
-    if (v.length >= 5) return `${v.slice(0, 4)}-${v.slice(4)}`;
-    return v;
-  },
-  calculateAge: (dobString) => {
-    if (dobString.length !== 10) return null;
-    const [day, month, year] = dobString.split('-');
-    const birthDate = new Date(`${year}-${month}-${day}`);
-    if (isNaN(birthDate)) return null;
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-    return age;
-  },
-  validateEmail: (email) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email),
-  validateURL: (url) => url === '' || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(url)
-};
-
-/* =========================================================
-   4) ATOMIC UI COMPONENTS
-   ========================================================= */
-const SectionHeader = ({ step, title, subtitle }) => (
-  <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'flex-start', gap: '16px', animation: 'slideUpFade 0.6s ease forwards' }}>
-    <div style={{ width: '40px', height: '40px', borderRadius: CONFIG.THEME.RADIUS_LG, background: CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', fontWeight: '700', flexShrink: 0, boxShadow: CONFIG.THEME.SHADOW_MD }}>
-      {step}
-    </div>
-    <div style={{ paddingTop: '2px' }}>
-      <h2 style={{ color: CONFIG.THEME.NAVY_MAIN, fontSize: '1.5rem', margin: '0 0 4px 0', fontWeight: '700' }}>{title}</h2>
-      <p style={{ margin: 0, color: CONFIG.THEME.TEXT_SEC, fontSize: '0.95rem', lineHeight: '1.5' }}>{subtitle}</p>
-    </div>
-  </div>
-);
-
-const InputWrapper = ({ label, error, required, children, width = '100%', helpText }) => (
-  <div className="form-group" style={{ width, display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
-    <label style={{ fontSize: '0.9rem', fontWeight: '600', color: error ? CONFIG.THEME.DANGER : CONFIG.THEME.TEXT_PRI, display: 'flex', justifyContent: 'space-between' }}>
-      <span>{label} {required && <span style={{ color: CONFIG.THEME.DANGER }}>*</span>}</span>
-      {error && <span style={{ color: CONFIG.THEME.DANGER, fontSize: '0.8rem', fontWeight: '500', animation: 'shake 0.4s ease' }}>{error}</span>}
-    </label>
-    {children}
-    {helpText && !error && <span style={{ fontSize: '0.8rem', color: CONFIG.THEME.TEXT_TER }}>{helpText}</span>}
-  </div>
-);
-
-const baseInputStyles = (error) => ({
-  width: '100%', padding: '14px 18px', fontSize: '1rem', fontFamily: 'Lora, serif',
-  border: `1px solid ${error ? CONFIG.THEME.DANGER : CONFIG.THEME.BORDER_LIGHT}`, 
-  borderRadius: CONFIG.THEME.RADIUS_MD, color: CONFIG.THEME.TEXT_PRI, 
-  backgroundColor: CONFIG.THEME.BG_SURFACE, outline: 'none', 
-  transition: CONFIG.THEME.TRANSITION_FAST,
-  boxShadow: error ? '0 0 0 3px rgba(239, 68, 68, 0.1)' : CONFIG.THEME.SHADOW_INNER
+/* ────────────────────────────────────────────────────────── */
+/* HELPERS                                                     */
+/* ────────────────────────────────────────────────────────── */
+const fileToBase64 = (file) => new Promise((res, rej) => {
+  const reader = new FileReader();
+  reader.onload  = () => res(reader.result);
+  reader.onerror = rej;
+  reader.readAsDataURL(file);
 });
 
-const FileDropzone = ({ label, file, error, onChange, accept, helpText }) => {
-  const [isDragging, setIsDragging] = useState(false);
-  
-  const handleDrag = (e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(e.type === "dragenter" || e.type === "dragover"); };
-  const handleDrop = (e) => { 
-    e.preventDefault(); e.stopPropagation(); setIsDragging(false); 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) validateAndSetFile(e.dataTransfer.files[0]); 
-  };
+const toTitleCase = (str) => {
+  return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+};
 
-  const validateAndSetFile = (selectedFile) => {
-    if (!selectedFile) return;
-    const fileSizeMB = selectedFile.size / (1024 * 1024);
-    if (fileSizeMB > CONFIG.MAX_FILE_SIZE_MB) {
-      onChange(null, `File exceeds ${CONFIG.MAX_FILE_SIZE_MB}MB limit.`);
-      return;
+const formatDOB = (val) => {
+  let cleaned = val.replace(/\D/g, '').substring(0, 8);
+  let formatted = '';
+  if (cleaned.length > 0) {
+    formatted += cleaned.substring(0, 2);
+    if (cleaned.length > 2) {
+      formatted += '-' + cleaned.substring(2, 4);
+      if (cleaned.length > 4) {
+        formatted += '-' + cleaned.substring(4, 8);
+      }
     }
-    onChange(selectedFile, null);
-  };
+  }
+  return formatted;
+};
 
+const formatAadhar = (val) => {
+  let cleaned = val.replace(/\D/g, '').substring(0, 12);
+  let formatted = '';
+  if (cleaned.length > 0) formatted += cleaned.substring(0, 4);
+  if (cleaned.length > 4) formatted += '-' + cleaned.substring(4, 8);
+  if (cleaned.length > 8) formatted += '-' + cleaned.substring(8, 12);
+  return formatted;
+};
+
+/* ────────────────────────────────────────────────────────── */
+/* FORM FIELD COMPONENT                                        */
+/* ────────────────────────────────────────────────────────── */
+const Field = ({ label, name, type = 'text', value, onChange, required, options, placeholder, error, maxLength }) => {
+  const [focused, setFocused] = useState(false);
+  const base = {
+    width: '100%', padding: '12px 14px', borderRadius: '10px',
+    border: `1.5px solid ${error ? T.DANGER : focused ? T.NAVY : T.BORDER}`,
+    fontSize: '0.95rem', background: '#FFF', color: T.TEXT,
+    outline: 'none', transition: 'border 0.2s', fontFamily: 'inherit',
+    boxSizing: 'border-box',
+  };
   return (
-    <div style={{ width: '100%', marginBottom: '20px' }}>
-      <label style={{ fontSize: '0.9rem', fontWeight: '600', color: error ? CONFIG.THEME.DANGER : CONFIG.THEME.TEXT_PRI, display: 'block', marginBottom: '8px' }}>{label} <span style={{ color: CONFIG.THEME.DANGER }}>*</span></label>
-      <div 
-        onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
-        style={{ 
-          border: `2px dashed ${error ? CONFIG.THEME.DANGER : isDragging ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.BORDER_LIGHT}`, 
-          borderRadius: CONFIG.THEME.RADIUS_LG, padding: '32px 20px', textAlign: 'center', 
-          background: isDragging ? CONFIG.THEME.BG_SURFACE_ALT : CONFIG.THEME.BG_SURFACE, 
-          transition: CONFIG.THEME.TRANSITION_FAST, cursor: 'pointer', position: 'relative'
-        }}
-      >
-        <input type="file" accept={accept} onChange={e => validateAndSetFile(e.target.files[0])} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} />
-        {file ? (
-          <div style={{ animation: 'fadeIn 0.3s ease' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: CONFIG.THEME.SUCCESS_BG, color: CONFIG.THEME.SUCCESS, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', fontSize: '1.2rem' }}>✓</div>
-            <div style={{ fontWeight: '600', color: CONFIG.THEME.NAVY_MAIN, fontSize: '0.95rem', wordBreak: 'break-all' }}>{file.name}</div>
-            <div style={{ color: CONFIG.THEME.TEXT_SEC, fontSize: '0.8rem', marginTop: '4px' }}>{(file.size / (1024*1024)).toFixed(2)} MB • Click to replace</div>
-          </div>
-        ) : (
-          <div>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>📄</div>
-            <div style={{ fontWeight: '600', color: CONFIG.THEME.TEXT_PRI, fontSize: '0.95rem', marginBottom: '4px' }}>Drag & Drop or Click to Upload</div>
-            <div style={{ color: CONFIG.THEME.TEXT_TER, fontSize: '0.8rem' }}>Max size: {CONFIG.MAX_FILE_SIZE_MB}MB</div>
-          </div>
-        )}
-      </div>
-      {(error || helpText) && <div style={{ fontSize: '0.8rem', color: error ? CONFIG.THEME.DANGER : CONFIG.THEME.TEXT_TER, marginTop: '8px' }}>{error || helpText}</div>}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <label style={{ fontSize: '0.82rem', fontWeight: '700', color: T.TEXT2 }}>
+        {label}{required && <span style={{ color: T.DANGER }}> *</span>}
+      </label>
+      {options ? (
+        <select name={name} value={value} onChange={onChange} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} style={base}>
+          <option value="">Select…</option>
+          {options.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      ) : type === 'textarea' ? (
+        <textarea name={name} value={value} onChange={onChange} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} placeholder={placeholder} rows={3} style={{ ...base, resize: 'vertical' }} />
+      ) : (
+        <input type={type} name={name} value={value} onChange={onChange} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} placeholder={placeholder} required={required} maxLength={maxLength} style={base} />
+      )}
+      {error && <span style={{ color: T.DANGER, fontSize: '0.75rem', fontWeight: '600' }}>{error}</span>}
     </div>
   );
 };
 
-/* =========================================================
-   5) MAIN REGISTRATION COMPONENT
-   ========================================================= */
-const Register = () => {
-  const navigate = useNavigate();
-  const formRef = useRef(null);
+const FileField = ({ label, name, onChange, required, accept, preview }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+    <label style={{ fontSize: '0.82rem', fontWeight: '700', color: T.TEXT2 }}>
+      {label}{required && <span style={{ color: T.DANGER }}> *</span>}
+    </label>
+    <label style={{ border: `1.5px dashed ${T.BORDER}`, borderRadius: '10px', padding: '20px', textAlign: 'center', cursor: 'pointer', background: T.BG }}>
+      <input type="file" name={name} onChange={onChange} accept={accept} style={{ display: 'none' }} />
+      {preview ? (
+        <img src={preview} alt="preview" style={{ maxHeight: '120px', maxWidth: '100%', objectFit: 'contain', borderRadius: '8px' }} />
+      ) : (
+        <div style={{ color: T.TEXT3, fontSize: '0.9rem' }}>
+          <i className="bi bi-upload" style={{ fontSize: '1.5rem', display: 'block', marginBottom: '8px' }} />
+          Click to upload
+        </div>
+      )}
+    </label>
+  </div>
+);
 
-  const [uiState, setUiState] = useState({ isSubmitting: false, success: false, submitError: null });
-  const [touched, setTouched] = useState({});
-  const [errors, setErrors] = useState({});
-  
+/* ────────────────────────────────────────────────────────── */
+/* PROGRESS BAR                                               */
+/* ────────────────────────────────────────────────────────── */
+const ProgressBar = ({ currentStep }) => (
+  <div style={{ padding: '28px 32px 0', borderBottom: `1px solid ${T.BORDER}`, background: '#FFF' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', paddingBottom: '16px' }}>
+      <div style={{ position: 'absolute', top: '18px', left: '0', right: '0', height: '2px', background: T.BORDER, zIndex: 0 }} />
+      <div style={{ position: 'absolute', top: '18px', left: '0', height: '2px', background: T.NAVY, zIndex: 0, transition: 'width 0.4s ease', width: `${(currentStep / (STEPS.length - 1)) * 100}%` }} />
+      {STEPS.map(step => (
+        <div key={step.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', zIndex: 1, cursor: 'default' }}>
+          <div style={{
+            width: '38px', height: '38px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: currentStep > step.id ? T.SUCCESS : currentStep === step.id ? T.NAVY : '#FFF',
+            border: `2px solid ${currentStep >= step.id ? (currentStep > step.id ? T.SUCCESS : T.NAVY) : T.BORDER}`,
+            color: currentStep >= step.id ? '#FFF' : T.TEXT3, transition: 'all 0.3s ease', fontSize: currentStep > step.id ? '1.1rem' : '0.85rem'
+          }}>
+            {currentStep > step.id ? <i className="bi bi-check-lg" /> : <i className={`bi ${step.icon}`} />}
+          </div>
+          <span style={{ fontSize: '0.72rem', fontWeight: currentStep === step.id ? '800' : '500', color: currentStep === step.id ? T.NAVY : T.TEXT3, whiteSpace: 'nowrap' }}>
+            {step.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+/* ────────────────────────────────────────────────────────── */
+/* MAIN REGISTER COMPONENT                                    */
+/* ────────────────────────────────────────────────────────── */
+const Register = () => {
+  const [step, setStep] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [idPreview, setIdPreview] = useState(null);
+
   const [form, setForm] = useState({
-    regNo: '', fullName: '', fatherName: '', motherName: '', dob: '', age: '', gender: '',
-    email: '', countryCode: '+91', phone: '', aadhar: '',
-    batchYear: '', degree: '', currentStatus: 'None',
-    designation: '', company: '', pgCourse: '', pgCollege: '',
-    description: '', skills: '', achievements: '', linkedin: '', reviews: ''
+    // Step 0: Personal
+    fullName: '', fathersName: '', mothersName: '', email: '',
+    countryCode: '+91', phoneNumber: '', dateOfBirth: '', gender: '', aadhar: '', age: '',
+    // Step 1: Academic
+    registerNumber: '', degree: '', batchYear: '', pgCollege: '', pgCourse: '',
+    // Step 2: Career
+    currentStatus: '', companyName: '', designation: '', linkedInProfile: '', skills: '',
+    // Step 3: Documents
+    profilePhotoUrl: '', idProofUrl: '',
   });
 
-  const [files, setFiles] = useState({ profile: null, idProof: null });
-
-  // Handlers
-  const handleUpdate = (field, value) => {
-    let finalValue = value;
-    if (['fullName', 'fatherName', 'motherName'].includes(field)) finalValue = Kernel.toTitleCase(value);
-    if (field === 'dob') {
-      finalValue = Kernel.maskDate(value);
-      const calculatedAge = Kernel.calculateAge(finalValue);
-      setForm(prev => ({ ...prev, age: calculatedAge !== null ? calculatedAge : '' }));
+  const handleChange = (e) => {
+    let { name, value } = e.target;
+    
+    // Auto-formatting logic
+    if (['fullName', 'fathersName', 'mothersName'].includes(name)) {
+      value = toTitleCase(value);
+    } else if (name === 'dateOfBirth') {
+      value = formatDOB(value);
+    } else if (name === 'aadhar') {
+      value = formatAadhar(value);
+    } else if (['registerNumber', 'username', 'email'].includes(name)) {
+       value = value.trim();
     }
-    if (field === 'aadhar') finalValue = Kernel.maskAadhar(value);
-    if (field === 'phone') finalValue = value.replace(/\D/g, '');
-
-    setForm(prev => ({ ...prev, [field]: finalValue }));
-    if (errors[field]) {
-      const newErrors = { ...errors };
-      delete newErrors[field];
-      setErrors(newErrors);
-    }
+    
+    setForm(p => ({ ...p, [name]: value }));
+    setError('');
   };
 
-  const handleBlur = (field) => { setTouched(prev => ({ ...prev, [field]: true })); validateField(field); };
-
-  const handleFileChange = (type, file, errorMsg) => {
-    if (errorMsg) {
-      setErrors(prev => ({ ...prev, [type]: errorMsg }));
-      setFiles(prev => ({ ...prev, [type]: null }));
-    } else {
-      setFiles(prev => ({ ...prev, [type]: file }));
-      setErrors(prev => { const newErr = {...prev}; delete newErr[type]; return newErr; });
-    }
-  };
-
-  const validateField = (field) => {
-    let err = null;
-    switch (field) {
-      case 'fullName': case 'fatherName': case 'motherName': case 'regNo': case 'gender': case 'degree': case 'batchYear':
-        if (!form[field]) err = "Required"; break;
-      case 'email':
-        if (!form.email) err = "Required"; else if (!Kernel.validateEmail(form.email)) err = "Invalid email format"; break;
-      case 'phone':
-        const limit = Object.values(COUNTRIES).find(c => c.code === form.countryCode)?.limit || 10;
-        if (!form.phone) err = "Required"; else if (form.phone.length !== limit) err = `Must be ${limit} digits`; break;
-      case 'aadhar':
-        if (form.aadhar && form.aadhar.length !== 14) err = "Must be exactly 12 digits"; break;
-      case 'dob':
-        if (!form.dob) err = "Required"; else if (form.dob.length !== 10) err = "Format: DD-MM-YYYY"; break;
-      case 'linkedin':
-        if (form.linkedin && !Kernel.validateURL(form.linkedin)) err = "Invalid URL"; break;
-      default: break;
-    }
-    if (err) setErrors(prev => ({ ...prev, [field]: err }));
-    return !err;
-  };
-
-  const validateAll = () => {
-    const fieldsToValidate = ['fullName', 'fatherName', 'motherName', 'regNo', 'email', 'phone', 'dob', 'gender', 'degree', 'batchYear', 'linkedin'];
-    let isValid = true;
-    let newErrors = {};
-    
-    fieldsToValidate.forEach(f => { if (!validateField(f) || errors[f]) isValid = false; });
-    if (!files.profile) { newErrors.profile = "Profile photo is mandatory"; isValid = false; }
-    if (!files.idProof) { newErrors.idProof = "Government/University ID is mandatory"; isValid = false; }
-    
-    if (Object.keys(newErrors).length > 0) setErrors(prev => ({ ...prev, ...newErrors }));
-    
-    if (!isValid && formRef.current) {
-      const firstError = formRef.current.querySelector('.form-group:has(span[style*="color: rgb(239, 68, 68)"])');
-      if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    return isValid;
-  };
-
-  // Ultra-Robust Submission Protocol
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setUiState({ ...uiState, submitError: null });
-    setTouched(Object.keys(form).reduce((acc, curr) => ({ ...acc, [curr]: true }), {}));
-    
-    if (!validateAll()) return;
-    setUiState(prev => ({ ...prev, isSubmitting: true }));
-
+  const handleFile = async (e, previewSetter, fieldName) => {
+    const file = e.target.files[0];
+    if (!file) return;
     try {
-      let profileUrl = '';
-      let idProofUrl = '';
-
-      // 1. Upload Assets securely
-      if (files.profile) {
-        const profileRef = ref(storage, `alumni_profiles/${form.regNo}_${Date.now()}_${files.profile.name}`);
-        await uploadBytes(profileRef, files.profile);
-        profileUrl = await getDownloadURL(profileRef);
-      }
-      if (files.idProof) {
-        const idRef = ref(storage, `alumni_id_proofs/${form.regNo}_${Date.now()}_${files.idProof.name}`);
-        await uploadBytes(idRef, files.idProof);
-        idProofUrl = await getDownloadURL(idRef);
-      }
-
-      // 2. Structured Payload matching the Admin Dashboard expectations
-      const dbPayload = {
-        ...form,
-        "Full Name": form.fullName,
-        "Batch Year": form.batchYear,
-        "Company Name": form.company,
-        "Designation": form.designation,
-        "Current Status": form.currentStatus === 'Job' ? 'Employed Full-Time' : (form.currentStatus === 'PG' ? 'Higher Studies' : form.currentStatus),
-        "Email": form.email,
-        "Degree": form.degree,
-        "Skills": form.skills ? form.skills.split(',').map(s => s.trim()) : [],
-        "Location": "Pending Admin Verification", 
-        
-        // Critical System Flags
-        profilePhotoUrl: profileUrl,
-        idProofUrl: idProofUrl,
-        status: 'PENDING', // Puts it directly in Admin Dashboard verification queue
-        verificationQueue: true,
-        registeredAt: serverTimestamp(),
-      };
-
-      // 3. Database Push to precise collection
-      await addDoc(collection(db, CONFIG.COLLECTION_NAME), dbPayload);
-      setUiState({ isSubmitting: false, success: true, submitError: null });
-
-    } catch (error) {
-      console.error("Submission Failure Pipeline:", error);
-      setUiState({ 
-        isSubmitting: false, 
-        success: false, 
-        submitError: `Transmission Failed: ${error.message}. Please check your connection and try again.` 
-      });
+      const base64 = await fileToBase64(file);
+      previewSetter(base64);
+      setForm(p => ({ ...p, [fieldName]: base64 }));
+    } catch {
+      setError('File upload failed. Try again.');
     }
   };
 
-  // --- SUCCESS SCREEN ---
-  if (uiState.success) {
+  const validateStep = () => {
+    if (step === 0) {
+      if (!form.fullName.trim()) return 'Full Name is required.';
+      if (form.fullName.split(' ').length < 2) return 'Full Name should contain at least two words (e.g., Ram Kumar).';
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(form.email)) return 'Invalid Email Format. Please use you@domain.com';
+      
+      const phoneClean = form.phoneNumber.replace(/\D/g, '');
+      if (form.countryCode === '+91') {
+          if (phoneClean.length !== 10) return 'India phone numbers must have exactly 10 digits.';
+      } else {
+          if (phoneClean.length < 7 || phoneClean.length > 15) return 'Invalid international phone number length.';
+      }
+      
+      const dobRegex = /^\d{2}-\d{2}-\d{4}$/;
+      if (!dobRegex.test(form.dateOfBirth)) return 'Date Of Birth must be in dd-mm-yyyy format.';
+      
+      const ageNum = parseInt(form.age);
+      if (isNaN(ageNum) || ageNum <= 0 || ageNum >= 100) return 'Age Error: It should be greater than 0 and less than 100.';
+      
+      const aadharRegex = /^\d{4}-\d{4}-\d{4}$/;
+      if (!aadharRegex.test(form.aadhar)) return 'Aadhar Card Number must be exactly 12 digits (xxxx-xxxx-xxxx).';
+      
+      if (!form.gender) return 'Gender selection is required.';
+    }
+    if (step === 1) {
+      if (!form.registerNumber.trim()) return 'Register Number is required.';
+      if (!form.degree) return 'Degree is required.';
+      if (!form.batchYear) return 'Batch Year is required.';
+    }
+    if (step === 3) {
+      if (!form.profilePhotoUrl) return 'Profile photo is required.';
+      if (!form.idProofUrl) return 'Identity document is required.';
+    }
+    return null;
+  };
+
+  const next = () => {
+    const err = validateStep();
+    if (err) { setError(err); return; }
+    setError('');
+    setStep(s => Math.min(s + 1, STEPS.length - 1));
+  };
+
+  const back = () => { setError(''); setStep(s => Math.max(s - 1, 0)); };
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setError('');
+    try {
+      // Convert dateOfBirth from dd-mm-yyyy to ISO format for backend
+      const payload = { 
+          ...form,
+          phoneNumber: `${form.countryCode} ${form.phoneNumber}`
+      };
+      if (payload.dateOfBirth) {
+        const parts = payload.dateOfBirth.split('-');
+        if (parts.length === 3) {
+          // Construct yyyy-mm-dd for standard Date parsing
+          const isoCompat = `${parts[2]}-${parts[1]}-${parts[0]}`;
+          payload.dateOfBirth = new Date(isoCompat).toISOString();
+        }
+      }
+      if (payload.batchYear) payload.batchYear = parseInt(payload.batchYear);
+      if (payload.age) payload.age = parseInt(payload.age);
+      if (payload.skills) payload.skills = payload.skills.split(',').map(s => s.trim()).filter(Boolean);
+
+      const res = await fetch(`${API_BASE}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.details || data.error || 'Submission failed.');
+
+      // Send confirmation email via Nodemailer backend (non-critical)
+      try {
+        await fetch(API_EMAIL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'registration_submitted',
+            to_name: form.fullName,
+            to_email: form.email,
+            message: 'Your registration has been received and is pending admin verification.',
+          }),
+        });
+      } catch { /* email failure is non-critical */ }
+
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  /* ── REVIEW SUMMARY ─────────────────────────────────── */
+  const ReviewItem = ({ label, value }) => (
+    value ? (
+      <div style={{ display: 'flex', gap: '8px', padding: '6px 0', borderBottom: `1px solid ${T.BORDER}` }}>
+        <span style={{ width: '160px', flexShrink: 0, fontSize: '0.82rem', color: T.TEXT3, fontWeight: '600' }}>{label}</span>
+        <span style={{ fontSize: '0.9rem', color: T.TEXT, fontWeight: '600', wordBreak: 'break-all' }}>{value}</span>
+      </div>
+    ) : null
+  );
+
+  /* ── PAGE WRAPPERS ───────────────────────────────────── */
+  const gridTwo = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' };
+
+  if (submitted) {
     return (
-      <div style={{ height: '100vh', width: '100vw', background: CONFIG.THEME.NAVY_MAIN, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-        <GlobalStyles />
-        <div style={{ background: CONFIG.THEME.BG_SURFACE, padding: '60px 50px', borderRadius: CONFIG.THEME.RADIUS_XL, maxWidth: '600px', width: '90%', textAlign: 'center', boxShadow: CONFIG.THEME.SHADOW_LG, animation: 'slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: CONFIG.THEME.SUCCESS_BG, border: `4px solid ${CONFIG.THEME.SUCCESS}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-            <svg width="40" height="40" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M14 27L22 35L38 15" stroke={CONFIG.THEME.SUCCESS} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" style={{ strokeDasharray: 50, strokeDashoffset: 50, animation: 'checkmark 0.6s ease forwards 0.3s' }} />
-            </svg>
+      <div style={{ minHeight: '100vh', background: T.BG, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
+        <div style={{ background: '#FFF', borderRadius: '20px', padding: '60px 48px', maxWidth: '560px', width: '100%', textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.08)' }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+            <i className="bi bi-check-lg" style={{ fontSize: '2.5rem', color: T.SUCCESS }} />
           </div>
-          <h1 style={{ color: CONFIG.THEME.NAVY_MAIN, fontSize: '2rem', marginBottom: '16px', fontWeight: '700' }}>Application Secured</h1>
-          <p style={{ color: CONFIG.THEME.TEXT_SEC, fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '32px' }}>
-            Your details are now in the Admin Verification Queue. Upon compliance approval, directory credentials will be dispatched to <strong>{form.email}</strong>.
+          <h2 style={{ color: T.NAVY, margin: '0 0 12px', fontSize: '1.8rem', fontWeight: '800' }}>Application Submitted!</h2>
+          <p style={{ color: T.TEXT2, lineHeight: '1.7', margin: '0 0 32px' }}>
+            Your registration has been received and is pending verification by the SJU Admin team. You'll receive your login credentials via email once approved.
           </p>
-          <button onClick={() => navigate('/')} style={{ padding: '14px 40px', background: CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN, borderRadius: CONFIG.THEME.RADIUS_FULL, fontSize: '1rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', border: 'none', cursor: 'pointer', transition: CONFIG.THEME.TRANSITION_BOUNCE }}>
-            Return to Home
-          </button>
+          <a href="/login" style={{ display: 'inline-block', padding: '14px 32px', background: T.NAVY, color: T.GOLD, borderRadius: '999px', fontWeight: '700', textDecoration: 'none', fontSize: '0.95rem' }}>
+            Go to Login
+          </a>
         </div>
       </div>
     );
   }
 
-  // --- SPLIT SCREEN REGISTRATION FORM ---
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', background: CONFIG.THEME.BG_APP, overflow: 'hidden' }}>
-      <GlobalStyles />
-      
-      {/* LEFT PANEL - BRANDING */}
-      <div style={{ flex: '0 0 40%', background: CONFIG.THEME.NAVY_DARK, position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px', zIndex: 10, boxShadow: '10px 0 30px rgba(0,0,0,0.15)' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.1, backgroundImage: 'linear-gradient(45deg, #020a17 25%, transparent 25%, transparent 75%, #020a17 75%, #020a17)', backgroundSize: '60px 60px', backgroundColor: CONFIG.THEME.NAVY_MAIN }} />
-        <div style={{ position: 'relative', zIndex: 2, animation: 'slideRightFade 0.8s ease' }}>
-          <div style={{ display: 'inline-block', padding: '10px 20px', background: 'rgba(212, 175, 55, 0.1)', border: `1px solid ${CONFIG.THEME.GOLD_DARK}`, borderRadius: CONFIG.THEME.RADIUS_FULL, color: CONFIG.THEME.GOLD_MAIN, fontWeight: '700', letterSpacing: '0.1em', fontSize: '0.8rem', marginBottom: '24px' }}>
-            ALUMNI NETWORK PORTAL
-          </div>
-          <h1 style={{ color: CONFIG.THEME.BG_SURFACE, fontSize: '3.5rem', fontWeight: '700', margin: '0 0 20px 0', lineHeight: '1.1' }}>
-            Reignite <br/>Your Legacy.
-          </h1>
-          <p style={{ color: CONFIG.THEME.TEXT_TER, fontSize: '1.1rem', lineHeight: '1.7', margin: '0 0 40px 0', maxWidth: '90%' }}>
-            Join the exclusive global directory of St. Joseph's University. Reconnect with peers, unlock mentorships, and expand your horizons.
-          </p>
-        </div>
+    <div style={{ minHeight: '100vh', background: T.BG, fontFamily: "'Lora', Georgia, serif", paddingBottom: '60px' }}>
+      {/* Page Header */}
+      <div style={{ background: `linear-gradient(135deg, ${T.NAVY_DARK}, ${T.NAVY})`, padding: '40px 24px 60px', textAlign: 'center' }}>
+        <h1 style={{ color: '#FFF', fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', fontWeight: '900', margin: 0 }}>
+          Alumni Registration
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.6)', margin: '10px 0 0', fontSize: '1rem' }}>
+          Join the SJU Alumni Network — St. Joseph's University, Bengaluru
+        </p>
       </div>
 
-      {/* RIGHT PANEL - SCROLLABLE FORM */}
-      <div style={{ flex: '1 1 60%', height: '100%', overflowY: 'auto', padding: '0', position: 'relative' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 40px 100px 40px' }}>
-          
-          <div style={{ marginBottom: '40px', animation: 'fadeIn 0.6s ease' }}>
-            <h2 style={{ fontSize: '2.2rem', color: CONFIG.THEME.NAVY_MAIN, margin: 0, fontWeight: '700' }}>Complete Your Profile</h2>
-            <div style={{ fontSize: '0.9rem', color: CONFIG.THEME.TEXT_TER, marginTop: '8px' }}>Fields marked with * are mandatory for compliance verification.</div>
-          </div>
+      {/* Card */}
+      <div style={{ maxWidth: '1000px', margin: '-36px auto 0', padding: '0 20px' }}>
+        <div style={{ background: '#FFF', borderRadius: '20px', boxShadow: '0 20px 60px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+          <ProgressBar currentStep={step} />
 
-          {uiState.submitError && (
-            <div style={{ background: CONFIG.THEME.DANGER_BG, borderLeft: `4px solid ${CONFIG.THEME.DANGER}`, padding: '16px 20px', borderRadius: CONFIG.THEME.RADIUS_SM, marginBottom: '32px', color: CONFIG.THEME.DANGER, fontWeight: '600', animation: 'shake 0.4s ease' }}>
-              {uiState.submitError}
-            </div>
-          )}
+          <div style={{ padding: '36px 36px 28px' }}>
 
-          <form ref={formRef} onSubmit={handleSubmit}>
-            
-            {/* SECTION 1: ACADEMIC */}
-            <div style={{ marginBottom: '60px' }}>
-              <SectionHeader step="1" title="Academic Identification" subtitle="Details used to retrieve your official university records." />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <InputWrapper label="Register Number" error={touched.regNo && errors.regNo} required>
-                  <input style={baseInputStyles(touched.regNo && errors.regNo)} value={form.regNo} onChange={e => handleUpdate('regNo', e.target.value.toUpperCase())} onBlur={() => handleBlur('regNo')} placeholder="e.g., 20SJU1234" />
-                </InputWrapper>
-                <InputWrapper label="Degree Studied" error={touched.degree && errors.degree} required>
-                  <select style={baseInputStyles(touched.degree && errors.degree)} value={form.degree} onChange={e => handleUpdate('degree', e.target.value)} onBlur={() => handleBlur('degree')}>
-                    <option value="" disabled>Select Degree...</option>
-                    <option value="B.Sc">B.Sc</option><option value="BCA">BCA</option><option value="B.Com">B.Com</option><option value="BA">BA</option><option value="M.Sc">M.Sc</option><option value="MBA">MBA</option>
-                  </select>
-                </InputWrapper>
-                <InputWrapper label="Year of Passing" error={touched.batchYear && errors.batchYear} required>
-                  <select style={baseInputStyles(touched.batchYear && errors.batchYear)} value={form.batchYear} onChange={e => handleUpdate('batchYear', e.target.value)} onBlur={() => handleBlur('batchYear')}>
-                    <option value="" disabled>Select Year...</option>
-                    {Array.from({length: 40}, (_, i) => new Date().getFullYear() - i).map(y => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                </InputWrapper>
-              </div>
-            </div>
-
-            {/* SECTION 2: BIODATA */}
-            <div style={{ marginBottom: '60px' }}>
-              <SectionHeader step="2" title="Personal Biodata" subtitle="Ensure details match your official government ID." />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <InputWrapper label="Full Name" error={touched.fullName && errors.fullName} required width="100%">
-                  <input style={baseInputStyles(touched.fullName && errors.fullName)} value={form.fullName} onChange={e => handleUpdate('fullName', e.target.value)} onBlur={() => handleBlur('fullName')} placeholder="e.g., Jane Doe" />
-                </InputWrapper>
-                <InputWrapper label="Aadhar Number" error={touched.aadhar && errors.aadhar}>
-                  <input style={baseInputStyles(touched.aadhar && errors.aadhar)} value={form.aadhar} onChange={e => handleUpdate('aadhar', e.target.value)} onBlur={() => handleBlur('aadhar')} placeholder="XXXX-XXXX-XXXX" maxLength={14} />
-                </InputWrapper>
-
-                <InputWrapper label="Date of Birth" error={touched.dob && errors.dob} required>
-                  <input style={baseInputStyles(touched.dob && errors.dob)} value={form.dob} onChange={e => handleUpdate('dob', e.target.value)} onBlur={() => handleBlur('dob')} placeholder="DD-MM-YYYY" maxLength={10} />
-                </InputWrapper>
-                <InputWrapper label="Gender" error={touched.gender && errors.gender} required>
-                  <select style={baseInputStyles(touched.gender && errors.gender)} value={form.gender} onChange={e => handleUpdate('gender', e.target.value)} onBlur={() => handleBlur('gender')}>
-                    <option value="" disabled>Select Gender...</option>
-                    <option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
-                  </select>
-                </InputWrapper>
-                
-                <div style={{ gridColumn: 'span 2', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                  <InputWrapper label="Father's Name" error={touched.fatherName && errors.fatherName} required>
-                    <input style={baseInputStyles(touched.fatherName && errors.fatherName)} value={form.fatherName} onChange={e => handleUpdate('fatherName', e.target.value)} onBlur={() => handleBlur('fatherName')} />
-                  </InputWrapper>
-                  <InputWrapper label="Mother's Name" error={touched.motherName && errors.motherName} required>
-                    <input style={baseInputStyles(touched.motherName && errors.motherName)} value={form.motherName} onChange={e => handleUpdate('motherName', e.target.value)} onBlur={() => handleBlur('motherName')} />
-                  </InputWrapper>
-                </div>
-              </div>
-            </div>
-
-            {/* SECTION 3: CONTACT */}
-            <div style={{ marginBottom: '60px' }}>
-              <SectionHeader step="3" title="Contact Details" subtitle="Portal login credentials will be dispatched here." />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <InputWrapper label="Primary Email" error={touched.email && errors.email} required>
-                  <input type="email" style={baseInputStyles(touched.email && errors.email)} value={form.email} onChange={e => handleUpdate('email', e.target.value)} onBlur={() => handleBlur('email')} placeholder="you@domain.com" />
-                </InputWrapper>
-                <InputWrapper label="Phone Number" error={touched.phone && errors.phone} required>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <select style={{...baseInputStyles(false), width: '120px', flexShrink: 0, padding: '14px 10px'}} value={form.countryCode} onChange={e => handleUpdate('countryCode', e.target.value)}>
-                      {Object.values(COUNTRIES).map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
-                    </select>
-                    <input style={baseInputStyles(touched.phone && errors.phone)} value={form.phone} onChange={e => handleUpdate('phone', e.target.value)} onBlur={() => handleBlur('phone')} placeholder={Object.values(COUNTRIES).find(c => c.code === form.countryCode)?.placeholder} />
+            {/* ── STEP 0: Personal ── */}
+            {step === 0 && (
+              <div>
+                <h3 style={{ color: T.NAVY, margin: '0 0 6px', fontSize: '1.3rem', fontWeight: '800' }}>Personal Information</h3>
+                <p style={{ color: T.TEXT3, margin: '0 0 28px', fontSize: '0.9rem' }}>Tell us about yourself.</p>
+                <div className="reg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                  <Field label="Full Name" name="fullName" value={form.fullName} onChange={handleChange} required placeholder="e.g. Ram Kumar" />
+                  <Field label="Primary Email Id" name="email" value={form.email} onChange={handleChange} required placeholder="you@domain.com" />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: '700', color: T.TEXT2 }}>
+                      Contact Number<span style={{ color: T.DANGER }}> *</span>
+                    </label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <select name="countryCode" value={form.countryCode} onChange={handleChange} style={{ padding: '12px 10px', borderRadius: '10px', border: `1.5px solid ${T.BORDER}`, fontSize: '0.9rem', width: '90px', background: '#FFF' }}>
+                        {COUNTRY_CODES.map(c => <option key={c.code} value={c.code}>{c.code} ({c.country})</option>)}
+                      </select>
+                      <input type="text" name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="9XXXXXXXXX" maxLength={15} style={{ flex: 1, padding: '12px 14px', borderRadius: '10px', border: `1.5px solid ${T.BORDER}`, fontSize: '0.95rem', background: '#FFF' }} />
+                    </div>
                   </div>
-                </InputWrapper>
-              </div>
-            </div>
-
-            {/* SECTION 4: STATUS */}
-            <div style={{ marginBottom: '60px' }}>
-              <SectionHeader step="4" title="Professional Status" subtitle="Help the network categorize your current career phase." />
-              <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
-                {[ {id:'None', label:'Open to Work', icon:'🚀'}, {id:'Job', label:'Employed', icon:'💼'}, {id:'PG', label:'Higher Studies', icon:'🎓'} ].map(status => (
-                  <label key={status.id} style={{ flex: 1, minWidth: '180px', padding: '16px', border: `2px solid ${form.currentStatus === status.id ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.BORDER_LIGHT}`, borderRadius: CONFIG.THEME.RADIUS_MD, background: form.currentStatus === status.id ? CONFIG.THEME.BG_SURFACE_ALT : CONFIG.THEME.BG_SURFACE, cursor: 'pointer', transition: CONFIG.THEME.TRANSITION_FAST, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                    <input type="radio" name="status" value={status.id} checked={form.currentStatus === status.id} onChange={() => handleUpdate('currentStatus', status.id)} style={{ display: 'none' }} />
-                    <span style={{ fontSize: '1.5rem' }}>{status.icon}</span>
-                    <span style={{ fontWeight: '600', color: form.currentStatus === status.id ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.TEXT_SEC }}>{status.label}</span>
-                  </label>
-                ))}
-              </div>
-
-              <div style={{ overflow: 'hidden', transition: 'max-height 0.4s ease', maxHeight: form.currentStatus === 'Job' ? '300px' : '0' }}>
-                <div style={{ background: CONFIG.THEME.BG_SURFACE_ALT, padding: '24px', borderRadius: CONFIG.THEME.RADIUS_MD, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
-                  <InputWrapper label="Company Name"><input style={baseInputStyles(false)} value={form.company} onChange={e => handleUpdate('company', e.target.value)} placeholder="e.g., Google, Infosys" /></InputWrapper>
-                  <InputWrapper label="Designation"><input style={baseInputStyles(false)} value={form.designation} onChange={e => handleUpdate('designation', e.target.value)} placeholder="e.g., Software Engineer" /></InputWrapper>
+                  <div style={{ position: 'relative' }}>
+                    <Field label="Date of Birth" name="dateOfBirth" value={form.dateOfBirth} onChange={handleChange} placeholder="dd-mm-yyyy" maxLength={10} />
+                    <input type="date" style={{ position: 'absolute', top: '30px', right: '10px', width: '24px', height: '24px', opacity: 0, cursor: 'pointer' }} onChange={(e) => {
+                      if (e.target.value) {
+                        const d = e.target.value.split('-');
+                        setForm(p => ({ ...p, dateOfBirth: `${d[2]}-${d[1]}-${d[0]}` }));
+                      }
+                    }} />
+                  </div>
+                  <Field label="Gender" name="gender" value={form.gender} onChange={handleChange} required options={['Male', 'Female', 'Other', 'Prefer not to say']} />
+                  <Field label="Age" name="age" type="text" value={form.age} onChange={handleChange} placeholder="e.g. 25" maxLength={2} />
+                  <Field label="Father's Name" name="fathersName" value={form.fathersName} onChange={handleChange} placeholder="First Last" />
+                  <Field label="Mother's Name" name="mothersName" value={form.mothersName} onChange={handleChange} placeholder="First Last" />
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <Field label="Aadhar Card Number" name="aadhar" value={form.aadhar} onChange={handleChange} placeholder="xxxx-xxxx-xxxx" maxLength={14} />
+                  </div>
                 </div>
               </div>
+            )}
 
-              <div style={{ overflow: 'hidden', transition: 'max-height 0.4s ease', maxHeight: form.currentStatus === 'PG' ? '300px' : '0' }}>
-                <div style={{ background: CONFIG.THEME.BG_SURFACE_ALT, padding: '24px', borderRadius: CONFIG.THEME.RADIUS_MD, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
-                  <InputWrapper label="PG Course Name"><input style={baseInputStyles(false)} value={form.pgCourse} onChange={e => handleUpdate('pgCourse', e.target.value)} placeholder="e.g., M.Tech in Data Science" /></InputWrapper>
-                  <InputWrapper label="University/College"><input style={baseInputStyles(false)} value={form.pgCollege} onChange={e => handleUpdate('pgCollege', e.target.value)} placeholder="e.g., IIT Bombay" /></InputWrapper>
+            {/* ── STEP 1: Academic ── */}
+            {step === 1 && (
+              <div>
+                <h3 style={{ color: T.NAVY, margin: '0 0 6px', fontSize: '1.3rem', fontWeight: '800' }}>Academic Details</h3>
+                <p style={{ color: T.TEXT3, margin: '0 0 28px', fontSize: '0.9rem' }}>Your SJU academic history.</p>
+                <div className="reg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                  <Field label="Register Number" name="registerNumber" value={form.registerNumber} onChange={handleChange} required placeholder="e.g. 232BCAA14" />
+                  <Field label="Degree / Programme" name="degree" value={form.degree} onChange={handleChange} required options={['B.Com', 'MBA', 'BCA', 'MCA', 'MSW', 'M.A.', 'B.A.', 'B.Sc.', 'M.Sc.', 'LLB', 'Ph.D', 'Other']} />
+                  <Field label="Year Of Passing" name="batchYear" value={form.batchYear} onChange={handleChange} required options={Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() + 1 - i))} />
+                  <Field label="PG College (if applicable)" name="pgCollege" value={form.pgCollege} onChange={handleChange} placeholder="Post-grad institution" />
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <Field label="PG Course / Specialisation" name="pgCourse" value={form.pgCourse} onChange={handleChange} placeholder="e.g. MBA in Finance" />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* SECTION 5: PROFILE */}
-            <div style={{ marginBottom: '60px' }}>
-              <SectionHeader step="5" title="Profile & Networking" subtitle="Rich data makes you discoverable in the directory." />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
-                <InputWrapper label="Short Professional Bio">
-                  <textarea style={{...baseInputStyles(false), minHeight: '100px'}} value={form.description} onChange={e => handleUpdate('description', e.target.value)} placeholder="Summarize your career goals..." />
-                </InputWrapper>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                  <InputWrapper label="Core Skills (Comma separated)"><input style={baseInputStyles(false)} value={form.skills} onChange={e => handleUpdate('skills', e.target.value)} placeholder="React, Data Analysis..." /></InputWrapper>
-                  <InputWrapper label="LinkedIn Profile" error={touched.linkedin && errors.linkedin}>
-                    <input style={baseInputStyles(touched.linkedin && errors.linkedin)} value={form.linkedin} onChange={e => handleUpdate('linkedin', e.target.value)} onBlur={() => handleBlur('linkedin')} placeholder="https://linkedin.com/in/..." />
-                  </InputWrapper>
+            {/* ── STEP 2: Career ── */}
+            {step === 2 && (
+              <div>
+                <h3 style={{ color: T.NAVY, margin: '0 0 6px', fontSize: '1.3rem', fontWeight: '800' }}>Career & Professional</h3>
+                <p style={{ color: T.TEXT3, margin: '0 0 28px', fontSize: '0.9rem' }}>Your current professional status.</p>
+                <div style={gridTwo}>
+                  <Field label="Current Status" name="currentStatus" value={form.currentStatus} onChange={handleChange} options={['Employed', 'Self-Employed', 'Higher Studies', 'Freelancer', 'Seeking Opportunities', 'Other']} />
+                  <Field label="Company / Organisation" name="companyName" value={form.companyName} onChange={handleChange} placeholder="e.g. Infosys" />
+                  <Field label="Designation / Role" name="designation" value={form.designation} onChange={handleChange} placeholder="e.g. Software Engineer" />
+                  <Field label="LinkedIn Profile URL" name="linkedInProfile" value={form.linkedInProfile} onChange={handleChange} placeholder="https://linkedin.com/in/..." />
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <Field label="Skills (comma-separated)" name="skills" type="textarea" value={form.skills} onChange={handleChange} placeholder="e.g. Python, React, Data Analysis, Leadership" />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* SECTION 6: VERIFICATION */}
-            <div style={{ marginBottom: '60px' }}>
-              <SectionHeader step="6" title="Identity Verification" subtitle={`Mandatory proof for portal authorization. Max size ${CONFIG.MAX_FILE_SIZE_MB}MB.`} />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                <FileDropzone 
-                  label="Profile Photograph" 
-                  accept="image/jpeg, image/png, image/webp" 
-                  file={files.profile} 
-                  error={errors.profile} 
-                  onChange={(f, err) => handleFileChange('profile', f, err)} 
-                  helpText="Professional headshot. Formats: JPG, PNG, WEBP."
-                />
-                <FileDropzone 
-                  label="Official ID Proof" 
-                  accept="image/jpeg, image/png, application/pdf" 
-                  file={files.idProof} 
-                  error={errors.idProof} 
-                  onChange={(f, err) => handleFileChange('idProof', f, err)} 
-                  helpText="Aadhar, Passport, or College ID. Formats: PDF, JPG, PNG."
-                />
+            {/* ── STEP 3: Documents ── */}
+            {step === 3 && (
+              <div>
+                <h3 style={{ color: T.NAVY, margin: '0 0 6px', fontSize: '1.3rem', fontWeight: '800' }}>Identity Documents</h3>
+                <p style={{ color: T.TEXT3, margin: '0 0 28px', fontSize: '0.9rem' }}>Upload your profile photo and a government/university ID for verification.</p>
+                <div style={gridTwo}>
+                  <FileField label="Profile Photo" name="profilePhoto" accept="image/*" onChange={e => handleFile(e, setPhotoPreview, 'profilePhotoUrl')} preview={photoPreview} required />
+                  <FileField label="Identity Document (Aadhar / College ID)" name="idProof" accept="image/*,application/pdf" onChange={e => handleFile(e, setIdPreview, 'idProofUrl')} preview={idPreview} required />
+                </div>
+                <p style={{ margin: '20px 0 0', fontSize: '0.82rem', color: T.TEXT3 }}>
+                  <i className="bi bi-info-circle" /> Accepted formats: JPG, PNG, PDF. Your documents are encrypted and used only for verification.
+                </p>
               </div>
-            </div>
+            )}
 
-            {/* SUBMISSION FOOTER */}
-            <div style={{ background: CONFIG.THEME.BG_SURFACE_ALT, padding: '32px', borderRadius: CONFIG.THEME.RADIUS_LG, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ width: '60%' }}>
-                <h4 style={{ margin: '0 0 6px 0', color: CONFIG.THEME.NAVY_MAIN, fontSize: '1.05rem', fontWeight: '700' }}>Ready to submit?</h4>
-                <p style={{ margin: 0, color: CONFIG.THEME.TEXT_SEC, fontSize: '0.85rem', lineHeight: 1.5 }}>By submitting, you consent to secure data processing.</p>
+            {/* ── STEP 4: Review ── */}
+            {step === 4 && (
+              <div>
+                <h3 style={{ color: T.NAVY, margin: '0 0 6px', fontSize: '1.3rem', fontWeight: '800' }}>Review Your Application</h3>
+                <p style={{ color: T.TEXT3, margin: '0 0 24px', fontSize: '0.9rem' }}>Please confirm all details before submitting.</p>
+                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                  {/* Left column: photo */}
+                  {photoPreview && (
+                    <div style={{ flexShrink: 0 }}>
+                      <img src={photoPreview} alt="Profile" style={{ width: '90px', height: '90px', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${T.GOLD}` }} />
+                    </div>
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <ReviewItem label="Full Name" value={form.fullName} />
+                    <ReviewItem label="Email" value={form.email} />
+                    <ReviewItem label="Phone" value={`${form.countryCode} ${form.phoneNumber}`} />
+                    <ReviewItem label="Gender" value={form.gender} />
+                    <ReviewItem label="Date of Birth" value={form.dateOfBirth} />
+                    <ReviewItem label="Register No." value={form.registerNumber} />
+                    <ReviewItem label="Degree" value={form.degree} />
+                    <ReviewItem label="Batch Year" value={form.batchYear} />
+                    <ReviewItem label="Current Status" value={form.currentStatus} />
+                    <ReviewItem label="Company" value={form.companyName} />
+                    <ReviewItem label="Designation" value={form.designation} />
+                    <ReviewItem label="Skills" value={form.skills} />
+                    <ReviewItem label="LinkedIn" value={form.linkedInProfile} />
+                  </div>
+                </div>
+                <div style={{ background: 'rgba(212,175,55,0.08)', border: `1px solid ${T.GOLD}`, borderRadius: '10px', padding: '14px 18px', marginTop: '24px', fontSize: '0.85rem', color: T.TEXT2 }}>
+                  <i className="bi bi-info-circle-fill" style={{ color: T.GOLD, marginRight: '8px' }} />
+                  By submitting, you agree that your information will be reviewed by the SJU Admin team. You'll receive login credentials by email after approval.
+                </div>
               </div>
-              <button 
-                type="submit" disabled={uiState.isSubmitting}
-                style={{ 
-                  padding: '16px 32px', background: uiState.isSubmitting ? CONFIG.THEME.TEXT_TER : CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN, 
-                  fontSize: '1rem', fontWeight: '700', border: 'none', borderRadius: CONFIG.THEME.RADIUS_FULL,
-                  cursor: uiState.isSubmitting ? 'not-allowed' : 'pointer', letterSpacing: '0.05em', textTransform: 'uppercase',
-                  display: 'flex', alignItems: 'center', gap: '10px', transition: CONFIG.THEME.TRANSITION_BOUNCE
-                }}
-              >
-                {uiState.isSubmitting ? (
-                  <>
-                    <span style={{ display: 'inline-block', width: '16px', height: '16px', border: `3px solid ${CONFIG.THEME.BG_SURFACE}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-                    Verifying...
-                  </>
-                ) : 'Submit Application'}
+            )}
+
+            {/* ERROR */}
+            {error && (
+              <div style={{ marginTop: '20px', padding: '12px 16px', background: 'rgba(239,68,68,0.08)', border: `1px solid ${T.DANGER}`, borderRadius: '10px', color: T.DANGER, fontSize: '0.875rem', fontWeight: '600' }}>
+                <i className="bi bi-exclamation-triangle-fill" style={{ marginRight: '8px' }} />
+                {error}
+              </div>
+            )}
+          </div>
+
+          {/* FOOTER NAV */}
+          <div style={{ padding: '0 36px 32px', display: 'flex', justifyContent: 'space-between' }}>
+            <button onClick={back} disabled={step === 0 || submitting} style={{
+              padding: '12px 28px', borderRadius: '999px', border: `2px solid ${T.BORDER}`,
+              background: 'transparent', color: step === 0 ? T.TEXT3 : T.TEXT, fontWeight: '700',
+              cursor: step === 0 ? 'not-allowed' : 'pointer', fontSize: '0.95rem', fontFamily: 'inherit'
+            }}>
+              ← Back
+            </button>
+
+            {step < STEPS.length - 1 ? (
+              <button onClick={next} style={{
+                padding: '12px 32px', borderRadius: '999px', border: 'none',
+                background: `linear-gradient(135deg, ${T.NAVY}, ${T.NAVY_LITE})`, color: T.GOLD,
+                fontWeight: '800', cursor: 'pointer', fontSize: '0.95rem', fontFamily: 'inherit'
+              }}>
+                Continue →
               </button>
-            </div>
-
-          </form>
+            ) : (
+              <button onClick={handleSubmit} disabled={submitting} style={{
+                padding: '12px 36px', borderRadius: '999px', border: 'none',
+                background: submitting ? T.BORDER : `linear-gradient(135deg, ${T.SUCCESS}, #059669)`,
+                color: '#FFF', fontWeight: '800', cursor: submitting ? 'not-allowed' : 'pointer',
+                fontSize: '0.95rem', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '8px'
+              }}>
+                {submitting && <span style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#FFF', borderRadius: '50%', animation: 'spin 1s linear infinite', display: 'inline-block' }} />}
+                {submitting ? 'Submitting…' : '✓ Submit Application'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+        @keyframes spin { to { transform: rotate(360deg); } }
+        * { box-sizing: border-box; font-family: 'Lora', serif !important; }
+        @media (max-width: 768px) {
+          .reg-container { padding: 12px 16px !important; }
+          .reg-card { padding: 24px !important; }
+          .reg-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+          div[style*="gridTemplateColumns: '1fr 1fr'"] { grid-template-columns: 1fr !important; }
+          .progress-steps { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 };

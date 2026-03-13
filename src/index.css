@@ -1,55 +1,61 @@
 /* ==========================================================================
    SJU ALUMNI PORTAL - ENTERPRISE DESIGN SYSTEM (v2.0)
    Author: SJU Dev Team
-   Theme: Royal Blue & Gold
+   Theme: Royal Blue & Gold | Font: Lora (Serif)
 ========================================================================== 
 */
 
+/* === GLOBAL FONT IMPORT === */
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 :root {
   /* --- BRAND PALETTE --- */
-  --sju-blue: #003366;        /* Deep Royal Blue (Primary) */
-  --sju-blue-dark: #002244;   /* Midnight Blue (Hover) */
-  --sju-blue-light: #004080;  /* Lighter Blue (Accents) */
+  --sju-blue: #0C2340;        /* Deep Navy (Primary) */
+  --sju-blue-dark: #061121;   /* Midnight Navy (Hover) */
+  --sju-blue-light: #1A3B66;  /* Lighter Navy (Accents) */
   
-  --sju-gold: #FFCC00;        /* SJU Gold (Secondary) */
-  --sju-gold-hover: #e6b800;  /* Dark Gold (Hover) */
-  --sju-gold-light: #ffdb4d;  /* Light Gold (Highlights) */
+  --sju-gold: #D4AF37;        /* SJU Gold (Secondary) */
+  --sju-gold-hover: #B5952F;  /* Dark Gold (Hover) */
+  --sju-gold-light: #FDF6DC;  /* Light Gold (Highlights) */
 
   /* --- NEUTRALS --- */
-  --bg-body: #f4f6f9;         /* Light Gray/Blue Tint */
+  --bg-body: #F0F4F8;
   --bg-white: #ffffff;
   --bg-glass: rgba(255, 255, 255, 0.95);
   
-  --text-primary: #1a1a1a;
-  --text-secondary: #5a6b7c;
-  --text-muted: #8c98a4;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
   
-  --border-color: #e1e4e8;
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 12px rgba(0, 51, 102, 0.1);
-  --shadow-lg: 0 10px 30px rgba(0, 51, 102, 0.15);
+  --border-color: #E2E8F0;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(12, 35, 64, 0.1);
+  --shadow-lg: 0 10px 40px rgba(12, 35, 64, 0.15);
 
   /* --- SEMANTIC COLORS --- */
-  --success: #28a745;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --info: #17a2b8;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --info: #3B82F6;
+
+  /* --- FONTS --- */
+  --font-serif: 'Lora', Georgia, serif;
+  --font-sans: 'Inter', 'Segoe UI', sans-serif;
 }
 
 /* --- GLOBAL RESETS --- */
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   background-color: var(--bg-body);
-  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-serif);
   color: var(--text-primary);
   line-height: 1.6;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a { text-decoration: none; transition: color 0.2s ease; }

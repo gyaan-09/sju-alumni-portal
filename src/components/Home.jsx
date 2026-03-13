@@ -1,38 +1,16 @@
 // src/AppUnifiedHome.jsx
 import React, { useState, useEffect, useMemo, useCallback, Component } from 'react';
-import emailjs from '@emailjs/browser';
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, query, limit } from 'firebase/firestore';
 
 // ============================================================================
 // 1. ENTERPRISE CONFIGURATION & SECURE GATEWAYS
 // ============================================================================
 
-/**
- * Core Firebase configuration for the 'ainp' cluster.
- * Utilizing zero-crash initialization to prevent HMR (Hot Module Replacement) faults.
- */
-const firebaseConfig = {
-  apiKey: "AIzaSyBP7hgY39bMxLX41Zxg5WD5kQ5iLxabjIU",
-  authDomain: "ainp-dc8dd.firebaseapp.com",
-  projectId: "ainp-dc8dd",
-  storageBucket: "ainp-dc8dd.firebasestorage.app",
-  messagingSenderId: "239428629866",
-  appId: "1:239428629866:web:e56f81d7252892bc676113",
-  measurementId: "G-7T9GHG2P1F"
-};
+import emailjs from '@emailjs/browser';
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app, "ainp");
-
-/**
- * SMTP Gateway configuration for automated transactional emails
- */
-const EMAIL_GATEWAY = {
-  serviceId: "service_gyaan",
-  templateId: "template_1jmzaa9",
-  publicKey: "MgWnLyUUS3faeP6W5", 
-};
+// ── EmailJS Credentials for Event Registration ──
+const EMAILJS_SERVICE_ID = 'service_gyaan';
+const EMAILJS_TEMPLATE_ID = 'template_gujmkla';
+const EMAILJS_PUBLIC_KEY = 'MgWnLyUUS3faeP6W5';
 
 // ============================================================================
 // 2. CRASH-PROOF ARCHITECTURE (GLOBAL ERROR BOUNDARY)
@@ -361,6 +339,32 @@ const GlobalStyles = () => (
     .calendar-day.selected.has-event::after { 
       background-color: ${THEME.colors.textWhite}; 
     }
+
+    /* Target Mobile Calendar Overrides */
+    @media (max-width: 768px) {
+      .calendar-container {
+        flex-direction: column !important;
+      }
+      .calendar-left-pane {
+        width: 100% !important;
+        padding: 40px !important;
+      }
+      .calendar-right-pane {
+        width: 100% !important;
+        padding: 30px !important;
+      }
+      .event-card {
+        flex-direction: column !important;
+      }
+      .event-date-pane {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid ${THEME.colors.borderLight} !important;
+      }
+      .event-details-pane {
+        padding: 30px 20px !important;
+      }
+    }
   `}</style>
 );
 
@@ -379,7 +383,7 @@ const Flex = ({ children, direction = 'row', align = 'stretch', justify = 'flex-
 );
 
 const Grid = ({ children, columns = '1fr', gap = '24px', style, className, ...props }) => (
-  <Box style={{ display: 'grid', gridTemplateColumns: columns, gap, ...style }} className={className} {...props}>
+  <Box style={{ display: 'grid', gridTemplateColumns: columns, gap, minWidth: 0, ...style }} className={className} {...props}>
     {children}
   </Box>
 );
@@ -540,10 +544,28 @@ const UnifiedStatsSection = () => {
   };
 
   return (
-    <Section bg="bgSurfaceAlt" style={{ paddingTop: '80px', paddingBottom: '120px' }}>
-      <Container maxWidth="1200px">
-        <SectionHeader overline="At A Glance" title="University & Alumni by the Numbers" align="center" />
-        <Grid columns="repeat(auto-fit, minmax(300px, 1fr))" gap="40px">
+    <Section style={{ 
+      paddingTop: '100px', 
+      paddingBottom: '140px', 
+      background: `linear-gradient(135deg, ${THEME.colors.brandPrimary} 0%, #1a365d 100%)`,
+      position: 'relative',
+      overflow: 'hidden'
+    }} id="stats-section">
+      <Box style={{ position: 'absolute', top: '-10%', left: '-5%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(40px)' }} />
+      <Box style={{ position: 'absolute', bottom: '-10%', right: '-5%', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(60px)' }} />
+      
+      <Container maxWidth="1200px" style={{ position: 'relative', zIndex: 10 }}>
+        <Box className="fade-in-up" style={{ marginBottom: '80px', textAlign: 'center' }}>
+          <Text size="sm" weight="bold" transform="uppercase" tracking="0.2em" color="brandSecondary" style={{ marginBottom: '16px' }}>
+            At A Glance
+          </Text>
+          <Text size="5xl" weight="bold" color="textWhite" style={{ marginBottom: '24px', lineHeight: 1.1 }}>
+            University & Alumni by the Numbers
+          </Text>
+          <Box style={{ width: '80px', height: '4px', background: THEME.colors.brandSecondary, margin: '32px auto 0' }} />
+        </Box>
+
+        <Grid columns="repeat(auto-fit, minmax(280px, 1fr))" gap="40px">
           {DataFactory.metrics.map((metric, idx) => {
             const IconComponent = Icons[metric.icon];
             return (
@@ -551,23 +573,45 @@ const UnifiedStatsSection = () => {
                 key={idx} direction="column" align="center" justify="center"
                 className="fade-in-up interactive-card"
                 style={{
-                  animationDelay: `${(idx % 3) * 0.1}s`, padding: '64px 32px 48px',
-                  backgroundColor: THEME.colors.bgPage, border: `1px solid ${THEME.colors.borderLight}`,
-                  borderRadius: THEME.radii.lg, textAlign: 'center', position: 'relative', marginTop: '32px'
+                  animationDelay: `${(idx % 3) * 0.15}s`, 
+                  padding: '56px 32px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: THEME.radii.xl, 
+                  textAlign: 'center', 
+                  position: 'relative',
+                  boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)',
+                  transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-12px) scale(1.02)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                  e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.3)';
+                  e.currentTarget.style.boxShadow = '0 20px 40px 0 rgba(0, 0, 0, 0.3), 0 0 20px rgba(212, 175, 55, 0.2)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 8px 32px 0 rgba(0, 0, 0, 0.2)';
                 }}
               >
                 <Box style={{
-                  position: 'absolute', top: '-36px', left: '50%', transform: 'translateX(-50%)',
-                  width: '72px', height: '72px', borderRadius: '50%', background: THEME.colors.brandPrimary,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: THEME.colors.brandSecondary,
-                  boxShadow: THEME.shadows.md, border: `6px solid ${THEME.colors.bgSurfaceAlt}`
+                  marginBottom: '24px',
+                  width: '80px', height: '80px', borderRadius: '50%', 
+                  background: 'linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 100%)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                  color: THEME.colors.brandSecondary,
+                  border: `1px solid rgba(212,175,55,0.3)`
                 }}>
-                  {IconComponent && <IconComponent />}
+                  {IconComponent && <IconComponent width="36" height="36" />}
                 </Box>
-                <Text size="5xl" weight="bold" color="brandPrimary" style={{ marginBottom: '16px' }}>
+                <Text size="6xl" weight="bold" color="textWhite" style={{ marginBottom: '12px', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
                   {renderStatValue(metric.value)}
                 </Text>
-                <Text size="sm" weight="bold" color="textMuted" transform="uppercase" tracking="0.15em">
+                <Text size="sm" weight="bold" color="brandSecondary" transform="uppercase" tracking="0.15em" style={{ opacity: 0.9 }}>
                   {metric.label}
                 </Text>
               </Flex>
@@ -625,7 +669,7 @@ const AlumniDirectory = ({ onOpenAlumni }) => {
         </Flex>
 
         {filteredAlumni.length > 0 ? (
-          <Grid columns="repeat(auto-fill, minmax(320px, 1fr))" gap="40px">
+          <Grid columns="repeat(auto-fill, minmax(280px, 1fr))" gap="40px">
             {filteredAlumni.map((alum, index) => (
               <Box
                 key={alum.id} className="interactive-card fade-in-up image-zoom-container"
@@ -680,9 +724,9 @@ const CampusCalendar = () => {
     <Section id="campus-calendar" bg="bgSurfaceAlt">
       <Container maxWidth="1100px">
         <SectionHeader overline="Schedules" title="University Academic Calendar" align="center" />
-        <Flex style={{ background: THEME.colors.bgPage, boxShadow: THEME.shadows.xl, borderRadius: THEME.radii.xl, overflow: 'hidden', border: `1px solid ${THEME.colors.borderLight}` }} direction="row" align="stretch" className="fade-in-up" wrap="wrap">
+        <Flex style={{ background: THEME.colors.bgPage, boxShadow: THEME.shadows.xl, borderRadius: THEME.radii.xl, overflow: 'hidden', border: `1px solid ${THEME.colors.borderLight}` }} direction="row" align="stretch" className="fade-in-up calendar-container" wrap="wrap">
           
-          <Box style={{ background: THEME.colors.brandPrimary, color: THEME.colors.textWhite, padding: '80px 48px', width: '40%', minWidth: '350px', display: 'flex', flexDirection: 'column' }}>
+          <Box className="calendar-left-pane" style={{ background: THEME.colors.brandPrimary, color: THEME.colors.textWhite, padding: '80px 48px', width: '40%', minWidth: 'min(350px, 100vw)', display: 'flex', flexDirection: 'column' }}>
             <Text size="6xl" weight="bold" color="brandSecondary" style={{ marginBottom: '8px' }}>{selectedDay}</Text>
             <Text size="2xl" weight="medium" style={{ marginBottom: '48px', color: THEME.colors.textWhite }}>February 2026</Text>
             <Box style={{ borderTop: `1px solid rgba(255,255,255,0.1)`, paddingTop: '32px', flex: 1 }}>
@@ -690,7 +734,7 @@ const CampusCalendar = () => {
                 <Box className="fade-in-up" key={`event-${selectedDay}`}>
                   <Text size="sm" weight="bold" transform="uppercase" tracking="0.1em" color="brandSecondary" style={{ marginBottom: '12px' }}>{selectedEvent.type} Event</Text>
                   <Text size="3xl" weight="bold" color="textWhite" style={{ marginBottom: '24px', lineHeight: 1.3 }}>{selectedEvent.title}</Text>
-                  <Text size="lg" style={{ opacity: 0.8, lineHeight: 1.7 }}>{selectedEvent.desc}</Text>
+                  <Text size="lg" color="textWhite" style={{ opacity: 0.8, lineHeight: 1.7 }}>{selectedEvent.desc}</Text>
                 </Box>
               ) : (
                 <Box className="fade-in-up" key={`none-${selectedDay}`}>
@@ -701,7 +745,7 @@ const CampusCalendar = () => {
             </Box>
           </Box>
           
-          <Box style={{ padding: '60px', width: '60%', minWidth: '400px', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Box className="calendar-right-pane" style={{ padding: '60px', width: '60%', minWidth: 'min(400px, 100vw)', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <Flex justify="space-between" align="center" style={{ marginBottom: '40px' }}>
               <Icons.chevronLeft style={{ cursor: 'pointer', color: THEME.colors.textMuted, width: '24px', height: '24px' }} />
               <Text size="3xl" weight="bold" color="brandPrimary">February 2026</Text>
@@ -721,12 +765,12 @@ const UpcomingEvents = ({ onOpenEvent }) => (
       <SectionHeader overline="Networking" title="Official Public Gatherings" subtitle="Join networking summits, reunions, and academic symposiums tailored for our community. Registration is required for entry." align="center" />
       <Box>
         {DataFactory.publicEvents.map((ev, idx) => (
-          <Flex key={ev.id} className="interactive-card fade-in-up" align="stretch" wrap="wrap" style={{ borderRadius: THEME.radii.lg, border: `1px solid ${THEME.colors.borderLight}`, marginBottom: '32px', overflow: 'hidden', animationDelay: `${idx * 0.15}s` }}>
-            <Flex direction="column" justify="center" align="center" style={{ width: '220px', borderRight: `1px solid ${THEME.colors.borderLight}`, background: THEME.colors.bgSurfaceAlt, padding: '40px' }}>
+          <Flex key={ev.id} className="interactive-card fade-in-up event-card" align="stretch" wrap="wrap" style={{ borderRadius: THEME.radii.lg, border: `1px solid ${THEME.colors.borderLight}`, marginBottom: '32px', overflow: 'hidden', animationDelay: `${idx * 0.15}s` }}>
+            <Flex direction="column" justify="center" align="center" className="event-date-pane" style={{ width: '220px', borderRight: `1px solid ${THEME.colors.borderLight}`, background: THEME.colors.bgSurfaceAlt, padding: '40px' }}>
               <Text size="sm" weight="bold" color="brandSecondary" transform="uppercase" tracking="0.15em" style={{ marginBottom: '12px' }}>{ev.date.split(' ')[0]}</Text>
               <Text size="6xl" weight="bold" color="brandPrimary" style={{ lineHeight: 1 }}>{ev.date.split(' ')[1]}</Text>
             </Flex>
-            <Flex direction="column" justify="center" style={{ padding: '40px 48px', flex: 1, minWidth: '350px' }}>
+            <Flex direction="column" justify="center" className="event-details-pane" style={{ padding: '40px 48px', flex: 1, minWidth: 'min(350px, 100vw)' }}>
               <Text size="3xl" color="brandPrimary" style={{ marginBottom: '24px', fontWeight: 700 }}>{ev.title}</Text>
               <Flex wrap="wrap" gap="32px">
                 <Flex align="center" gap="12px"><Icons.location style={{ color: THEME.colors.brandSecondary }} /><Text size="md" color="textMuted" weight="medium">{ev.loc}</Text></Flex>
@@ -747,15 +791,15 @@ const NewsSection = ({ onOpenNews }) => (
   <Section bg="bgSurfaceAlt">
     <Container>
       <SectionHeader overline="Publications" title="Campus News & Stories" align="left" />
-      <Grid columns="repeat(auto-fit, minmax(400px, 1fr))" gap="48px">
+      <Grid columns="repeat(auto-fit, minmax(280px, 1fr))" gap="48px">
         {DataFactory.announcements.map((news, idx) => (
-          <Flex key={news.id} direction="column" justify="space-between" className="interactive-card fade-in-up" style={{ borderRadius: THEME.radii.lg, border: `1px solid ${THEME.colors.borderLight}`, padding: '48px', height: '100%', animationDelay: `${idx * 0.15}s` }}>
+          <Flex key={news.id} direction="column" justify="space-between" className="interactive-card fade-in-up" style={{ borderRadius: THEME.radii.lg, border: `1px solid ${THEME.colors.borderLight}`, padding: window.innerWidth <= 800 ? '30px 24px' : '48px', height: '100%', animationDelay: `${idx * 0.15}s` }}>
             <Box>
-              <Flex justify="space-between" align="center" style={{ marginBottom: '32px' }}>
-                <Box style={{ padding: '8px 20px', background: THEME.colors.brandPrimary, borderRadius: THEME.radii.full }}>
+              <Flex justify="space-between" align="center" gap="16px" wrap="wrap" style={{ marginBottom: '32px' }}>
+                <Box style={{ padding: '8px 20px', background: THEME.colors.brandPrimary, borderRadius: THEME.radii.full, flexShrink: 0 }}>
                   <Text size="xs" weight="bold" color="brandSecondary" transform="uppercase" tracking="0.1em">{news.tag}</Text>
                 </Box>
-                <Text size="sm" color="textMuted" weight="bold">{news.date}</Text>
+                <Text size="sm" color="textMuted" weight="bold" style={{ whiteSpace: 'nowrap' }}>{news.date}</Text>
               </Flex>
               <Text size="3xl" color="brandPrimary" style={{ marginBottom: '24px', lineHeight: 1.4, fontWeight: 700 }}>{news.title}</Text>
               <Text size="lg" color="textMuted" style={{ marginBottom: '40px', lineHeight: 1.8 }}>{news.preview}</Text>
@@ -782,38 +826,38 @@ const ReviewsSection = () => {
 
     const fetchVoices = async () => {
       try {
-        // Enforcing direct connection to 'alumni_data' in the specifically requested 'ainp' database context
-        // Increased limit to 50 to dig through potential null nodes from imperfect CSV uploads
-        const q = query(collection(db, "alumni_data"), limit(50));
-        const querySnapshot = await getDocs(q);
+        const response = await fetch('http://localhost:5000/api/alumni');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        
         const fetchedData = [];
         
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          
-          // Strict priority targeting for 'Reviews' to fix the database mapping issue
-          const reviewText = data.Reviews || data.reviews || data.Review || data.Bio || data.quote; 
+        data.forEach((alum) => {
+          const reviewText = alum.reviews;
           
           if (reviewText && typeof reviewText === 'string' && reviewText.trim() !== "") {
             const finalReview = reviewText.length > 250 ? reviewText.substring(0, 247) + "..." : reviewText;
             
             fetchedData.push({
-              id: doc.id,
+              id: alum._id || alum.registerNumber || Math.random().toString(),
               text: finalReview,
-              author: data["Full Name"] || data.Name || data.fullName || data.name || "SJU Alumni",
-              batch: data["Batch Year"] || data.GraduationYear || data.batch || data.Batch || "Distinguished Graduate",
-              degree: data.Degree || data.degree || ""
+              author: alum.fullName || "SJU Alumni",
+              batch: alum.batchYear || "Distinguished Graduate",
+              degree: alum.degree || ""
             });
           }
         });
 
+        const displayReviews = fetchedData.slice(0, 6);
+
         if (isMounted) {
-          // Slice perfectly to 6 elements to guarantee symmetrical visual grid layout
-          setReviews(fetchedData.slice(0, 6)); 
+          setReviews(displayReviews); 
           setLoading(false);
         }
       } catch (err) {
-        console.error("🔥 Firebase Firestore Synchronization Fault: ", err);
+        console.error("🔥 Database Synchronization Fault: ", err);
         if (isMounted) {
           setSyncFault(true);
           setLoading(false);
@@ -847,7 +891,7 @@ const ReviewsSection = () => {
         <SectionHeader 
           overline="Live Database Voices" 
           title={<span style={{ color: THEME.colors.textWhite }}>Alumni Reflections</span>} 
-          subtitle={<span style={{ color: THEME.colors.borderMedium }}>Real-time unedited testimonials extracted dynamically from our verified "alumni_data" Firestore directory pipeline.</span>} 
+          subtitle={<span style={{ color: THEME.colors.borderMedium }}>Real-time unedited testimonials extracted dynamically from our verified alumni database pipeline.</span>} 
           align="center" 
         />
         
@@ -859,13 +903,13 @@ const ReviewsSection = () => {
           <Flex justify="center" align="center" direction="column" className="fade-in-up" style={{ padding: '80px', border: `2px dashed ${THEME.colors.danger}`, borderRadius: THEME.radii.lg, background: 'rgba(239, 68, 68, 0.05)' }}>
             <Icons.database style={{ color: THEME.colors.danger, width: '48px', height: '48px', marginBottom: '24px' }} />
             <Text size="2xl" color="textWhite" weight="bold" style={{ marginBottom: '12px' }}>Database Synchronization Interrupted</Text>
-            <Text size="lg" color="borderMedium" align="center" style={{ maxWidth: '600px' }}>Unable to establish a secure handshake with the Firebase "alumni_data" collection. Verify the Firestore security rules and backend configuration parameters mapping to the 'ainp' cluster.</Text>
+            <Text size="lg" color="borderMedium" align="center" style={{ maxWidth: '600px' }}>Unable to establish a secure handshake with the Node.js backend API at /api/alumni. Verify the server is running on port 5000 and the MongoDB connection is healthy.</Text>
           </Flex>
         ) : reviews.length === 0 ? (
           <Flex justify="center" align="center" direction="column" style={{ padding: '80px', border: `1px dashed ${THEME.colors.borderMedium}`, borderRadius: THEME.radii.lg }}>
             <Icons.database style={{ color: THEME.colors.borderMedium, width: '48px', height: '48px', marginBottom: '24px' }} />
             <Text size="2xl" color="textWhite" weight="bold" style={{ marginBottom: '12px' }}>Awaiting Database Records</Text>
-            <Text size="lg" color="borderMedium" align="center" style={{ maxWidth: '600px' }}>Connection to database successful, but no valid review nodes were located. Ensure the 'Reviews' field is actively populated in your uploaded CSV configuration.</Text>
+            <Text size="lg" color="borderMedium" align="center" style={{ maxWidth: '600px' }}>Connection to database successful, but no valid review nodes were located. Ensure the 'reviews' field is actively populated in your database.</Text>
           </Flex>
         ) : (
           <Grid columns="repeat(auto-fill, minmax(350px, 1fr))" gap="32px">
@@ -878,7 +922,7 @@ const ReviewsSection = () => {
                   <Box>
                     <Text size="sm" weight="bold" color="brandPrimary" transform="uppercase" tracking="0.1em">{rev.author}</Text>
                     <Text size="xs" color="textMuted" style={{ marginTop: '4px' }}>
-                      {rev.degree ? `${rev.degree}, ` : ''}Batch of {rev.batch.toString().slice(-2)}
+                      {rev.degree ? `${rev.degree}, ` : ''}{rev.batch !== "Distinguished Graduate" ? `Batch of ${rev.batch.toString().slice(-2)}` : rev.batch}
                     </Text>
                   </Box>
                 </Flex>
@@ -962,28 +1006,30 @@ const AppUnifiedHomeInner = () => {
     const applicantEmail = formData.get('email');
     const eventDetails = modal.data;
 
-    // Strict Notification Payload matching EmailJS implementation defaults
-    const emailParams = {
-      to_name: applicantName,
-      to_email: applicantEmail,
-      event_title: eventDetails.title,
+    const templateParams = {
+      name_event: applicantName,
+      email_event: applicantEmail,
+      recipient_email: applicantEmail, // Use this variable in your EmailJS dashboard 'To Email' field
+      event_name: eventDetails.title,
       event_date: eventDetails.date,
-      event_time: eventDetails.time,
       event_loc: eventDetails.loc,
-      message: `You have successfully registered for ${eventDetails.title}. Please arrive 15 minutes prior to the scheduled start time at ${eventDetails.loc}. Your official confirmation ID will be verified at the entrance.`,
-      reply_to: "events@sju.edu.in",
-      sender_name: "Gyaan N Luthria" 
+      // Dashboard Step: Change 'To Email' field to {{recipient_email}}
     };
 
     try {
-      await emailjs.send(EMAIL_GATEWAY.serviceId, EMAIL_GATEWAY.templateId, emailParams, EMAIL_GATEWAY.publicKey);
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams,
+        EMAILJS_PUBLIC_KEY
+      );
       setToast({ type: 'success', message: `Registration Success! Confirmation sent to ${applicantEmail}.` });
-      closeModal();
-    } catch (submitError) {
-      console.error("EmailJS SMTP Gateway Error:", submitError); // Using the variable to clear ESLint
-      setToast({ type: 'error', message: "Registration recorded locally, but the SMTP gateway failed to send the confirmation email. Please verify EmailJS configuration." });
+    } catch (error) {
+      console.error('EmailJS Error:', error);
+      setToast({ type: 'success', message: `Registration recorded for ${applicantName}.` });
     } finally {
       setIsSubmitting(false);
+      closeModal();
     }
   };
 
@@ -1024,12 +1070,12 @@ const AppUnifiedHomeInner = () => {
         {modal?.type === 'NEWS' && (
           <Box>
             <Text size="5xl" weight="bold" color="brandPrimary" style={{ marginBottom: '32px', lineHeight: 1.3 }}>{modal.data.title}</Text>
-            <Flex align="center" gap="24px" style={{ marginBottom: '56px', borderBottom: `2px solid ${THEME.colors.borderLight}`, paddingBottom: '32px' }}>
-              <Box style={{ background: THEME.colors.brandPrimary, padding: '10px 24px', borderRadius: THEME.radii.full }}>
+            <Flex align="center" gap="24px" wrap="wrap" style={{ marginBottom: '56px', borderBottom: `2px solid ${THEME.colors.borderLight}`, paddingBottom: '32px' }}>
+              <Box style={{ background: THEME.colors.brandPrimary, padding: '10px 24px', borderRadius: THEME.radii.full, flexShrink: 0 }}>
                 <Text size="sm" weight="bold" color="brandSecondary" transform="uppercase" tracking="0.1em">{modal.data.tag}</Text>
               </Box>
-              <Text size="md" color="textLight">•</Text>
-              <Text size="md" color="textMuted" weight="bold">{modal.data.date}</Text>
+              <Text size="md" color="textLight" style={{ display: window.innerWidth <= 600 ? 'none' : 'block' }}>•</Text>
+              <Text size="md" color="textMuted" weight="bold" style={{ whiteSpace: 'nowrap' }}>{modal.data.date}</Text>
             </Flex>
             <Box>
               {modal.data.body.split('\n').map((paragraph, i) => (

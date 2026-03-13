@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
-import emailjs from '@emailjs/browser';
 
 // ============================================================================
 // COMPONENT IMPORTS (Map these to your React + Vite project structure)
@@ -15,13 +14,9 @@ import Mentorship from './components/Mentorship';
 import AdminDashboard from './components/AdminDashboard';
 
 // ============================================================================
-// CONFIGURATION & CREDENTIALS
+// CONFIGURATION
 // ============================================================================
-const EMAIL_GATEWAY = {
-  serviceId: "service_gyaan",
-  templateId: "template_1jmzaa9",
-  publicKey: "MgWnLyUUS3faeP6W5",
-};
+const API_EMAIL = 'http://localhost:5000/api/send-email';
 
 // ============================================================================
 // ULTRA-DETAILED POLICY CONTENT 
@@ -147,24 +142,24 @@ const styles = {
     flexDirection: 'column',
     minHeight: '100vh',
     backgroundColor: '#f8f9fa',
-    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    fontFamily: "'Lora', Georgia, serif",
   },
   mainContent: {
     flex: '1 0 auto',
-    marginTop: '80px', 
+    marginTop: '80px',
     width: '100%',
     position: 'relative',
   },
-  
+
   // --- FOOTER STYLES ---
   footer: {
     flexShrink: 0,
-    backgroundColor: '#060e1a', 
+    backgroundColor: '#060e1a',
     color: '#e2e8f0',
     paddingTop: '80px',
     paddingBottom: '30px',
-    borderTop: '4px solid #FFCC00', 
-    fontFamily: "'Lora', serif", 
+    borderTop: '4px solid #FFCC00',
+    fontFamily: "'Lora', serif",
     position: 'relative',
     overflow: 'hidden',
   },
@@ -179,7 +174,7 @@ const styles = {
     margin: '0 auto',
     padding: '0 20px',
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)', 
+    gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '50px',
     position: 'relative',
     zIndex: 2,
@@ -199,11 +194,11 @@ const styles = {
     fontSize: '1.8rem',
     backgroundColor: '#fff',
     color: '#060e1a',
-    borderRadius: '12px', 
-    width: '50px', 
+    borderRadius: '12px',
+    width: '50px',
     height: '50px',
-    display: 'flex', 
-    alignItems: 'center', 
+    display: 'flex',
+    alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0 4px 15px rgba(255, 204, 0, 0.2)',
     transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
@@ -211,7 +206,7 @@ const styles = {
   brandText: {
     fontSize: '1.4rem',
     fontWeight: '800',
-    color: '#FFCC00', 
+    color: '#FFCC00',
     textTransform: 'uppercase',
     lineHeight: '1',
     letterSpacing: '0.05em',
@@ -248,7 +243,7 @@ const styles = {
     gap: '14px'
   },
   footerLink: {
-    color: '#cbd5e1', 
+    color: '#cbd5e1',
     textDecoration: 'none',
     fontSize: '1rem',
     transition: 'all 0.3s ease',
@@ -264,7 +259,9 @@ const styles = {
     color: '#cbd5e1',
     fontSize: '0.95rem',
     lineHeight: '1.6',
-    transition: 'color 0.3s ease',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer',
+    textDecoration: 'none',
   },
   contactIcon: {
     color: '#FFCC00',
@@ -325,13 +322,13 @@ const styles = {
     gap: '15px'
   },
   socialIcon: {
-    width: '38px', 
-    height: '38px', 
-    backgroundColor: 'rgba(255,255,255,0.05)', 
+    width: '38px',
+    height: '38px',
+    backgroundColor: 'rgba(255,255,255,0.05)',
     border: '1px solid rgba(255,255,255,0.1)',
     borderRadius: '8px',
-    display: 'flex', 
-    alignItems: 'center', 
+    display: 'flex',
+    alignItems: 'center',
     justifyContent: 'center',
     color: '#fff',
     fontSize: '1.2rem',
@@ -509,7 +506,7 @@ const PolicyModal = ({ policy, onClose }) => {
   useEffect(() => {
     const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handleEsc);
-    document.body.style.overflow = 'hidden'; 
+    document.body.style.overflow = 'hidden';
     return () => {
       window.removeEventListener('keydown', handleEsc);
       document.body.style.overflow = 'unset';
@@ -539,16 +536,16 @@ const PolicyModal = ({ policy, onClose }) => {
 const Unauthorized = () => (
   <div style={styles.errorPage}>
     <div style={styles.errorCode}>403</div>
-    <h2 style={{color: '#060e1a', fontWeight: '800', fontFamily: "'Lora', serif", fontSize: '2.5rem'}}>Access Restricted</h2>
-    <p style={styles.errorMsg}>You do not have permission to view this directory.<br/>This area requires elevated administrative credentials.</p>
+    <h2 style={{ color: '#060e1a', fontWeight: '800', fontFamily: "'Lora', serif", fontSize: '2.5rem' }}>Access Restricted</h2>
+    <p style={styles.errorMsg}>You do not have permission to view this directory.<br />This area requires elevated administrative credentials.</p>
     <Link to="/" style={styles.btnHome} className="btn-lift">Return to Safety</Link>
   </div>
 );
 
 const NotFound = () => (
   <div style={styles.errorPage}>
-    <div style={styles.errorCode}><span style={{color:'#FFCC00'}}>4</span>04</div>
-    <h2 style={{color: '#060e1a', fontWeight: '800', fontFamily: "'Lora', serif", fontSize: '2.5rem'}}>Page Not Found</h2>
+    <div style={styles.errorCode}><span style={{ color: '#FFCC00' }}>4</span>04</div>
+    <h2 style={{ color: '#060e1a', fontWeight: '800', fontFamily: "'Lora', serif", fontSize: '2.5rem' }}>Page Not Found</h2>
     <p style={styles.errorMsg}>The coordinates you entered don't map to any sector in our alumni network. The page may have been moved.</p>
     <Link to="/" style={styles.btnHome} className="btn-lift">Go Back Home</Link>
   </div>
@@ -579,8 +576,6 @@ const MegaFooter = () => {
   const location = useLocation();
   const [hoverLink, setHoverLink] = useState(null);
   const [activePolicy, setActivePolicy] = useState(null);
-  const [email, setEmail] = useState('');
-  const [subStatus, setSubStatus] = useState('idle'); 
 
   // --- HIDE FOOTER LOGIC ---
   // The footer will NOT render if the current URL exactly matches or starts with these routes.
@@ -590,51 +585,6 @@ const MegaFooter = () => {
   if (shouldHideFooter) {
     return null; // Render absolutely nothing on these pages.
   }
-
-  // --- ROBUST EMAILJS HANDLER ---
-  const handleSubscribe = async (e) => {
-    e.preventDefault();
-    
-    // Basic Regex Validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
-      setSubStatus('error');
-      setTimeout(() => setSubStatus('idle'), 3000);
-      return;
-    }
-    
-    setSubStatus('loading');
-    
-    try {
-      // Corrected payload mapping
-      await emailjs.send(
-        EMAIL_GATEWAY.serviceId,
-        EMAIL_GATEWAY.templateId,
-        {
-          to_email: email, // Maps to your EmailJS template variable
-          to_name: "SJU Alumni Member", 
-        },
-        EMAIL_GATEWAY.publicKey
-      );
-      
-      setSubStatus('success');
-      setEmail('');
-      setTimeout(() => setSubStatus('idle'), 5000);
-    } catch (error) {
-      console.error("EmailJS Subscription Error:", error);
-      setSubStatus('error');
-      setTimeout(() => setSubStatus('idle'), 5000);
-    }
-  };
-
-  const getStatusMessage = () => {
-    switch (subStatus) {
-      case 'loading': return <span style={{ color: '#FFCC00' }}><i className="bi bi-hourglass-split spin"></i> Verifying...</span>;
-      case 'success': return <span style={{ color: '#10B981' }}><i className="bi bi-check-circle-fill"></i> Welcome to the list!</span>;
-      case 'error': return <span style={{ color: '#EF4444' }}><i className="bi bi-exclamation-triangle-fill"></i> Invalid email or server error.</span>;
-      default: return <span style={{ color: '#64748B', opacity: 0 }}>Placeholder</span>;
-    }
-  };
 
   const linkStyle = (name) => ({
     ...styles.footerLink,
@@ -648,10 +598,10 @@ const MegaFooter = () => {
     <>
       <footer style={styles.footer}>
         <div style={styles.footerOverlay}></div>
-        <div style={styles.footerContainer}>
-          
+        <div style={styles.footerContainer} className="footerContainer">
+
           {/* COLUMN 1: BRAND */}
-          <div style={styles.footerCol}>
+          <div style={styles.footerCol} className="footerCol">
             <div style={styles.logoGroup} className="logo-hover-group">
               <div style={styles.logoIcon} className="logo-spin-target">
                 <i className="bi bi-mortarboard-fill"></i>
@@ -662,85 +612,66 @@ const MegaFooter = () => {
               </div>
             </div>
             <p style={styles.footerDesc}>
-              The official digital bridge connecting thousands of students and alumni. 
+              The official digital bridge connecting thousands of students and alumni.
               Fostering mentorship, career growth, and lifelong relationships within the Josephite family.
             </p>
           </div>
 
           {/* COLUMN 2: QUICK LINKS */}
-          <div style={styles.footerCol}>
+          <div style={styles.footerCol} className="footerCol">
             <h4 style={styles.footerTitle} className="title-underline">Quick Links</h4>
             <div style={styles.linkList}>
               <Link to="/" style={linkStyle('Home')} onMouseEnter={() => setHoverLink('Home')} onMouseLeave={() => setHoverLink(null)}>
-                <i className="bi bi-chevron-right" style={{ fontSize: '0.7rem', marginRight: hoverLink==='Home'?'8px':'4px', transition: 'all 0.2s', opacity: hoverLink==='Home'?1:0.5 }}></i> Home
+                <i className="bi bi-chevron-right" style={{ fontSize: '0.7rem', marginRight: hoverLink === 'Home' ? '8px' : '4px', transition: 'all 0.2s', opacity: hoverLink === 'Home' ? 1 : 0.5 }}></i> Home
               </Link>
               <Link to="/directory" style={linkStyle('Dir')} onMouseEnter={() => setHoverLink('Dir')} onMouseLeave={() => setHoverLink(null)}>
-                <i className="bi bi-chevron-right" style={{ fontSize: '0.7rem', marginRight: hoverLink==='Dir'?'8px':'4px', transition: 'all 0.2s', opacity: hoverLink==='Dir'?1:0.5 }}></i> Alumni Directory
+                <i className="bi bi-chevron-right" style={{ fontSize: '0.7rem', marginRight: hoverLink === 'Dir' ? '8px' : '4px', transition: 'all 0.2s', opacity: hoverLink === 'Dir' ? 1 : 0.5 }}></i> Alumni Directory
               </Link>
               <Link to="/jobs" style={linkStyle('Jobs')} onMouseEnter={() => setHoverLink('Jobs')} onMouseLeave={() => setHoverLink(null)}>
-                <i className="bi bi-chevron-right" style={{ fontSize: '0.7rem', marginRight: hoverLink==='Jobs'?'8px':'4px', transition: 'all 0.2s', opacity: hoverLink==='Jobs'?1:0.5 }}></i> Career Board
+                <i className="bi bi-chevron-right" style={{ fontSize: '0.7rem', marginRight: hoverLink === 'Jobs' ? '8px' : '4px', transition: 'all 0.2s', opacity: hoverLink === 'Jobs' ? 1 : 0.5 }}></i> Career Board
               </Link>
               <Link to="/mentorship" style={linkStyle('Ment')} onMouseEnter={() => setHoverLink('Ment')} onMouseLeave={() => setHoverLink(null)}>
-                <i className="bi bi-chevron-right" style={{ fontSize: '0.7rem', marginRight: hoverLink==='Ment'?'8px':'4px', transition: 'all 0.2s', opacity: hoverLink==='Ment'?1:0.5 }}></i> Find a Mentor
+                <i className="bi bi-chevron-right" style={{ fontSize: '0.7rem', marginRight: hoverLink === 'Ment' ? '8px' : '4px', transition: 'all 0.2s', opacity: hoverLink === 'Ment' ? 1 : 0.5 }}></i> Find a Mentor
               </Link>
             </div>
           </div>
 
           {/* COLUMN 3: CONTACT */}
-          <div style={styles.footerCol}>
+          <div style={styles.footerCol} className="footerCol">
             <h4 style={styles.footerTitle} className="title-underline">Contact Us</h4>
-            <div style={styles.contactItem} className="contact-hover">
+            
+            <a href="https://www.google.com/maps/search/St.+Joseph's+University,+36+Lalbagh+Road,+Bengaluru" target="_blank" rel="noopener noreferrer" style={styles.contactItem} className="contact-hover">
               <i className="bi bi-geo-alt-fill" style={styles.contactIcon}></i>
-              <div>36, Langford Rd, Langford Gardens,<br/>Bengaluru, Karnataka 560027</div>
-            </div>
-            <a href="mailto:alumni.sju.ainp@gmail.com" style={{...styles.contactItem, textDecoration:'none'}} className="contact-hover">
+              <div>36, Langford Rd, Langford Gardens,<br />Bengaluru, Karnataka 560027</div>
+            </a>
+            
+            <a href="mailto:alumni.sju.ainp@gmail.com" style={styles.contactItem} className="contact-hover">
               <i className="bi bi-envelope-fill" style={styles.contactIcon}></i>
               <span>alumni.sju.ainp@gmail.com</span>
             </a>
-            <a href="tel:+918022211429" style={{...styles.contactItem, textDecoration:'none'}} className="contact-hover">
+            
+            <a href="tel:+918022211429" style={styles.contactItem} className="contact-hover">
               <i className="bi bi-telephone-fill" style={styles.contactIcon}></i>
               <span>+91 80 2221 1429</span>
             </a>
           </div>
 
           {/* COLUMN 4: UPDATES & INTEGRATION */}
-          <div style={styles.footerCol}>
+          <div style={styles.footerCol} className="footerCol">
             <h4 style={styles.footerTitle} className="title-underline">Stay Updated</h4>
-            <p style={{...styles.footerDesc, marginBottom: '10px'}}>Subscribe to get the latest news and event invites directly to your inbox.</p>
-            
-            <form onSubmit={handleSubscribe} className="newsletter-form" style={{...styles.newsletterBox, borderColor: subStatus === 'loading' ? '#FFCC00' : subStatus === 'error' ? '#EF4444' : 'rgba(255,255,255,0.1)'}}>
-              <input 
-                type="text" // Changed from email to allow regex check before native browser validation
-                placeholder="Your Email Address" 
-                style={styles.input} 
-                required 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={subStatus === 'loading'}
-                className="input-focus-glow"
-              />
-              <button 
-                type="submit" 
-                style={{...styles.btnGo, ...(subStatus === 'loading' ? styles.btnGoDisabled : {})}}
-                disabled={subStatus === 'loading'}
-                className={subStatus === 'loading' ? '' : 'btn-pulse-hover'}
-              >
-                {subStatus === 'loading' ? <i className="bi bi-send-fill" style={{opacity: 0.5}}></i> : "GO"}
-              </button>
-            </form>
-            <div style={styles.statusText}>{getStatusMessage()}</div>
-            
+            <p style={{ ...styles.footerDesc, marginBottom: '10px' }}>Follow us on our social media platforms to get the latest university updates and campus news.</p>
+
             <div style={styles.socialGroup}>
-              <a href="https://www.linkedin.com/school/st-joseph's-university-bengaluru/" target="_blank" rel="noreferrer" className="social-glowing" style={styles.socialIcon} aria-label="LinkedIn">
+              <a href="https://www.linkedin.com/in/sju-bangalore-alumni/" target="_blank" rel="noreferrer" className="social-glowing" style={styles.socialIcon} aria-label="LinkedIn">
                 <i className="bi bi-linkedin"></i>
               </a>
               <a href="https://twitter.com/sjubengaluru" target="_blank" rel="noreferrer" className="social-glowing" style={styles.socialIcon} aria-label="Twitter">
                 <i className="bi bi-twitter-x"></i>
               </a>
-              <a href="https://www.instagram.com/stjosephsuniversity/" target="_blank" rel="noreferrer" className="social-glowing" style={styles.socialIcon} aria-label="Instagram">
+              <a href="https://www.instagram.com/sjubengaluru/" target="_blank" rel="noreferrer" className="social-glowing" style={styles.socialIcon} aria-label="Instagram">
                 <i className="bi bi-instagram"></i>
               </a>
-              <a href="https://www.youtube.com/@StJosephsUniversityBengaluru" target="_blank" rel="noreferrer" className="social-glowing" style={styles.socialIcon} aria-label="YouTube">
+              <a href="https://www.youtube.com/@SJUBengaluru" target="_blank" rel="noreferrer" className="social-glowing" style={styles.socialIcon} aria-label="YouTube">
                 <i className="bi bi-youtube"></i>
               </a>
             </div>
@@ -748,18 +679,18 @@ const MegaFooter = () => {
         </div>
 
         {/* BOTTOM BAR WITH POLICY TRIGGERS */}
-        <div style={styles.footerBottom}>
+        <div style={styles.footerBottom} className="footerBottom">
           <button onClick={scrollToTop} style={styles.backToTopBtn} className="back-to-top-hover" aria-label="Back to top">
-            <i className="bi bi-arrow-up-short" style={{fontSize: '1.5rem'}}></i>
+            <i className="bi bi-arrow-up-short" style={{ fontSize: '1.5rem' }}></i>
           </button>
           <div>© {new Date().getFullYear()} St. Joseph's University Alumni Portal. All Rights Reserved.</div>
-          <div style={styles.legalLinks}>
+          <div style={styles.legalLinks} className="legalLinks">
             <button onClick={() => setActivePolicy('PRIVACY')} style={styles.legalLink} className="legal-link-hover">Privacy Policy</button>
             <button onClick={() => setActivePolicy('TERMS')} style={styles.legalLink} className="legal-link-hover">Terms of Service</button>
             <button onClick={() => setActivePolicy('COOKIE')} style={styles.legalLink} className="legal-link-hover">Cookie Policy</button>
           </div>
         </div>
-        
+
         {/* ULTRA-ENHANCED CSS INJECTION */}
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
@@ -817,10 +748,10 @@ const MegaFooter = () => {
 
           /* Responsive Breakpoints */
           @media (max-width: 1024px) { 
-            footer > div.footerContainer { grid-template-columns: repeat(2, 1fr); gap: 40px; } 
+            footer > div.footerContainer { grid-template-columns: repeat(2, 1fr) !important; gap: 40px; } 
           }
           @media (max-width: 650px) { 
-            footer > div.footerContainer { grid-template-columns: 1fr; gap: 40px; } 
+            footer > div.footerContainer { grid-template-columns: 1fr !important; gap: 40px; } 
             .legalLinks { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; }
             .footerBottom { flex-direction: column; text-align: center; padding-top: 50px; }
             .backToTopBtn { top: -20px; right: 50%; transform: translateX(50%); }
@@ -830,9 +761,9 @@ const MegaFooter = () => {
       </footer>
 
       {/* POLICY POPUP WINDOW */}
-      <PolicyModal 
-        policy={activePolicy ? POLICY_CONTENT[activePolicy] : null} 
-        onClose={() => setActivePolicy(null)} 
+      <PolicyModal
+        policy={activePolicy ? POLICY_CONTENT[activePolicy] : null}
+        onClose={() => setActivePolicy(null)}
       />
     </>
   );
@@ -851,25 +782,25 @@ function App() {
           <Routes>
             {/* PUBLIC ROUTES */}
             <Route path="/" element={<Home />} />
-            
+
             {/* ROUTES WHERE FOOTER IS HIDDEN (Handled inside MegaFooter) */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            
-            {/* SECURE ROUTES */}
-            <Route path="/directory" element={ <ProtectedRoute><Directory /></ProtectedRoute> } />
-            <Route path="/jobs" element={ <ProtectedRoute><Jobs /></ProtectedRoute> } />
-            <Route path="/mentorship" element={ <ProtectedRoute><Mentorship /></ProtectedRoute> } />
-            
-            {/* ADMIN ROUTE */}
-            <Route path="/admin" element={ <AdminRoute><AdminDashboard /></AdminRoute> } />
-            
+
+            {/* PROTECTED ROUTES (Requires Login) */}
+            <Route path="/directory" element={<ProtectedRoute><Directory /></ProtectedRoute>} />
+            <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
+            <Route path="/mentorship" element={<ProtectedRoute><Mentorship /></ProtectedRoute>} />
+
+            {/* ADMIN ROUTES (Requires Admin Role) */}
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+
             {/* ERROR ROUTES */}
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        
+
         {/* GLOBAL ULTRA-ENHANCED FOOTER */}
         <MegaFooter />
       </div>

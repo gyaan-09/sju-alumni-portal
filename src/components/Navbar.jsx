@@ -250,7 +250,7 @@ const Navbar = () => {
           /* Settings Modal Overlay */
           .modal-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 20, 40, 0.7);
             backdrop-filter: blur(8px);
             z-index: 3000;
@@ -299,6 +299,19 @@ const Navbar = () => {
           }
           .toggle-switch:checked::after {
             transform: translateX(24px);
+          }
+
+          /* Global Mobile Overrides to prevent overflow */
+          @media (max-width: 600px) {
+            .dropdown-menu {
+              min-width: unset;
+              width: calc(100% + 40px);
+              right: -20px; 
+            }
+            .modal-content {
+              width: 95%;
+              padding: 20px;
+            }
           }
 
           @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -408,21 +421,53 @@ const Navbar = () => {
 
       {/* MOBILE MENU OVERLAY */}
       {isMobile && mobileMenuOpen && (
-        <div style={{ position: 'fixed', top: '75px', left: 0, width: '100%', height: 'calc(100vh - 75px)', backgroundColor: 'rgba(0, 30, 60, 0.98)', backdropFilter: 'blur(15px)', zIndex: 1040, padding: '2rem', animation: 'fadeIn 0.3s ease' }}>
-          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '20px', fontFamily: "'Lora', serif" }}>
+        <div style={{ position: 'fixed', top: '75px', left: 0, width: '100%', height: 'calc(100vh - 75px)', backgroundColor: 'rgba(0, 30, 60, 0.98)', backdropFilter: 'blur(15px)', zIndex: 1040, padding: '2rem', display: 'flex', flexDirection: 'column', animation: 'fadeIn 0.3s ease' }}>
+          
+          {user && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px 20px', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '15px', marginBottom: '25px', border: `1px solid rgba(255,255,255,0.15)` }}>
+              <div style={{ width: '50px', height: '50px', backgroundColor: theme.accent, color: theme.bg, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '1.5rem', flexShrink: 0 }}>
+                {(user.full_name || user.name || "U").charAt(0).toUpperCase()}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <span style={{ color: '#ffffff', fontWeight: '700', fontSize: '1.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.full_name || user.name}</span>
+                <span style={{ color: theme.accent, fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '1px' }}>{user.role || "Alumni"}</span>
+              </div>
+            </div>
+          )}
+
+          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '12px', fontFamily: "'Lora', serif", flex: 1, overflowY: 'auto' }}>
             {navItems.map(item => (
               <li key={item.name}>
-                <Link to={item.path} style={{ color: 'white', textDecoration: 'none', fontSize: '1.5rem', fontWeight: '500', display: 'block', padding: '15px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }} onClick={() => setMobileMenuOpen(false)}>
+                <Link to={item.path} style={{ color: 'white', textDecoration: 'none', fontSize: '1.2rem', fontWeight: '500', display: 'flex', alignItems: 'center', padding: '14px 20px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', transition: 'background 0.2s' }} onClick={() => setMobileMenuOpen(false)}>
                   {item.name}
                 </Link>
               </li>
             ))}
-             <li style={{ marginTop: '20px' }}>
-                <button onClick={() => {setSettingsOpen(true); setMobileMenuOpen(false);}} style={{ background: 'transparent', border: 'none', color: theme.accent, fontSize: '1.5rem', fontWeight: '500', padding: '15px 0', width: '100%', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+             <li>
+                <button onClick={() => {setSettingsOpen(true); setMobileMenuOpen(false);}} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#FFF', fontSize: '1.2rem', fontWeight: '500', padding: '14px 20px', width: '100%', textAlign: 'left', borderRadius: '12px', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                   Preferences
                 </button>
              </li>
+             {user && user.role === 'admin' && (
+               <li>
+                 <Link to="/admin" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '1.2rem', fontWeight: '500', display: 'flex', padding: '14px 20px', background: 'rgba(96, 165, 250, 0.1)', borderRadius: '12px', border: '1px solid rgba(96, 165, 250, 0.3)' }} onClick={() => setMobileMenuOpen(false)}>
+                   Admin Console
+                 </Link>
+               </li>
+             )}
           </ul>
+
+          <div style={{ marginTop: '20px', paddingBottom: '20px' }}>
+            {user ? (
+               <button onClick={() => { setMobileMenuOpen(false); handleLogout(); }} style={{ background: '#ef4444', color: 'white', border: 'none', fontSize: '1.2rem', fontWeight: '600', padding: '15px 0', width: '100%', textAlign: 'center', borderRadius: '50px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(239, 68, 68, 0.4)' }}>
+                 Sign Out
+               </button>
+            ) : (
+               <Link to="/login" style={{ color: '#003366', backgroundColor: theme.accent, textDecoration: 'none', fontSize: '1.2rem', fontWeight: '700', display: 'block', padding: '15px 0', textAlign: 'center', borderRadius: '50px', boxShadow: `0 4px 15px ${theme.accent}66` }} onClick={() => setMobileMenuOpen(false)}>
+                 Login / Join
+               </Link>
+            )}
+          </div>
         </div>
       )}
 

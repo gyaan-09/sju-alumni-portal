@@ -1,27 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback, Component } from 'react';
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, query, limit } from 'firebase/firestore';
 
 /* ============================================================================
-   1. ENTERPRISE CONFIGURATION & FIREBASE GATEWAY
+   1. ENTERPRISE CONFIGURATION & GATEWAY
    ============================================================================ */
-
-/**
- * Firebase Configuration Object
- * Ensure these values are secured in environment variables in a real production environment.
- */
-const firebaseConfig = {
-  apiKey: "AIzaSyCiJ-4SeUb6u-f4FISN4RK104746HN-G74",
-  authDomain: "ainp-f8709.firebaseapp.com",
-  projectId: "ainp-f8709",
-  storageBucket: "ainp-f8709.firebasestorage.app",
-  messagingSenderId: "1027353321858",
-  appId: "1:1027353321858:web:b15c79969a62111e852f9b"
-};
-
-// Zero-crash initialization: Prevents "Firebase App already exists" during HMR
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app, "ainp");
 
 /**
  * Global Enterprise Configuration
@@ -163,6 +144,56 @@ const GlobalStyles = () => (
     }
     .sju-input.has-icon { padding-left: 48px; border-radius: ${CONFIG.THEME.RADIUS_FULL}; }
     .sju-input:focus, .sju-textarea:focus { border-color: ${CONFIG.THEME.NAVY_MAIN}; box-shadow: 0 0 0 4px rgba(12, 35, 64, 0.1); outline: none; }
+    
+    @media (max-width: 1024px) {
+      .mentorship-controls {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 16px;
+      }
+      .mentorship-search-container {
+        width: 100% !important;
+      }
+      .mentorship-view-buttons {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+      .mentorship-workspace {
+        grid-template-columns: 1fr !important;
+        padding: 0 24px !important;
+        margin-top: -30px !important;
+        gap: 32px !important;
+      }
+      .mentorship-sidebar {
+        height: auto !important;
+        position: relative !important;
+        top: 0 !important;
+      }
+      .mentorship-header {
+        padding: 60px 0 80px 0 !important;
+      }
+      .mentorship-title {
+        font-size: 2.8rem !important;
+      }
+    }
+    @media (max-width: 600px) {
+      .mentorship-workspace {
+        padding: 0 16px !important;
+      }
+      .mentorship-header {
+        padding: 40px 0 60px 0 !important;
+      }
+      .mentorship-title {
+        font-size: 2.2rem !important;
+      }
+      .mentorship-card-grid {
+        grid-template-columns: 1fr !important;
+        min-width: 0 !important;
+      }
+      .mentorship-sidebar .glass-panel {
+        padding: 20px !important;
+      }
+    }
   `}</style>
 );
 
@@ -474,7 +505,7 @@ const BookingWizard = ({ mentor, onClose, onConfirm }) => {
 const GridView = ({ data, onSelect, onBook }) => {
   if (data.length === 0) return <EmptyState />;
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+    <div className="mentorship-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px', minWidth: 0 }}>
       {data.map((m, i) => (
         <div key={m.id} className="animated-card" style={{ animation: `slideUpFade 0.4s ease forwards ${Math.min(i * 0.04, 0.4)}s`, opacity: 0, height: '100%' }} onClick={() => onSelect(m)}>
           <div style={{ padding: '32px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -523,7 +554,7 @@ const ListView = ({ data, onSelect, onBook }) => {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1000px' }}>
           <thead style={{ background: CONFIG.THEME.BG_SURFACE_ALT, color: CONFIG.THEME.NAVY_MAIN }}>
             <tr>
-              {['Mentor Profile', 'Expertise Domain', 'Professional Role', 'Performance', 'Rate', 'Action'].map(h => (
+              {['Expert Member', 'Expertise Domain', 'Professional Role', 'Performance', 'Rate', 'Action'].map(h => (
                 <th key={h} style={{ padding: '20px 24px', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '700', borderBottom: `2px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>{h}</th>
               ))}
             </tr>
@@ -749,9 +780,34 @@ const SmartMatchView = ({ data, onSelect }) => {
       <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center', marginBottom: '48px' }}>
         <h2 style={{ fontSize: '2.5rem', color: CONFIG.THEME.NAVY_MAIN, marginBottom: '16px' }}>AI Smart Match</h2>
         <p style={{ color: CONFIG.THEME.TEXT_SEC, fontSize: '1.1rem', marginBottom: '32px' }}>Tell us what you want to achieve, and our matching algorithm will find the top 3 highly compatible mentors for your exact needs.</p>
-        <div style={{ position: 'relative' }}>
-          <input className="sju-input" placeholder="E.g., I want to learn React performance optimization..." value={goal} onChange={(e) => setGoal(e.target.value)} style={{ padding: '20px 24px', fontSize: '1.1rem', boxShadow: CONFIG.THEME.SHADOW_MD, border: `2px solid ${CONFIG.THEME.BORDER_LIGHT}` }} />
-          <Button onClick={handleMatch} disabled={!goal} style={{ position: 'absolute', right: '8px', top: '8px', bottom: '8px', padding: '0 32px' }}>Find Mentors</Button>
+        <div style={{ position: 'relative', maxWidth: '100%', overflow: 'hidden' }}>
+          <input 
+            className="sju-input" 
+            placeholder="E.g., I want to learn React performance optimization..." 
+            value={goal} 
+            onChange={(e) => setGoal(e.target.value)} 
+            style={{ 
+              padding: '20px 180px 20px 24px', 
+              fontSize: '1.1rem', 
+              boxShadow: CONFIG.THEME.SHADOW_MD, 
+              border: `2px solid ${CONFIG.THEME.BORDER_LIGHT}`,
+              width: '100%'
+            }} 
+          />
+          <Button 
+            onClick={handleMatch} 
+            disabled={!goal} 
+            style={{ 
+              position: 'absolute', 
+              right: '8px', 
+              top: '8px', 
+              bottom: '8px', 
+              padding: '0 24px',
+              fontSize: '0.8rem'
+            }}
+          >
+            Find Mentors
+          </Button>
         </div>
       </div>
 
@@ -798,61 +854,82 @@ const MentorshipGatewayInner = () => {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const mentorsRef = collection(db, 'alumni_data');
-            const q = query(mentorsRef, limit(CONFIG.DATA.PAGE_SIZE * 5));
-            const snapshot = await getDocs(q);
+    let isActive = true;
 
-            const fetched = snapshot.docs.map(doc => {
-                const d = doc.data();
-                const clean = (val, fb = "N/A") => (!val || String(val).toLowerCase().includes("not applicable") || String(val).toLowerCase() === "none") ? fb : val;
-                
-                const fullName = clean(d["Full Name"] || d.fullName || d.Name, "Alumni Mentor");
-                const batchYear = parseInt(d["Batch Year"] || d.batchYear, 10) || 2020;
-                const exp = Math.max(0, 2026 - batchYear);
-                const rawTier = clean(d.Tier || d.tier, null);
-                const validTier = rawTier ? rawTier : (exp > 10 ? "Industry Leader" : exp > 5 ? "Senior Mentor" : "Peer Mentor");
-                
-                const basePrice = exp > 10 ? 2500 : exp > 5 ? 1500 : 0;
-                const seed = Utils.seedGen(doc.id);
-                
-                return {
-                    id: doc.id,
-                    name: fullName,
-                    email: clean(d.Email || d.email, "Hidden"),
-                    initials: fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
-                    domain: clean(d.Degree || d.degree || d.Domain, "Tech & Engineering"),
-                    role: clean(d.Designation || d.designation || d.Role, "Professional"),
-                    company: clean(d["Company Name"] || d.company || d.Company, "Independent"),
-                    tier: validTier,
-                    mentorship: (d.Mentorship === "Available" || d["Current Status"] === "Working" || d.Status === "Working") ? "Available" : "Unavailable",
-                    experience: exp,
-                    bio: clean(d.Reviews || d.bio, `Experienced professional offering guidance in ${clean(d.Degree || "their domain")}. Passions include scaling systems and career coaching.`),
-                    
-                    rating: (4.0 + (seed % 10) / 10).toFixed(1),
-                    sessionsConducted: (seed % 150) + 5,
-                    price: d.price !== undefined ? d.price : basePrice,
-                    priceCategory: basePrice === 0 ? "Pro-Bono (Free)" : basePrice < 2000 ? "Standard Rates" : "Premium Tier",
-                    isTopRated: (seed % 5) === 0,
-                    languages: ['English', seed % 2 === 0 ? 'Hindi' : 'Spanish'],
-                    availability: seed % 3 === 0 ? "Weekends" : seed % 2 === 0 ? "Weekdays" : "Flexible",
-                    responseRate: 90 + (seed % 10),
-                    sessionTypes: ['1:1 Career Sync', 'Resume Review', 'Mock Interview (Technical)'],
-                    companyTier: clean(d.companyTier || d.CompanyTier, "Corporate")
-                };
-            });
-            
-            setData(fetched.filter(m => m.mentorship === "Available"));
-        } catch (err) {
-            console.error("Firebase Fetch Error:", err);
-        } finally {
-            setLoading(false);
+    const fetchMentors = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/alumni');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        const backendData = await response.json();
+
+        if (!isActive) return;
+
+        if (!backendData || backendData.length === 0) {
+          setData([]);
+          setLoading(false);
+          return;
+        }
+
+        const candidates = [];
+        backendData.forEach((d, i) => {
+          const currentStatus = String(d.currentStatus || d["Current Status"] || d.Status || "");
+          const mentorshipFlag = d.mentorship || d.Mentorship;
+          const isEligible = mentorshipFlag === "Available" || currentStatus.toLowerCase().includes("working") || currentStatus.toLowerCase().includes("employ") || currentStatus.toLowerCase().includes("professional");
+          
+          if (!isEligible) return;
+
+          const clean = (val, fb = "N/A") => (!val || String(val).toLowerCase().includes("not applicable") || String(val).toLowerCase() === "none") ? fb : val;
+          const fullName = clean(d.fullName || d["Full Name"] || d.Name, "Alumni Mentor");
+          const companyStr = clean(d.company || d["Company Name"] || d.Company, "Independent");
+          
+          const batchYear = parseInt(d.batchYear || d["Batch Year"] || d.GraduationYear, 10) || 2020;
+          const exp = Math.max(0, 2026 - batchYear);
+          const rawTier = clean(d.tier || d.Tier, null);
+          const validTier = rawTier ? rawTier : (exp > 10 ? "Industry Leader" : exp > 5 ? "Senior Mentor" : "Peer Mentor");
+          
+          const basePrice = exp > 10 ? 2500 : exp > 5 ? 1500 : 0;
+          const seed = Utils.seedGen(d._id || d.id || `M-${i}`);
+
+          candidates.push({
+            id: d._id || d.id || `M-${i}`,
+            name: fullName,
+            email: clean(d.email || d.Email, "Hidden"),
+            initials: fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
+            domain: clean(d.degree || d.Degree || d.Domain, "Tech & Engineering"),
+            role: clean(d.designation || d.Designation || d.Role, "Professional"),
+            company: companyStr,
+            tier: validTier,
+            mentorship: "Available",
+            experience: exp,
+            bio: clean(d.reviews || d.Reviews || d.bio, `Experienced professional offering guidance in ${clean(d.degree || d.Degree || "their domain")}. Passions include scaling systems and career coaching.`),
+            rating: (4.0 + (seed % 10) / 10).toFixed(1),
+            sessionsConducted: (seed % 150) + 5,
+            price: d.price !== undefined ? d.price : basePrice,
+            priceCategory: basePrice === 0 ? "Pro-Bono (Free)" : basePrice < 2000 ? "Standard Rates" : "Premium Tier",
+            isTopRated: (seed % 5) === 0,
+            languages: ['English', seed % 2 === 0 ? 'Hindi' : 'Spanish'],
+            availability: seed % 3 === 0 ? "Weekends" : seed % 2 === 0 ? "Weekdays" : "Flexible",
+            responseRate: 90 + (seed % 10),
+            sessionTypes: ['1:1 Career Sync', 'Resume Review', 'Mock Interview (Technical)'],
+            companyTier: clean(d.companyTier || d.CompanyTier, "Corporate"),
+            profilePhotoUrl: d.profilePhotoUrl || null
+          });
+        });
+
+        setData(candidates.sort((a,b) => b.rating - a.rating));
+        setLoading(false);
+      } catch (err) {
+        if (!isActive) return;
+        console.error("🔥 Mentorship API Integration Fault:", err);
+        setLoading(false);
+      }
     };
 
-    fetchData();
+    fetchMentors();
+
+    return () => { isActive = false; };
   }, []);
 
   const { filteredData, facets } = useMemo(() => {
@@ -928,36 +1005,29 @@ const MentorshipGatewayInner = () => {
     showToast(`Session successfully booked! A calendar invite has been dispatched.`);
   };
 
-  // Pre-Loader Display
-  if (loading) return (
-    <div style={{ height: '100vh', width: '100vw', background: CONFIG.THEME.NAVY_DARK, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-      <GlobalStyles />
-      <div style={{ width: '80px', height: '80px', border: `4px solid rgba(212, 175, 55, 0.1)`, borderTopColor: CONFIG.THEME.GOLD_MAIN, borderRadius: '50%', animation: 'spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite', marginBottom: '32px' }} />
-      <div style={{ fontSize: '2rem', fontWeight: '700', letterSpacing: '0.1em', color: CONFIG.THEME.GOLD_MAIN, textTransform: 'uppercase' }}>{CONFIG.SYSTEM.ORG}</div>
-      <div style={{ fontSize: '1rem', fontWeight: '500', letterSpacing: '0.2em', color: CONFIG.THEME.TEXT_TER, marginTop: '8px' }}>INITIALIZING MENTORSHIP NEXUS</div>
-    </div>
-  );
+  // Pre-Loader Display Removed - Per User Request
+  if (loading) return <SkeletonLoader />;
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', paddingBottom: '80px' }}>
       <GlobalStyles />
       
       {/* HEADER SECTION */}
-      <header style={{ background: CONFIG.THEME.NAVY_MAIN, padding: '80px 0 100px 0', textAlign: 'center', position: 'relative', overflow: 'hidden', borderBottom: `4px solid ${CONFIG.THEME.GOLD_MAIN}` }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.05, backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', margin: '0 auto', padding: '0 24px' }}>
-          <h1 style={{ color: 'white', fontSize: '3.5rem', fontWeight: '700', margin: '0 0 20px 0', letterSpacing: '-0.02em', lineHeight: 1.1 }}>{CONFIG.SYSTEM.APP_NAME}</h1>
-          <p style={{ color: CONFIG.THEME.TEXT_TER, fontSize: '1.25rem', margin: 0, fontWeight: '400', lineHeight: 1.6 }}>
-            Book 1:1 sessions with {Utils.formatNumber(data.length)}+ verified industry experts. Accelerate your career with personalized, actionable guidance.
+      <header className="mentorship-header" style={{ background: `linear-gradient(135deg, ${CONFIG.THEME.NAVY_DARK} 0%, ${CONFIG.THEME.NAVY_MAIN} 100%)`, padding: '56px 24px 100px', textAlign: 'center', position: 'relative', overflow: 'hidden', borderBottom: `4px solid ${CONFIG.THEME.GOLD_MAIN}` }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.04, backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', margin: '0 auto' }}>
+          <h1 className="mentorship-title" style={{ color: 'white', fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: '900', margin: '0 0 14px 0', letterSpacing: '-0.5px', lineHeight: 1.1 }}>SJU Mentorship</h1>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.05rem', margin: 0, lineHeight: 1.6 }}>
+            Connect with <strong style={{ color: '#FFF' }}>{Utils.formatNumber(data.length)}+</strong> verified alumni mentors for 1:1 career guidance.
           </p>
         </div>
       </header>
 
       {/* ENTERPRISE WORKSPACE LAYOUT */}
-      <div style={{ maxWidth: '1700px', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: '340px 1fr', gap: '40px', position: 'relative', zIndex: 10, marginTop: '-50px' }}>
+      <div className="mentorship-workspace" style={{ maxWidth: '100vw', boxSizing: 'border-box', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'minmax(300px, 340px) minmax(0, 1fr)', gap: '40px', position: 'relative', zIndex: 10, marginTop: '-50px' }}>
         
         {/* SIDEBAR FILTERS */}
-        <aside style={{ height: 'calc(100vh - 40px)', position: 'sticky', top: '20px' }}>
+        <aside className="mentorship-sidebar" style={{ height: 'calc(100vh - 40px)', position: 'sticky', top: '20px' }}>
           <div className="glass-panel" style={{ borderRadius: CONFIG.THEME.RADIUS_LG, padding: '32px 24px', height: '100%', overflowY: 'auto', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', paddingBottom: '16px', borderBottom: `2px solid ${CONFIG.THEME.NAVY_MAIN}` }}>
               <span style={{ fontWeight: '700', fontSize: '1.25rem', color: CONFIG.THEME.NAVY_MAIN, letterSpacing: '-0.02em' }}>Gateway Filters</span>
@@ -978,13 +1048,13 @@ const MentorshipGatewayInner = () => {
         {/* MAIN DATA CONTENT */}
         <main ref={scrollRef} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           
-          <div className="glass-panel" style={{ padding: '20px 32px', borderRadius: CONFIG.THEME.RADIUS_LG, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
-            <div style={{ position: 'relative', width: '450px' }}>
+          <div className="glass-panel mentorship-controls" style={{ padding: '20px 32px', borderRadius: CONFIG.THEME.RADIUS_LG, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+            <div className="mentorship-search-container" style={{ position: 'relative', width: '450px' }}>
               <span style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>🔍</span>
               <input className="sju-input has-icon" placeholder="Search mentors by name, company, or domain..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
             </div>
             
-            <div style={{ display: 'flex', gap: '8px', background: CONFIG.THEME.BG_APP, padding: '8px', borderRadius: CONFIG.THEME.RADIUS_SM, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+            <div className="mentorship-view-buttons" style={{ display: 'flex', gap: '8px', background: CONFIG.THEME.BG_APP, padding: '8px', borderRadius: CONFIG.THEME.RADIUS_SM, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
               {['GRID', 'LIST', 'CALENDAR', 'SMART MATCH', 'ANALYTICS'].map(v => (
                 <button key={v} onClick={() => { setView(v); setPage(1); }} style={{ padding: '8px 20px', border: 'none', background: view === v ? CONFIG.THEME.BG_SURFACE : 'transparent', borderRadius: '6px', fontWeight: '700', fontSize: '0.8rem', letterSpacing: '0.05em', color: view === v ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.TEXT_SEC, cursor: 'pointer', boxShadow: view === v ? CONFIG.THEME.SHADOW_SM : 'none', transition: CONFIG.THEME.TRANSITION_FAST }}>{v}</button>
               ))}
@@ -1008,76 +1078,69 @@ const MentorshipGatewayInner = () => {
       {/* ZERO-OVERLAP SCALABLE MODAL DIALOG */}
       {selectedMentor && (
         <div role="dialog" aria-modal="true" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(6, 17, 33, 0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '6vh', paddingBottom: '6vh', zIndex: 99999, overflowY: 'auto' }} onClick={() => { setSelectedMentor(null); setIsBooking(false); }}>
-          <div style={{ background: CONFIG.THEME.BG_SURFACE, width: '92%', maxWidth: isBooking ? '800px' : '1050px', borderRadius: CONFIG.THEME.RADIUS_XL, padding: '48px', position: 'relative', animation: 'scaleInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards', boxShadow: CONFIG.THEME.SHADOW_LG, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }} onClick={e => e.stopPropagation()}>
-            <button onClick={() => { setSelectedMentor(null); setIsBooking(false); }} style={{ position: 'absolute', top: '32px', right: '32px', background: CONFIG.THEME.BG_APP, border: 'none', width: '48px', height: '48px', borderRadius: '50%', fontSize: '1.25rem', cursor: 'pointer', color: CONFIG.THEME.TEXT_SEC, transition: CONFIG.THEME.TRANSITION_FAST, zIndex: 100 }} onMouseEnter={(e) => { e.currentTarget.style.background = CONFIG.THEME.DANGER_BG; e.currentTarget.style.color = CONFIG.THEME.DANGER; }} onMouseLeave={(e) => { e.currentTarget.style.background = CONFIG.THEME.BG_APP; e.currentTarget.style.color = CONFIG.THEME.TEXT_SEC; }}>✕</button>
+          <div style={{ background: CONFIG.THEME.BG_SURFACE, width: '92%', maxWidth: isBooking ? '800px' : '1050px', borderRadius: CONFIG.THEME.RADIUS_XL, padding: window.innerWidth <= 800 ? '32px 20px' : '48px', position: 'relative', animation: 'scaleInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards', boxShadow: CONFIG.THEME.SHADOW_LG, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }} onClick={e => e.stopPropagation()}>
+            <button onClick={() => { setSelectedMentor(null); setIsBooking(false); }} style={{ position: 'absolute', top: window.innerWidth <= 800 ? '16px' : '32px', right: window.innerWidth <= 800 ? '16px' : '32px', background: CONFIG.THEME.BG_APP, border: 'none', width: window.innerWidth <= 800 ? '36px' : '48px', height: window.innerWidth <= 800 ? '36px' : '48px', borderRadius: '50%', fontSize: '1.25rem', cursor: 'pointer', color: CONFIG.THEME.TEXT_SEC, transition: CONFIG.THEME.TRANSITION_FAST, zIndex: 100 }} onMouseEnter={(e) => { e.currentTarget.style.background = CONFIG.THEME.DANGER_BG; e.currentTarget.style.color = CONFIG.THEME.DANGER; }} onMouseLeave={(e) => { e.currentTarget.style.background = CONFIG.THEME.BG_APP; e.currentTarget.style.color = CONFIG.THEME.TEXT_SEC; }}>✕</button>
             
             {isBooking ? (
               <BookingWizard mentor={selectedMentor} onClose={() => setIsBooking(false)} onConfirm={handleBookingConfirm} />
             ) : (
               <div>
-                <div style={{ display: 'flex', gap: '40px', alignItems: 'flex-start', borderBottom: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingBottom: '40px', marginBottom: '40px' }}>
+                <div style={{ display: 'flex', gap: window.innerWidth <= 800 ? '24px' : '40px', alignItems: 'center', flexDirection: window.innerWidth <= 800 ? 'column' : 'row', borderBottom: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingBottom: '40px', marginBottom: '40px', textAlign: window.innerWidth <= 800 ? 'center' : 'left' }}>
                   <div style={{ position: 'relative' }}>
-                    <div style={{ width: '160px', height: '160px', borderRadius: CONFIG.THEME.RADIUS_LG, background: Utils.generateAvatarGradient(selectedMentor.name), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '4rem', fontWeight: '700', flexShrink: 0, boxShadow: CONFIG.THEME.SHADOW_MD }}>{selectedMentor.initials}</div>
-                    {selectedMentor.isTopRated && <div style={{ position: 'absolute', bottom: -10, right: -10, background: CONFIG.THEME.GOLD_MAIN, color: CONFIG.THEME.NAVY_MAIN, borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', border: `4px solid ${CONFIG.THEME.BG_SURFACE}`, boxShadow: CONFIG.THEME.SHADOW_SM, fontWeight: 'bold' }} title="Top Rated Mentor">★</div>}
+                    <div style={{ width: window.innerWidth <= 800 ? '120px' : '160px', height: window.innerWidth <= 800 ? '120px' : '160px', borderRadius: CONFIG.THEME.RADIUS_LG, background: Utils.generateAvatarGradient(selectedMentor.name), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: window.innerWidth <= 800 ? '3rem' : '4rem', fontWeight: '700', flexShrink: 0, boxShadow: CONFIG.THEME.SHADOW_MD }}>{selectedMentor.initials}</div>
+                    {selectedMentor.isTopRated && <div style={{ position: 'absolute', bottom: -5, right: -5, background: CONFIG.THEME.GOLD_MAIN, color: CONFIG.THEME.NAVY_MAIN, borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', border: `3px solid ${CONFIG.THEME.BG_SURFACE}`, boxShadow: CONFIG.THEME.SHADOW_SM, fontWeight: 'bold' }} title="Top Rated Mentor">★</div>}
                   </div>
                   
-                  <div style={{ flex: 1, paddingRight: '48px' }}>
-                    <h2 style={{ fontSize: '2.5rem', color: CONFIG.THEME.NAVY_MAIN, margin: '0 0 8px 0', fontWeight: '700', letterSpacing: '-0.02em' }}>{selectedMentor.name}</h2>
-                    <div style={{ fontSize: '1.25rem', color: CONFIG.THEME.TEXT_PRI, fontWeight: '500', marginBottom: '24px' }}>{selectedMentor.role} at <strong style={{color: CONFIG.THEME.NAVY_MAIN}}>{selectedMentor.company}</strong></div>
+                  <div style={{ flex: 1, paddingRight: window.innerWidth <= 800 ? '0' : '48px' }}>
+                    <h2 style={{ fontSize: window.innerWidth <= 800 ? '1.8rem' : '2.5rem', color: CONFIG.THEME.NAVY_MAIN, margin: '0 0 8px 0', fontWeight: '700', letterSpacing: '-0.02em', lineHeight: 1.1 }}>{selectedMentor.name}</h2>
+                    <div style={{ fontSize: window.innerWidth <= 800 ? '1rem' : '1.25rem', color: CONFIG.THEME.TEXT_PRI, fontWeight: '500', marginBottom: '24px' }}>{selectedMentor.role} at <strong style={{color: CONFIG.THEME.NAVY_MAIN}}>{selectedMentor.company}</strong></div>
                     
-                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '32px' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '32px', justifyContent: window.innerWidth <= 800 ? 'center' : 'flex-start' }}>
                       <Badge label={selectedMentor.domain} color={CONFIG.THEME.NAVY_MAIN} bg={CONFIG.THEME.BG_SURFACE_ALT} />
                       {selectedMentor.tier && selectedMentor.tier !== "N/A" && <Badge label={selectedMentor.tier} color={CONFIG.THEME.ACCENT_PURPLE} outline />}
-                      <Badge label={`${selectedMentor.sessionsConducted} Lifetime Sessions`} color={CONFIG.THEME.TEXT_SEC} outline />
-                      <Badge label={`${selectedMentor.rating} / 5.0 Rating`} color={CONFIG.THEME.WARNING} bg={CONFIG.THEME.WARNING_BG} />
+                      <Badge label={`${selectedMentor.sessionsConducted} Sessions`} color={CONFIG.THEME.TEXT_SEC} outline />
+                      <Badge label={`${selectedMentor.rating} ★`} color={CONFIG.THEME.WARNING} bg={CONFIG.THEME.WARNING_BG} />
                     </div>
 
-                    <div style={{ display: 'flex', gap: '16px' }}>
+                    <div style={{ display: 'flex', gap: '16px', justifyContent: window.innerWidth <= 800 ? 'center' : 'flex-start', flexWrap: 'wrap' }}>
                       <Button onClick={() => setIsBooking(true)}>Schedule Sync</Button>
-                      <Button variant="outline" onClick={() => alert(`Direct Message interface opened for ${selectedMentor.name}.`)}>Message Mentor</Button>
+                      <Button variant="outline" onClick={() => alert(`Direct Message interface opened for ${selectedMentor.name}.`)}>Message</Button>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '48px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 1024 ? '1fr' : '1.5fr 1fr', gap: '40px' }}>
                   <div>
                     <h4 style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', marginTop: 0 }}>Executive Bio</h4>
-                    <p style={{ margin: '0 0 40px 0', lineHeight: 1.8, color: CONFIG.THEME.TEXT_PRI, fontSize: '1.1rem' }}>{selectedMentor.bio}</p>
-
-                    <h4 style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Languages Supported</h4>
-                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '32px' }}>
-                      {selectedMentor.languages.map(lang => (
-                        <Badge key={lang} label={lang} color={CONFIG.THEME.TEXT_SEC} outline />
-                      ))}
-                    </div>
+                    <p style={{ margin: '0 0 32px 0', lineHeight: 1.8, color: CONFIG.THEME.TEXT_PRI, fontSize: '1.05rem' }}>{selectedMentor.bio}</p>
 
                     <h4 style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Offered Session Types</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 600 ? '1fr' : '1fr 1fr', gap: '12px' }}>
                       {selectedMentor.sessionTypes.map(type => (
-                        <div key={type} style={{ padding: '16px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, borderRadius: CONFIG.THEME.RADIUS_MD, background: CONFIG.THEME.BG_APP }}>
-                          <div style={{ fontWeight: 'bold', color: CONFIG.THEME.NAVY_MAIN }}>{type}</div>
-                          <div style={{ fontSize: '0.8rem', color: CONFIG.THEME.TEXT_SEC, marginTop: '4px' }}>Standard Rate Applies</div>
+                        <div key={type} style={{ padding: '12px 16px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, borderRadius: CONFIG.THEME.RADIUS_MD, background: CONFIG.THEME.BG_APP }}>
+                          <div style={{ fontWeight: 'bold', color: CONFIG.THEME.NAVY_MAIN, fontSize: '0.9rem' }}>{type}</div>
+                          <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_SEC, marginTop: '2px' }}>Standard Rate Applies</div>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div style={{ background: CONFIG.THEME.BG_SURFACE_ALT, borderRadius: CONFIG.THEME.RADIUS_LG, padding: '32px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
-                    <div style={{ marginBottom: '32px' }}>
+                  <div style={{ background: CONFIG.THEME.BG_SURFACE_ALT, borderRadius: CONFIG.THEME.RADIUS_LG, padding: '24px', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+                    <div style={{ marginBottom: '24px' }}>
                       <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '8px', fontWeight: '700', letterSpacing: '0.05em' }}>Domain & Experience</div>
-                      <div style={{ fontWeight: '700', color: CONFIG.THEME.TEXT_PRI, fontSize: '1.1rem' }}>{selectedMentor.domain}</div>
-                      <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC, marginTop: '8px' }}>{selectedMentor.experience} Years active in industry</div>
+                      <div style={{ fontWeight: '700', color: CONFIG.THEME.TEXT_PRI, fontSize: '1.05rem' }}>{selectedMentor.domain}</div>
+                      <div style={{ fontSize: '0.85rem', color: CONFIG.THEME.TEXT_SEC, marginTop: '4px' }}>{selectedMentor.experience} Years active</div>
                     </div>
 
-                    <div style={{ borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingTop: '32px', marginBottom: '32px' }}>
-                      <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '8px', fontWeight: '700', letterSpacing: '0.05em' }}>Logistics & Availability</div>
-                      <div style={{ fontWeight: '700', color: CONFIG.THEME.TEXT_PRI, fontSize: '1rem', marginBottom: '8px' }}>{selectedMentor.availability} slots usually open</div>
-                      <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC }}>Typical Response: ~{selectedMentor.responseRate}% rate</div>
+                    <div style={{ borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingTop: '24px', marginBottom: '24px' }}>
+                      <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '8px', fontWeight: '700', letterSpacing: '0.05em' }}>Logistics</div>
+                      <div style={{ fontWeight: '700', color: CONFIG.THEME.TEXT_PRI, fontSize: '1rem', marginBottom: '4px' }}>{selectedMentor.availability} slots</div>
+                      <div style={{ fontSize: '0.85rem', color: CONFIG.THEME.TEXT_SEC }}>Typical Response: ~{selectedMentor.responseRate}%</div>
                     </div>
 
-                    <div style={{ borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingTop: '32px' }}>
+                    <div style={{ borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingTop: '24px' }}>
                       <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', marginBottom: '8px', fontWeight: '700', letterSpacing: '0.05em' }}>Base Hourly Rate</div>
-                      <div style={{ fontWeight: '800', color: CONFIG.THEME.SUCCESS, fontSize: '1.5rem' }}>{Utils.formatCurrency(selectedMentor.price)}</div>
+                      <div style={{ fontWeight: '800', color: CONFIG.THEME.SUCCESS, fontSize: '1.4rem' }}>{Utils.formatCurrency(selectedMentor.price)}</div>
                     </div>
                   </div>
                 </div>

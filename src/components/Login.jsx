@@ -21,7 +21,7 @@ import { useNavigate } from 'react-router-dom';
 const SYSTEM_CONFIG = {
   INSTITUTION_NAME: "St. Joseph's University",
   VERSION: "v23.1.0-Omega-Refined",
-  API_URL: "http://localhost:8081/api/auth/login",
+  API_URL: "http://localhost:5000/api/alumni/login",
   SIMULATED_DELAY: 1200,
   ANIMATION_SPEED: "0.4s"
 };
@@ -228,6 +228,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [backendStatus, setBackendStatus] = useState('Checking...');
 
   // Modals & Recovery State
   const [modalMode, setModalMode] = useState(null); // 'recovery' | 'biometric' | null
@@ -255,12 +256,17 @@ const Login = () => {
       setSystemReady(true);
     }, SYSTEM_CONFIG.SIMULATED_DELAY);
 
-    // Hydrate persistent data
-    const rememberedId = localStorage.getItem('sju_secure_id');
-    if (rememberedId) {
-      setCreds(prev => ({ ...prev, identifier: rememberedId }));
-      setRememberMe(true);
-    }
+    // Check Backend Health
+    const checkHealth = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/health');
+        if (res.ok) setBackendStatus('Online');
+        else setBackendStatus('Degraded');
+      } catch (e) {
+        setBackendStatus('Offline');
+      }
+    };
+    checkHealth();
 
     return () => {
       document.head.removeChild(fontLink);
@@ -318,44 +324,36 @@ const Login = () => {
     setIsLoading(true);
     setErrors({});
 
-    // Simulated Authentication Flow
-    setTimeout(async () => {
-      // 1. MASTER KEY BYPASS (For Demonstration)
-      if (activeTab === 'admin' && creds.identifier === 'ADMIN01' && creds.password === 'admin123') {
-        executeLoginSuccess({ id: 999, role: 'admin', name: 'System Administrator', reg_no: 'ADMIN01' });
-        return;
-      }
+    try {
+      // UNIFIED BACKEND CHECK FOR BOTH ADMIN AND ALUMNI
+      const response = await fetch(SYSTEM_CONFIG.API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              identifier: creds.identifier.trim(),
+              password: creds.password.trim()
+          })
+      });
 
-      // 2. VIRTUAL DB CHECK
-      const virtualUsers = JSON.parse(localStorage.getItem('sju_approved_users') || "[]");
-      const foundUser = virtualUsers.find(
-        u => (u.reg_no === creds.identifier) && u.password === creds.password
-      );
+      const data = await response.json();
 
-      if (foundUser) {
-        if (activeTab === 'admin' && foundUser.role !== 'admin') {
-          setErrors({ global: "Security Violation: Insufficient Privileges." });
+      if (!response.ok) {
+          setErrors({ 
+              global: data.error || "The credentials provided are unrecognized or expired.",
+              detail: data.detail || null 
+          });
           setIsLoading(false);
           return;
-        }
-        executeLoginSuccess(foundUser);
-        return;
       }
 
-      // If all local checks fail (Simulating API rejection)
-      setErrors({ global: "The credentials provided are unrecognized or expired." });
+      executeLoginSuccess(data);
+
+    } catch (error) {
+      setErrors({ global: "Authentication service offline.", detail: "The server appears to be unreachable. Please check your connection." });
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
-  const handleBiometricAuth = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setModalMode(null);
-      setErrors({ global: "Biometric node offline. Please utilize manual entry." });
-    }, 2500);
-  };
 
   const handleOtpChange = (element, index) => {
     if (isNaN(element.value)) return;
@@ -367,16 +365,10 @@ const Login = () => {
 
   // --- RENDER HELPERS ---
 
-  if (!systemReady) {
-    return (
-      <div style={{ height: '100vh', background: THEME.colors.secondary, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white', fontFamily: THEME.fonts.main }}>
-        <div style={{ width: '80px', height: '80px', border: `4px solid rgba(255,204,0,0.1)`, borderTopColor: THEME.colors.accent, borderRadius: '50%', animation: 'spin 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite' }}></div>
-        <h2 style={{ marginTop: '40px', fontWeight: '700', letterSpacing: '4px', textTransform: 'uppercase' }}>Initializing Security</h2>
-        <p style={{ color: THEME.colors.muted, marginTop: '12px', fontSize: '1rem', fontStyle: 'italic' }}>{SYSTEM_CONFIG.VERSION}</p>
-        <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
+  // Simulated Pre-flight check removed - Per user request
+  useEffect(() => {
+    setSystemReady(true);
+  }, []);
 
   // --- MAIN LAYOUT STYLES ---
 
@@ -506,9 +498,9 @@ const Login = () => {
         }}></div>
 
         <div style={{ zIndex: 10, position: 'relative', transform: 'translateY(-5%)' }}>
-          <h1 style={{ fontSize: '5.5rem', fontWeight: '700', lineHeight: '1.1', marginBottom: '30px', letterSpacing: '-2px', textShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+          <h1 style={{ fontSize: '5.5rem', fontWeight: '700', lineHeight: '1.1', marginBottom: '30px', letterSpacing: '-2px', textShadow: '0 20px 50px rgba(0,0,0,0.5)', color: THEME.colors.accent }}>
             THE ALUMNI<br /> 
-            <span style={{ color: THEME.colors.accent }}>CONNECTION</span>
+            CONNECTION
           </h1>
           <p style={{ fontSize: '1.4rem', opacity: 0.9, fontWeight: '400', maxWidth: '600px', lineHeight: '1.8', color: '#e2e8f0', fontStyle: 'italic' }}>
             Authenticate to access the exclusive global network of St. Joseph's University. Connect, mentor, and build the future together.
@@ -552,12 +544,19 @@ const Login = () => {
             {errors.global && (
               <div style={{ 
                 background: THEME.colors.errorBg, color: '#991b1b', padding: '18px 24px', 
-                borderRadius: '16px', marginBottom: '35px', display: 'flex', alignItems: 'center', 
-                gap: '15px', fontWeight: '600', borderLeft: `5px solid ${THEME.colors.error}`,
+                borderRadius: '16px', marginBottom: '35px', display: 'flex', flexDirection: 'column', 
+                gap: '8px', fontWeight: '600', borderLeft: `5px solid ${THEME.colors.error}`,
                 animation: 'slideUpFade 0.3s ease-out', fontSize: '1.05rem'
               }}>
-                <i className="bi bi-shield-x fs-4"></i>
-                {errors.global}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  <i className="bi bi-shield-x fs-4"></i>
+                  {errors.global}
+                </div>
+                {errors.detail && (
+                  <div style={{ fontSize: '0.85rem', opacity: 0.8, fontWeight: '500', marginLeft: '39px', fontStyle: 'italic' }}>
+                    {errors.detail}
+                  </div>
+                )}
               </div>
             )}
 
@@ -616,21 +615,13 @@ const Login = () => {
                   )}
                 </button>
 
-                {activeTab === 'alumni' && (
-                  <button 
-                    type="button" onClick={() => setModalMode('biometric')}
-                    style={{ 
-                      marginTop: '25px', width: '100%', padding: '20px', border: `2px dashed ${THEME.colors.border}`, 
-                      borderRadius: '18px', background: 'transparent', color: THEME.colors.primary, 
-                      fontWeight: '700', fontSize: '1.1rem', cursor: 'pointer', display: 'flex', 
-                      alignItems: 'center', justifyContent: 'center', gap: '12px', transition: THEME.transitions.smooth 
-                    }}
-                    onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(0,51,102,0.03)'; e.currentTarget.style.borderColor = THEME.colors.primary; }}
-                    onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = THEME.colors.border; }}
-                  >
-                    <i className="bi bi-fingerprint fs-4"></i> Login with Passkey / FaceID
-                  </button>
-                )}
+
+              </div>
+
+              {/* Backend Status Indicator */}
+              <div style={{ textAlign: 'center', marginTop: '25px', opacity: 0.7, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: backendStatus === 'Online' ? THEME.colors.success : THEME.colors.error }}></div>
+                <span style={{ fontWeight: '600' }}>System Status: {backendStatus}</span>
               </div>
             </form>
 
@@ -713,30 +704,7 @@ const Login = () => {
         </div>
       )}
 
-      {/* 2. BIOMETRIC MODAL */}
-      {modalMode === 'biometric' && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: THEME.colors.darkGlass, backdropFilter: 'blur(15px)', zIndex: 1040, display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'fadeIn 0.3s' }}>
-          <div style={{ background: 'white', width: '90%', maxWidth: '450px', borderRadius: '32px', padding: '60px 40px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-            <button onClick={() => setModalMode(null)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', fontSize: '1.8rem', color: THEME.colors.muted, cursor: 'pointer', zIndex: 10 }}>
-              <i className="bi bi-x-circle-fill"></i>
-            </button>
-            <h4 style={{ fontWeight: '700', color: THEME.colors.primary, marginBottom: '40px', fontSize: '1.6rem', fontFamily: THEME.fonts.main }}>Biometric Verification</h4>
-            
-            <div style={{ position: 'relative', width: '140px', height: '140px', margin: '0 auto 40px', border: `4px solid ${THEME.colors.accent}`, borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: '#f8fafc' }}>
-              <i className="bi bi-fingerprint" style={{ fontSize: '5.5rem', color: THEME.colors.primary }}></i>
-              {isLoading && <div style={{ position: 'absolute', width: '100%', height: '5px', background: THEME.colors.success, boxShadow: '0 0 15px #10b981', animation: 'scanline 1.5s linear infinite' }}></div>}
-            </div>
 
-            <p style={{ color: THEME.colors.muted, fontWeight: '500', marginBottom: '40px', fontSize: '1.1rem' }}>
-              {isLoading ? "Analyzing telemetry..." : "Position your face or finger to authenticate."}
-            </p>
-
-            <button onClick={handleBiometricAuth} disabled={isLoading} style={{ width: '100%', padding: '20px', borderRadius: '18px', border: 'none', background: THEME.colors.primary, color: 'white', fontWeight: '700', fontSize: '1.15rem', cursor: isLoading ? 'not-allowed' : 'pointer' }}>
-              {isLoading ? "Processing..." : "Initiate Scan"}
-            </button>
-          </div>
-        </div>
-      )}
 
     </div>
   );
