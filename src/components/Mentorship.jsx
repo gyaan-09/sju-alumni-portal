@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback, Component } from 'react';
+import API_BASE_URL from '../config';
 
 /* ============================================================================
    1. ENTERPRISE CONFIGURATION & GATEWAY
@@ -858,7 +859,7 @@ const MentorshipGatewayInner = () => {
 
     const fetchMentors = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/alumni');
+        const response = await fetch(`${API_BASE_URL}/api/alumni`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

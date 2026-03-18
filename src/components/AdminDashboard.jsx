@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import emailjs from '@emailjs/browser';
+import API_BASE_CONFIG from '../config';
 
 
 /* ============================================================================
    CONFIGURATION
    ============================================================================ */
 
-const API_BASE_URL = 'http://localhost:5000/api/alumni';
+const API_BASE_URL = `${API_BASE_CONFIG}/api/alumni`;
 
 // EmailJS Credentials
 const EMAILJS_PUBLIC_KEY = 'MgWnLyUUS3faeP6W5';

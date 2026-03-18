@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
+import API_BASE_URL from '../config';
 
 /* ────────────────────────────────────────────────────────── */
 /* CONFIG                                                      */
 /* ────────────────────────────────────────────────────────── */
-const API_BASE  = 'http://localhost:5000/api/alumni';
-const API_EMAIL = 'http://localhost:5000/api/send-email';
+const API_BASE  = `${API_BASE_URL}/api/alumni`;
+const API_EMAIL = `${API_BASE_URL}/api/send-email`;
 
 const T = {
   NAVY: '#0C2340', NAVY_DARK: '#061121', NAVY_LITE: '#1A3B66',

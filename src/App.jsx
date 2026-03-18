@@ -12,11 +12,12 @@ import Directory from './components/Directory';
 import Jobs from './components/Jobs';
 import Mentorship from './components/Mentorship';
 import AdminDashboard from './components/AdminDashboard';
+import API_BASE_URL from './config';
 
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
-const API_EMAIL = 'http://localhost:5000/api/send-email';
+const API_EMAIL = `${API_BASE_URL}/api/send-email`;
 
 // ============================================================================
 // ULTRA-DETAILED POLICY CONTENT 

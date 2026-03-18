@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback, Component } from 'react';
+import API_BASE_URL from '../config';
 
 /* ============================================================================
    1. ENTERPRISE CONFIGURATION & GATEWAY
@@ -35,7 +36,7 @@ const CONFIG = {
   }
 };
 
-const API_BASE = 'http://localhost:5000/api/jobs';
+const API_BASE = `${API_BASE_URL}/api/jobs`;
 
 /* ============================================================================
    2. ERROR BOUNDARY

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import API_BASE_URL_CONFIG from '../config';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -21,7 +22,7 @@ import { useNavigate } from 'react-router-dom';
 const SYSTEM_CONFIG = {
   INSTITUTION_NAME: "St. Joseph's University",
   VERSION: "v23.1.0-Omega-Refined",
-  API_URL: "http://localhost:5000/api/alumni/login",
+  API_URL: `${API_BASE_URL_CONFIG}/api/alumni/login`,
   SIMULATED_DELAY: 1200,
   ANIMATION_SPEED: "0.4s"
 };
@@ -259,7 +260,7 @@ const Login = () => {
     // Check Backend Health
     const checkHealth = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/health');
+        const res = await fetch(`${API_BASE_URL_CONFIG}/api/health`);
         if (res.ok) setBackendStatus('Online');
         else setBackendStatus('Degraded');
       } catch (e) {

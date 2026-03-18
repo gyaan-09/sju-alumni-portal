@@ -1,5 +1,6 @@
 // src/AppUnifiedHome.jsx
 import React, { useState, useEffect, useMemo, useCallback, Component } from 'react';
+import API_BASE_URL from '../config';
 
 // ============================================================================
 // 1. ENTERPRISE CONFIGURATION & SECURE GATEWAYS
@@ -826,7 +827,7 @@ const ReviewsSection = () => {
 
     const fetchVoices = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/alumni');
+        const response = await fetch(`${API_BASE_URL}/api/alumni`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
