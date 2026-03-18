@@ -1,1 +1,51 @@
+services:
+  # ----------------------------------------------------
+  # 1. Backend Web Service (Node.js/Express)
+  # ----------------------------------------------------
+  - type: web
+    name: sju-alumni-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      # Use sync: false for secrets; you will input these manually 
+      # in the Render Dashboard once the services are created.
+      - key: MONGO_URI
+        sync: false
+      - key: MAIL_USER
+        sync: false
+      - key: MAIL_PASS
+        sync: false
+      - key: ADMIN_ID
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: sju-alumni-frontend
+          envVarKey: RENDER_EXTERNAL_URL
 
+  # ----------------------------------------------------
+  # 2. Frontend Static Site (React/Vite)
+  # ----------------------------------------------------
+  - type: web
+    name: sju-alumni-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: sju-alumni-backend
+          envVarKey: RENDER_EXTERNAL_URL
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
