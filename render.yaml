@@ -4,6 +4,7 @@ services:
   # ----------------------------------------------------
   - type: web
     name: sju-alumni-backend
+    plan: free
     env: node
     rootDir: backend
     buildCommand: npm install
