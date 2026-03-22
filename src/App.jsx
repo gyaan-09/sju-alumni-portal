@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 
 // ============================================================================
-// COMPONENT IMPORTS (Map these to your React + Vite project structure)
+// COMPONENT IMPORTS
 // ============================================================================
 import Navbar from './components/Navbar';
 import Home from './components/Home';

@@ -2,23 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import API_BASE_URL_CONFIG from '../config';
 import { useNavigate } from 'react-router-dom';
 
-/**
- * ==================================================================================
- * SJU ENTERPRISE ACCESS GATEWAY - OMEGA PRESTIGE EDITION (v23.1)
- * ==================================================================================
- * ARCHITECTURE & ENHANCEMENTS:
- * - Layout Integrity: Replaced fixed viewport heights with fluid min-heights and 
- * isolated scroll zones to permanently eliminate DOM overlap and clipping.
- * - Routing Added: Re-introduced the registration node for new user onboarding.
- * - Visual Fidelity: Multi-layered glassmorphism, dynamic ambient lighting, and 
- * sub-pixel typography adjustments.
- * - Component Modularization: Extracted inputs and modals into high-performance 
- * pure functions to prevent unnecessary re-renders.
- * ==================================================================================
- */
-
-// --- 1. CONFIGURATION & THEME ENGINE ---
-
 const SYSTEM_CONFIG = {
   INSTITUTION_NAME: "St. Joseph's University",
   VERSION: "v23.1.0-Omega-Refined",

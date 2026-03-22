@@ -1,18 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
-/**
- * ==================================================================================
- * SJU GLOBAL NAVIGATION - ULTRA EDITION (v7.0)
- * ==================================================================================
- * FEATURES:
- * 1. Unified Navigation: Home, Directory, Mentorship, Jobs.
- * 2. Typography: Elegant "Lora" serif font integration.
- * 3. Animations: Ultra-smooth spring transitions, animated underlines, and scales.
- * 4. Real-time Settings: Built-in modal for UI toggles (No 404s!).
- * 5. Smart Profile Routing: Passes user role via router state for dynamic rendering.
- */
-
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
