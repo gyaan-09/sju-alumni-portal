@@ -418,7 +418,7 @@ const BookingWizard = ({ mentor, onClose, onConfirm }) => {
         {step === 1 && (
           <div style={{ animation: 'fadeIn 0.3s ease' }}>
             <h4 style={{ margin: '0 0 20px 0', fontSize: '1.1rem', color: CONFIG.THEME.TEXT_PRI }}>Select Engagement Model</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
               {mentor.sessionTypes.map(type => (
                 <div key={type} onClick={() => setSelectedType(type)} style={{ border: `2px solid ${selectedType === type ? CONFIG.THEME.GOLD_MAIN : CONFIG.THEME.BORDER_LIGHT}`, borderRadius: CONFIG.THEME.RADIUS_LG, padding: '24px', cursor: 'pointer', background: selectedType === type ? CONFIG.THEME.GOLD_LITE : CONFIG.THEME.BG_SURFACE, transition: CONFIG.THEME.TRANSITION_FAST, position: 'relative', overflow: 'hidden' }}>
                   {selectedType === type && <div style={{ position: 'absolute', top: 0, right: 0, background: CONFIG.THEME.GOLD_MAIN, color: CONFIG.THEME.NAVY_MAIN, padding: '4px 12px', borderBottomLeftRadius: CONFIG.THEME.RADIUS_MD, fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Selected</div>}
@@ -467,7 +467,7 @@ const BookingWizard = ({ mentor, onClose, onConfirm }) => {
             <h3 style={{ margin: '0 0 12px 0', color: CONFIG.THEME.NAVY_MAIN, fontSize: '1.5rem', fontWeight: '700' }}>Confirm Session Details</h3>
             
             <div style={{ background: CONFIG.THEME.BG_SURFACE_ALT, borderRadius: CONFIG.THEME.RADIUS_LG, padding: '24px', textAlign: 'left', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, marginTop: '24px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '20px' }}>
                 <div>
                   <div style={{ fontSize: '0.75rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: 'bold' }}>Mentor</div>
                   <div style={{ fontWeight: 'bold', color: CONFIG.THEME.TEXT_PRI, fontSize: '1.1rem' }}>{mentor.name}</div>

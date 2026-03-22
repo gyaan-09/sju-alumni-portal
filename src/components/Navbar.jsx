@@ -293,8 +293,8 @@ const Navbar = () => {
           @media (max-width: 600px) {
             .dropdown-menu {
               min-width: unset;
-              width: calc(100% + 40px);
-              right: -20px; 
+              width: 260px;
+              right: 0; 
             }
             .modal-content {
               width: 95%;

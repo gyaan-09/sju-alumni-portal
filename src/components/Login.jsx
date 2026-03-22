@@ -91,7 +91,7 @@ const FloatingInput = ({
       ? `2px solid ${THEME.colors.error}` 
       : isFocused ? `2px solid ${THEME.colors.primary}` : `1px solid ${THEME.colors.border}`,
     transition: THEME.transitions.smooth,
-    height: '72px',
+    height: 'clamp(55px, 8vh, 72px)',
     display: 'flex',
     alignItems: 'center',
     boxShadow: isFocused ? THEME.shadows.inputFocus : 'inset 0 2px 4px rgba(0,0,0,0.02)',
@@ -99,11 +99,11 @@ const FloatingInput = ({
   };
 
   const iconStyle = {
-    width: '60px',
+    width: 'clamp(45px, 6vw, 60px)',
     display: 'flex',
     justifyContent: 'center',
     color: error ? THEME.colors.error : (isFocused ? THEME.colors.primary : THEME.colors.muted),
-    fontSize: '1.4rem',
+    fontSize: 'clamp(1.1rem, 2vw, 1.4rem)',
     transition: THEME.transitions.smooth,
     transform: isFocused ? 'scale(1.1)' : 'scale(1)'
   };
@@ -111,8 +111,8 @@ const FloatingInput = ({
   const labelStyle = {
     position: 'absolute',
     left: '0',
-    top: (isFocused || hasValue) ? '12px' : '25px',
-    fontSize: (isFocused || hasValue) ? '0.8rem' : '1.1rem',
+    top: (isFocused || hasValue) ? 'clamp(6px, 1.5vw, 12px)' : 'calc(50% - 12px)',
+    fontSize: (isFocused || hasValue) ? 'clamp(0.7rem, 1.5vw, 0.8rem)' : 'clamp(0.95rem, 2.5vw, 1.1rem)',
     color: error ? THEME.colors.error : (isFocused ? THEME.colors.primary : THEME.colors.muted),
     fontWeight: (isFocused || hasValue) ? '700' : '500',
     letterSpacing: (isFocused || hasValue) ? '0.5px' : '0',
@@ -126,9 +126,9 @@ const FloatingInput = ({
     height: '100%',
     border: 'none',
     background: 'transparent',
-    paddingTop: '24px',
-    paddingRight: '20px',
-    fontSize: '1.2rem',
+    paddingTop: 'clamp(14px, 3vw, 24px)',
+    paddingRight: 'clamp(12px, 2vw, 20px)',
+    fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
     color: THEME.colors.textDark,
     fontWeight: '600',
     outline: 'none',
@@ -383,7 +383,7 @@ const Login = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '40px 20px', 
+      padding: 'clamp(20px, 4vh, 40px) clamp(10px, 3vw, 20px)', 
       background: THEME.colors.bg,
       position: 'relative',
       zIndex: 5,
@@ -392,14 +392,13 @@ const Login = () => {
     loginCard: {
       width: '100%',
       maxWidth: '520px',
-      // Removed minHeight to allow natural dynamic sizing based on content
       display: 'flex',
       flexDirection: 'column',
       background: THEME.colors.glass,
       backdropFilter: 'blur(30px)',
       WebkitBackdropFilter: 'blur(30px)',
       borderRadius: '28px',
-      padding: '50px 40px',
+      padding: 'clamp(30px, 6vw, 50px) clamp(20px, 5vw, 40px)',
       boxShadow: THEME.shadows.card,
       border: `1px solid ${THEME.colors.glassBorder}`,
       animation: 'slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
@@ -414,12 +413,12 @@ const Login = () => {
     },
     tabItem: (active, color) => ({
       flex: 1,
-      padding: '16px',
+      padding: 'clamp(12px, 2.5vw, 16px)',
       textAlign: 'center',
       borderRadius: '14px',
       cursor: 'pointer',
       fontWeight: '700',
-      fontSize: '1.05rem',
+      fontSize: 'clamp(0.9rem, 2.5vw, 1.05rem)',
       transition: THEME.transitions.smooth,
       background: active ? 'white' : 'transparent',
       color: active ? color : THEME.colors.muted,
@@ -428,14 +427,14 @@ const Login = () => {
     }),
     submitButton: {
       width: '100%',
-      padding: '22px',
+      padding: 'clamp(14px, 3vw, 22px)',
       borderRadius: '18px',
       border: 'none',
       background: activeTab === 'admin' 
         ? `linear-gradient(135deg, ${THEME.colors.error} 0%, #7f1d1d 100%)`
         : `linear-gradient(135deg, ${THEME.colors.primary} 0%, ${THEME.colors.secondary} 100%)`,
       color: 'white',
-      fontSize: '1.25rem',
+      fontSize: 'clamp(1.05rem, 3vw, 1.25rem)',
       fontWeight: '700',
       letterSpacing: '1px',
       cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -516,10 +515,10 @@ const Login = () => {
           <div key={activeTab} style={{ display: 'flex', flexDirection: 'column', animation: 'formSwap 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
             
             <div style={{ textAlign: 'center', marginBottom: '45px' }}>
-              <h2 style={{ fontWeight: '700', color: THEME.colors.textDark, marginBottom: '12px', fontSize: '2.4rem', letterSpacing: '-0.5px' }}>
+              <h2 style={{ fontWeight: '700', color: THEME.colors.textDark, marginBottom: '12px', fontSize: 'clamp(1.8rem, 5vw, 2.4rem)', letterSpacing: '-0.5px' }}>
                 {activeTab === 'admin' ? 'Restricted Access' : 'Welcome Back'}
               </h2>
-              <p style={{ color: THEME.colors.muted, fontSize: '1.15rem', fontStyle: 'italic' }}>
+              <p style={{ color: THEME.colors.muted, fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', fontStyle: 'italic' }}>
                 {activeTab === 'admin' ? 'Elevated clearance required.' : 'Enter credentials to establish secure link.'}
               </p>
             </div>
@@ -560,19 +559,19 @@ const Login = () => {
               />
 
               {/* Utility Row: Remember Me & Forgot Password */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', padding: '0 5px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(25px, 5vw, 40px)', padding: '0 5px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)}
-                    style={{ width: '20px', height: '20px', accentColor: THEME.colors.primary, cursor: 'pointer' }}
+                    style={{ width: 'clamp(16px, 2vw, 20px)', height: 'clamp(16px, 2vw, 20px)', accentColor: THEME.colors.primary, cursor: 'pointer' }}
                   />
-                  <span style={{ fontSize: '1rem', color: THEME.colors.textDark, fontWeight: '600' }}>Remember Device</span>
+                  <span style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1rem)', color: THEME.colors.textDark, fontWeight: '600' }}>Remember Device</span>
                 </label>
                 
                 <button 
                   type="button" onClick={() => setModalMode('recovery')} 
                   style={{ 
-                    background: 'none', border: 'none', color: THEME.colors.primary, fontWeight: '700', fontSize: '1rem',
+                    background: 'none', border: 'none', color: THEME.colors.primary, fontWeight: '700', fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
                     textDecoration: 'underline', textDecorationColor: 'transparent', transition: 'all 0.3s', cursor: 'pointer'
                   }}
                   onMouseOver={(e) => e.currentTarget.style.textDecorationColor = THEME.colors.primary}

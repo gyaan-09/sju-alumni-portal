@@ -166,7 +166,7 @@ const ReviewModal = ({ user, onClose, onApprove, onReject }) => {
                 Portal Credentials Preview
                 <span style={{ color: T.SUCCESS, fontSize: '0.65rem' }}>Auto-Generated</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
                 <div>
                   <div style={{ fontSize: '0.7rem', color: T.TEXT3, fontWeight: '600', marginBottom: '4px' }}>Generated Username</div>
                   <input value={genUser} onChange={e => setGenUser(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: `1px solid ${T.BORDER}`, fontWeight: '700', fontSize: '0.9rem' }} />
@@ -185,7 +185,7 @@ const ReviewModal = ({ user, onClose, onApprove, onReject }) => {
             {/* Academic Details */}
             <div style={{ marginBottom: '24px' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: '800', color: T.TEXT3, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '14px' }}>Academic & Career</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
                 {[
                   { label: 'Degree', value: degree },
                   { label: 'Batch Year', value: `Class of ${batch}` },
@@ -203,7 +203,7 @@ const ReviewModal = ({ user, onClose, onApprove, onReject }) => {
             {/* Personal Details */}
             <div>
               <div style={{ fontSize: '0.72rem', fontWeight: '800', color: T.TEXT3, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '14px' }}>Personal Information</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
                 {[
                   { label: 'Email', value: email },
                   { label: 'Phone', value: phone },
@@ -531,7 +531,7 @@ const AdminDashboard = () => {
         <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, minWidth: '1000px' }}>
           <thead>
             <tr style={{ background: `linear-gradient(135deg, ${T.NAVY_DARK}, ${T.NAVY_MAIN})`, color: '#FFF', position: 'sticky', top: 0, zIndex: 10 }}>
-                {['Name', 'Register No', 'Password', 'Username', 'Degree', 'Batch', 'Email', 'Status'].map(h => (
+                {['Name', 'Register No', 'Username', 'Password', 'Degree', 'Batch', 'Email', 'Status'].map(h => (
                   <th key={h} style={{ padding: '14px 20px', textAlign: 'left', fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.5px', textTransform: 'uppercase', background: 'inherit', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
             </tr>
@@ -543,8 +543,8 @@ const AdminDashboard = () => {
               <tr key={u._id || i} style={{ background: i % 2 === 0 ? '#FFF' : T.BG_ALT, borderBottom: `1px solid ${T.BORDER}` }}>
                 <td style={{ padding: '12px 20px', fontWeight: '700', color: T.TEXT, whiteSpace: 'nowrap' }}>{u.fullName || u["Full Name"] || '—'}</td>
                 <td style={{ padding: '12px 20px', color: T.TEXT2, fontSize: '0.9rem', whiteSpace: 'nowrap' }}>{u.registerNumber || '—'}</td>
-                 <td style={{ padding: '12px 20px', color: T.SUCCESS, fontSize: '0.9rem', fontWeight: '600', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{u.password || '—'}</td>
-                 <td style={{ padding: '12px 20px', color: T.INFO, fontSize: '0.9rem', fontWeight: '600', whiteSpace: 'nowrap' }}>{u.username || '—'}</td>
+                 <td style={{ padding: '12px 20px', color: T.INFO, fontSize: '0.9rem', fontWeight: '600', whiteSpace: 'nowrap' }}>{u.registerNumber || u.username || '—'}</td>
+                 <td style={{ padding: '12px 20px', color: T.SUCCESS, fontSize: '0.9rem', fontWeight: '600', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{u.password || (u.username && u.username.length > 8 ? u.username : '—') || '—'}</td>
                 
                 <td style={{ padding: '12px 20px', color: T.TEXT2, fontSize: '0.9rem', whiteSpace: 'nowrap' }}>{u.degree || '—'}</td>
                 <td style={{ padding: '12px 20px', color: T.TEXT2, fontSize: '0.9rem', whiteSpace: 'nowrap' }}>{u.batchYear || '—'}</td>

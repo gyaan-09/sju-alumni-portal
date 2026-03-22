@@ -318,7 +318,7 @@ const Register = () => {
   );
 
   /* ── PAGE WRAPPERS ───────────────────────────────────── */
-  const gridTwo = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' };
+  const gridTwo = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px' };
 
   if (submitted) {
     return (
@@ -340,7 +340,14 @@ const Register = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: T.BG, fontFamily: "'Lora', Georgia, serif", paddingBottom: '60px' }}>
+    <div className="register-container" style={{ minHeight: '100vh', background: T.BG, fontFamily: "'Lora', Georgia, serif", paddingBottom: '60px' }}>
+      <style>{`
+        @media (max-width: 600px) {
+          .reg-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+          .reg-card-padding { padding: 24px 20px 20px !important; }
+        }
+      `}</style>
+      
       {/* Page Header */}
       <div style={{ background: `linear-gradient(135deg, ${T.NAVY_DARK}, ${T.NAVY})`, padding: '40px 24px 60px', textAlign: 'center' }}>
         <h1 style={{ color: '#FFF', fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', fontWeight: '900', margin: 0 }}>
@@ -356,7 +363,7 @@ const Register = () => {
         <div style={{ background: '#FFF', borderRadius: '20px', boxShadow: '0 20px 60px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
           <ProgressBar currentStep={step} />
 
-          <div style={{ padding: '36px 36px 28px' }}>
+          <div className="reg-card-padding" style={{ padding: '36px 36px 28px' }}>
 
             {/* ── STEP 0: Personal ── */}
             {step === 0 && (

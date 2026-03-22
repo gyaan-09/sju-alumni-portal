@@ -304,7 +304,12 @@ const login = async (req, res) => {
             });
         }
 
-        const dbPass = (user.password || "").toString().trim();
+        let dbPass = (user.password || "").toString().trim();
+        // Fallback: If DB failed to save password previously, it was saved into the username field
+        if (!dbPass && user.username && user.username.trim().length > 6) {
+            dbPass = user.username.toString().trim();
+        }
+
         if (dbPass !== password) {
             // Hex logging to detect invisible characters (like zero-width spaces)
             const dbHex = Buffer.from(dbPass).toString('hex');
