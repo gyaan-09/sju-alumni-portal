@@ -531,7 +531,7 @@ const AdminDashboard = () => {
         <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, minWidth: '1000px' }}>
           <thead>
             <tr style={{ background: `linear-gradient(135deg, ${T.NAVY_DARK}, ${T.NAVY_MAIN})`, color: '#FFF', position: 'sticky', top: 0, zIndex: 10 }}>
-                {['Name', 'Register No', 'Username', 'Password', 'Degree', 'Batch', 'Email', 'Status'].map(h => (
+                {['Name', 'Register No', 'Password', 'Username', 'Degree', 'Batch', 'Email', 'Status'].map(h => (
                   <th key={h} style={{ padding: '14px 20px', textAlign: 'left', fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.5px', textTransform: 'uppercase', background: 'inherit', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
             </tr>
@@ -543,8 +543,9 @@ const AdminDashboard = () => {
               <tr key={u._id || i} style={{ background: i % 2 === 0 ? '#FFF' : T.BG_ALT, borderBottom: `1px solid ${T.BORDER}` }}>
                 <td style={{ padding: '12px 20px', fontWeight: '700', color: T.TEXT, whiteSpace: 'nowrap' }}>{u.fullName || u["Full Name"] || '—'}</td>
                 <td style={{ padding: '12px 20px', color: T.TEXT2, fontSize: '0.9rem', whiteSpace: 'nowrap' }}>{u.registerNumber || '—'}</td>
-                <td style={{ padding: '12px 20px', color: T.INFO, fontSize: '0.9rem', fontWeight: '600', whiteSpace: 'nowrap' }}>{u.username || '—'}</td>
-                <td style={{ padding: '12px 20px', color: T.SUCCESS, fontSize: '0.9rem', fontWeight: '600', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{u.password || '—'}</td>
+                 <td style={{ padding: '12px 20px', color: T.SUCCESS, fontSize: '0.9rem', fontWeight: '600', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{u.password || '—'}</td>
+                 <td style={{ padding: '12px 20px', color: T.INFO, fontSize: '0.9rem', fontWeight: '600', whiteSpace: 'nowrap' }}>{u.username || '—'}</td>
+                
                 <td style={{ padding: '12px 20px', color: T.TEXT2, fontSize: '0.9rem', whiteSpace: 'nowrap' }}>{u.degree || '—'}</td>
                 <td style={{ padding: '12px 20px', color: T.TEXT2, fontSize: '0.9rem', whiteSpace: 'nowrap' }}>{u.batchYear || '—'}</td>
                 <td style={{ padding: '12px 20px', color: T.TEXT2, fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{u.email || '—'}</td>
