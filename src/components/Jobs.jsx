@@ -118,12 +118,22 @@ const GlobalStyles = () => (
     .sju-input:focus { border-color: ${CONFIG.THEME.NAVY_MAIN}; box-shadow: 0 0 0 4px rgba(12, 35, 64, 0.1); }
 
     @media (max-width: 1100px) {
-      .jobs-workspace { grid-template-columns: 1fr; margin-top: -40px; padding: 0 24px; }
+      .jobs-workspace { grid-template-columns: 1fr; margin-top: -40px; padding: 0 24px; gap: 24px; }
       .jobs-sidebar { position: relative; top: 0; }
     }
 
-    @media (max-width: 600px) {
-      .jobs-workspace { padding: 0 16px; }
+    @media (max-width: 768px) {
+      .jobs-workspace { padding: 0 16px; margin-top: -30px; }
+      .jobs-post-grid { grid-template-columns: 1fr !important; }
+      .jobs-detail-header { padding: 24px 20px !important; }
+      .jobs-detail-body { padding: 24px 20px !important; max-height: 50vh !important; }
+      .jobs-detail-footer { padding: 16px 20px !important; flex-direction: column !important; gap: 12px !important; align-items: stretch !important; }
+      .jobs-detail-footer button { width: 100% !important; text-align: center !important; }
+    }
+
+    @media (max-width: 480px) {
+      .jobs-workspace { padding: 0 12px; margin-top: -20px; }
+      .jobs-search-bar { flex-direction: column !important; }
     }
 
     @keyframes slideUpFade {
@@ -145,11 +155,11 @@ const Icons = {
    ============================================================================ */
 
 const MOCK_JOBS = [
-  { _id: 'm1', title: 'Senior AI Engineer', company: 'Google India', location: 'Bengaluru', type: 'Full-Time', domain: 'Technology', salary: '45–60 LPA', createdAt: new Date().toISOString() },
-  { _id: 'm2', title: 'UX/UI Specialist', company: 'Flipkart', location: 'Remote', type: 'Contract', domain: 'Design', salary: '15–20 LPA', createdAt: new Date().toISOString() },
-  { _id: 'm3', title: 'Financial Analyst', company: 'Goldman Sachs', location: 'Mumbai', type: 'Full-Time', domain: 'Finance', salary: '20–30 LPA', createdAt: new Date().toISOString() },
-  { _id: 'm4', title: 'Data Science Intern', company: 'Microsoft', location: 'Hyderabad', type: 'Internship', domain: 'Technology', salary: '50k/mo', createdAt: new Date().toISOString() },
-  { _id: 'm5', title: 'Marketing lead', company: 'Zomato', location: 'Gurgaon', type: 'Full-Time', domain: 'Marketing', salary: '25–40 LPA', createdAt: new Date().toISOString() },
+  { _id: 'm1', title: 'Senior AI Engineer', company: 'Google India', location: 'Bengaluru', type: 'Full-Time', domain: 'Technology', salary: '45–60 LPA', createdAt: new Date().toISOString(), description: 'Join Google India as a Senior AI Engineer to build and deploy large-scale machine learning models. You will work on Google Search, Assistant, and Cloud AI products, collaborating with world-class researchers and engineers.', requirements: 'B.Tech/M.Tech in CS or related field. 5+ years of ML/AI experience. Proficiency in Python, TensorFlow or PyTorch. Experience with distributed systems and large-scale data pipelines.', applicationLink: 'https://careers.google.com' },
+  { _id: 'm2', title: 'UX/UI Specialist', company: 'Flipkart', location: 'Remote', type: 'Contract', domain: 'Design', salary: '15–20 LPA', createdAt: new Date().toISOString(), description: 'Design intuitive, beautiful user experiences for Flipkart\'s e-commerce platform used by millions of customers across India. You will own end-to-end design for key product areas including checkout, discovery, and personalization.', requirements: '3+ years in UX/UI design. Proficiency in Figma and Adobe XD. Strong portfolio demonstrating mobile-first design. Experience with user research and usability testing.', applicationLink: 'https://www.flipkartcareers.com' },
+  { _id: 'm3', title: 'Financial Analyst', company: 'Goldman Sachs', location: 'Mumbai', type: 'Full-Time', domain: 'Finance', salary: '20–30 LPA', createdAt: new Date().toISOString(), description: 'Analyze market trends, prepare financial models, and support investment banking transactions at Goldman Sachs Mumbai. You will work directly with senior bankers on mergers, acquisitions, and capital markets deals.', requirements: 'MBA Finance or CA/CFA. 2–4 years of financial modeling experience. Strong Excel and PowerPoint skills. Knowledge of Indian capital markets and regulatory framework.', applicationLink: 'https://www.goldmansachs.com/careers' },
+  { _id: 'm4', title: 'Data Science Intern', company: 'Microsoft', location: 'Hyderabad', type: 'Internship', domain: 'Technology', salary: '50k/mo', createdAt: new Date().toISOString(), description: 'A 6-month internship opportunity at Microsoft Hyderabad\'s Azure Data & AI team. You will work on real customer projects involving big data analytics, predictive modeling, and business intelligence dashboards.', requirements: 'Final year B.Tech/M.Tech students in CS, Statistics, or related field. Knowledge of Python, SQL, and at least one ML library (scikit-learn, XGBoost). Good communication skills.', applicationLink: 'https://careers.microsoft.com' },
+  { _id: 'm5', title: 'Marketing Lead', company: 'Zomato', location: 'Gurgaon', type: 'Full-Time', domain: 'Marketing', salary: '25–40 LPA', createdAt: new Date().toISOString(), description: 'Lead marketing campaigns for Zomato\'s food delivery and dining-out products across multiple Indian cities. You will own brand strategy, digital marketing, and growth experiments to drive customer acquisition and retention.', requirements: '5+ years in digital or growth marketing. Experience managing ₹1Cr+ budgets. Proficiency in Google Ads, Meta Ads, and analytics tools. Strong data-driven mindset with creative instincts.', applicationLink: 'https://www.zomato.com/careers' },
 ];
 
 /* ============================================================================
@@ -193,31 +203,45 @@ const Button = ({ children, onClick, variant = 'primary', active = false, style 
   );
 };
 
-const JobDetail = ({ job, onClose }) => (
-  <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(6,17,33,0.85)', backdropFilter:'blur(12px)', zIndex:2000, display:'flex', alignItems:'center', justifyContent:'center', padding:'24px' }}>
-    <div onClick={e => e.stopPropagation()} className="glass-panel" style={{ width:'100%', maxWidth:'700px', borderRadius:CONFIG.THEME.RADIUS_XL, overflow:'hidden', animation:'slideUpFade 0.4s' }}>
-      <div style={{ background:CONFIG.THEME.NAVY_MAIN, padding:'40px', color:'#FFF', position:'relative' }}>
-        <button onClick={onClose} style={{ position:'absolute', top:'24px', right:'24px', background:'rgba(255,255,255,0.1)', border:'none', color:'#FFF', width:'40px', height:'40px', borderRadius:'50%', cursor:'pointer' }}>✕</button>
-        <h2 style={{ fontSize:'1.8rem', color:CONFIG.THEME.GOLD_MAIN, margin:'0 0 8px' }}>{job.title}</h2>
-        <p style={{ margin:0, opacity:0.8 }}>{job.company} · {job.location}</p>
-      </div>
-      <div style={{ padding:'40px', maxHeight:'60vh', overflowY:'auto' }}>
-        <div style={{ marginBottom:'32px' }}>
-          <h4 style={{ textTransform:'uppercase', letterSpacing:'1px', fontSize:'0.8rem', color:CONFIG.THEME.NAVY_MAIN, marginBottom:'12px' }}>About the Role</h4>
-          <p style={{ lineHeight:'1.8', color:CONFIG.THEME.TEXT_SEC }}>{job.description || 'No description provided.'}</p>
+const JobDetail = ({ job, onClose }) => {
+  const handleApply = () => {
+    const link = job.applicationLink;
+    if (link && link.trim() !== '') {
+      window.open(link, '_blank', 'noopener,noreferrer');
+    } else {
+      // Fallback: open company careers page via Google search
+      const query = encodeURIComponent(`${job.company} careers jobs`);
+      window.open(`https://www.google.com/search?q=${query}`, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  return (
+    <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(6,17,33,0.85)', backdropFilter:'blur(12px)', zIndex:2000, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px' }}>
+      <div onClick={e => e.stopPropagation()} className="glass-panel" style={{ width:'100%', maxWidth:'700px', borderRadius:CONFIG.THEME.RADIUS_XL, overflow:'hidden', animation:'slideUpFade 0.4s', maxHeight:'90vh', display:'flex', flexDirection:'column' }}>
+        <div className="jobs-detail-header" style={{ background:CONFIG.THEME.NAVY_MAIN, padding:'36px 40px', color:'#FFF', position:'relative', flexShrink:0 }}>
+          <button onClick={onClose} style={{ position:'absolute', top:'20px', right:'20px', background:'rgba(255,255,255,0.1)', border:'none', color:'#FFF', width:'38px', height:'38px', borderRadius:'50%', cursor:'pointer', fontSize:'1rem' }}>✕</button>
+          <h2 style={{ fontSize:'clamp(1.3rem, 4vw, 1.8rem)', color:CONFIG.THEME.GOLD_MAIN, margin:'0 0 8px', paddingRight:'50px' }}>{job.title}</h2>
+          <p style={{ margin:0, opacity:0.8, fontSize:'clamp(0.85rem, 2.5vw, 1rem)' }}>{job.company} · {job.location}</p>
+          {job.salary && <p style={{ margin:'8px 0 0', color:CONFIG.THEME.GOLD_MAIN, fontWeight:'700', fontSize:'0.9rem' }}>₹ {job.salary}</p>}
         </div>
-        <div>
-          <h4 style={{ textTransform:'uppercase', letterSpacing:'1px', fontSize:'0.8rem', color:CONFIG.THEME.NAVY_MAIN, marginBottom:'12px' }}>Requirements</h4>
-          <p style={{ lineHeight:'1.8', color:CONFIG.THEME.TEXT_SEC }}>{job.requirements || 'Contact the poster for more details.'}</p>
+        <div className="jobs-detail-body" style={{ padding:'32px 40px', overflowY:'auto', flex:1 }}>
+          <div style={{ marginBottom:'28px' }}>
+            <h4 style={{ textTransform:'uppercase', letterSpacing:'1px', fontSize:'0.78rem', color:CONFIG.THEME.NAVY_MAIN, marginBottom:'12px' }}>About the Role</h4>
+            <p style={{ lineHeight:'1.8', color:CONFIG.THEME.TEXT_SEC, fontSize:'clamp(0.9rem, 2.5vw, 1rem)' }}>{job.description || 'No description provided. Please contact the alumni who posted this role for more details.'}</p>
+          </div>
+          <div>
+            <h4 style={{ textTransform:'uppercase', letterSpacing:'1px', fontSize:'0.78rem', color:CONFIG.THEME.NAVY_MAIN, marginBottom:'12px' }}>Requirements</h4>
+            <p style={{ lineHeight:'1.8', color:CONFIG.THEME.TEXT_SEC, fontSize:'clamp(0.9rem, 2.5vw, 1rem)' }}>{job.requirements || 'Kindly reach out to the posting alumni member for requirement details.'}</p>
+          </div>
         </div>
-      </div>
-      <div style={{ padding:'24px 40px', borderTop:`1px solid ${CONFIG.THEME.BORDER_LIGHT}`, background:CONFIG.THEME.BG_SURFACE_ALT, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-        <span style={{ fontSize:'0.8rem', color:CONFIG.THEME.TEXT_TER }}>Posted by {job.postedByName || 'Alumni Member'}</span>
-        <Button onClick={() => window.open(job.applicationLink, '_blank')}>Apply Opportunity →</Button>
+        <div className="jobs-detail-footer" style={{ padding:'20px 40px', borderTop:`1px solid ${CONFIG.THEME.BORDER_LIGHT}`, background:CONFIG.THEME.BG_SURFACE_ALT, display:'flex', justifyContent:'space-between', alignItems:'center', flexShrink:0 }}>
+          <span style={{ fontSize:'0.8rem', color:CONFIG.THEME.TEXT_TER }}>Posted by {job.postedByName || 'Alumni Member'}</span>
+          <Button onClick={handleApply}>Apply Opportunity →</Button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const PostJobModal = ({ onClose, onPosted, user }) => {
   const [form, setForm] = useState({ title: '', company: '', location: '', type: 'Full-Time', domain: 'Technology', salary: '', applicationLink: '', description: '', requirements: '' });
@@ -244,7 +268,7 @@ const PostJobModal = ({ onClose, onPosted, user }) => {
         <div style={{ background:CONFIG.THEME.NAVY_MAIN, padding:'24px 32px', color:CONFIG.THEME.GOLD_MAIN }}>
           <h3 style={{ margin:0, color:CONFIG.THEME.GOLD_MAIN }}>Post elitist opportunity</h3>
         </div>
-        <div style={{ padding:'32px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px', maxHeight:'70vh', overflowY:'auto' }}>
+        <div style={{ padding:'32px', display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:'20px', maxHeight:'70vh', overflowY:'auto' }} className="jobs-post-grid">
           <div style={{ gridColumn:'1/-1' }}><label className="sju-label">Job Title</label><input className="sju-input" onChange={e => setForm({...form, title:e.target.value})} /></div>
           <div><label className="sju-label">Company</label><input className="sju-input" onChange={e => setForm({...form, company:e.target.value})} /></div>
           <div><label className="sju-label">Location</label><input className="sju-input" onChange={e => setForm({...form, location:e.target.value})} /></div>
@@ -365,12 +389,12 @@ const Jobs = () => {
           {/* MAIN CONTENT */}
           <main style={{ flex: 1 }}>
             {/* SEARCH & CONTROLS */}
-            <div className="glass-panel" style={{ padding: '24px', borderRadius: CONFIG.THEME.RADIUS_LG, marginBottom: '32px', display: 'flex', gap: '16px', alignItems: 'center' }}>
-              <div style={{ flex: 1, position: 'relative' }}>
+            <div className="glass-panel jobs-search-bar" style={{ padding: '20px 24px', borderRadius: CONFIG.THEME.RADIUS_LG, marginBottom: '28px', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
                 <input value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1); }} placeholder="Search companies, roles, or skills..." className="sju-input" />
                 <span style={{ position: 'absolute', left: '20px', top: '18px', color: CONFIG.THEME.TEXT_TER }}><Icons.Search/></span>
               </div>
-              <div style={{ fontSize: '0.9rem', color: CONFIG.THEME.TEXT_SEC, fontWeight: '600' }}>
+              <div style={{ fontSize: '0.9rem', color: CONFIG.THEME.TEXT_SEC, fontWeight: '600', whiteSpace: 'nowrap' }}>
                 Showing {filteredJobs.length} Positions
               </div>
             </div>

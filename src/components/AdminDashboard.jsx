@@ -667,6 +667,45 @@ const AdminDashboard = () => {
   // ---- LAYOUT ----
   return (
     <div className="admin-layout" style={{ display: 'flex', height: '100vh', width: '100vw', background: T.BG_APP, fontFamily: "'Lora', serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700&display=swap');
+        @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css');
+
+        .admin-layout { display: flex; flex-direction: row; }
+        .admin-sidebar { width: 260px; flex-shrink: 0; }
+        .admin-main { flex: 1; overflow-y: auto; }
+        .admin-table-container { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+
+        @media (max-width: 900px) {
+          .admin-layout { flex-direction: column !important; height: auto !important; min-height: 100vh; }
+          .admin-sidebar {
+            width: 100% !important; flex-direction: row !important; height: auto !important;
+            overflow-x: auto; display: flex; flex-direction: row !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+          }
+          .admin-sidebar nav {
+            flex-direction: row !important; padding: 8px !important; gap: 4px !important;
+            overflow-x: auto; white-space: nowrap;
+          }
+          .admin-sidebar nav button {
+            padding: 10px 14px !important; font-size: 0.8rem !important; flex-shrink: 0;
+            border-left: none !important; border-bottom: 3px solid transparent !important;
+          }
+          .admin-main { height: calc(100vh - 120px); overflow-y: auto; }
+        }
+
+        @media (max-width: 600px) {
+          .admin-overview-grid { grid-template-columns: 1fr 1fr !important; }
+          .admin-queue-grid { grid-template-columns: 1fr !important; }
+          .admin-modal { padding: 12px !important; }
+          .admin-modal > div { max-width: 100% !important; max-height: 95vh !important; overflow-y: auto; }
+        }
+
+        @media (max-width: 480px) {
+          .admin-overview-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+
 
       {/* SIDEBAR */}
       <div className="admin-sidebar" style={{ width: '260px', flexShrink: 0, background: `linear-gradient(180deg, ${T.NAVY_DARK} 0%, ${T.NAVY_MAIN} 100%)`, color: '#FFF', display: 'flex', flexDirection: 'column', boxShadow: '4px 0 20px rgba(0,0,0,0.15)' }}>
@@ -702,7 +741,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* MAIN */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className="admin-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* TOPBAR */}
         <header className="admin-topbar" style={{ background: '#FFF', borderBottom: `1px solid ${T.BORDER}`, padding: '0 32px', height: '68px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', flexShrink: 0 }}>

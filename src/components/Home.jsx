@@ -366,7 +366,46 @@ const GlobalStyles = () => (
         padding: 30px 20px !important;
       }
     }
+
+    /* Global Responsive Breakpoints */
+    @media (max-width: 900px) {
+      /* Section padding */
+      div[id] > div { padding-left: 5% !important; padding-right: 5% !important; }
+    }
+
+    @media (max-width: 768px) {
+      /* Hero */
+      h2[style*="6rem"], h1[style*="6rem"] { font-size: clamp(2.2rem, 8vw, 3.5rem) !important; }
+
+      /* Section padding */
+      section, [class*="section"] { padding-top: 60px !important; padding-bottom: 60px !important; }
+
+      /* Event action button pane */
+      .event-card > div:last-child { padding: 20px 24px !important; justify-content: flex-start !important; }
+
+      /* Generic grids */
+      .grid-auto { grid-template-columns: 1fr !important; }
+    }
+
+    @media (max-width: 480px) {
+      /* Hero text */
+      h2[style*="6rem"], h1[style*="6rem"] { font-size: clamp(1.8rem, 7vw, 2.5rem) !important; }
+      
+      /* Calendar day text */
+      .calendar-day { font-size: 0.9rem !important; }
+      .calendar-day-header { font-size: 0.7rem !important; }
+
+      /* Stats cards text */
+      .stats-value { font-size: 2.5rem !important; }
+
+      /* Toast */
+      div[style*="bottom: 40px; right: 40px"] { 
+        bottom: 16px !important; right: 16px !important; left: 16px !important; 
+        padding: 16px 20px !important;
+      }
+    }
   `}</style>
+
 );
 
 // ============================================================================
