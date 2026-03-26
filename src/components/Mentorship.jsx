@@ -161,8 +161,8 @@ const GlobalStyles = () => (
       }
       .mentorship-workspace {
         grid-template-columns: 1fr !important;
-        padding: 0 24px !important;
-        margin-top: -30px !important;
+        padding: 0 16px !important;
+        margin-top: 0 !important;
         gap: 32px !important;
       }
       .mentorship-sidebar {
@@ -171,7 +171,7 @@ const GlobalStyles = () => (
         top: 0 !important;
       }
       .mentorship-header {
-        padding: 60px 0 80px 0 !important;
+        padding: 60px 0 40px 0 !important;
       }
       .mentorship-title {
         font-size: 2.8rem !important;
@@ -182,7 +182,7 @@ const GlobalStyles = () => (
         padding: 0 16px !important;
       }
       .mentorship-header {
-        padding: 40px 0 60px 0 !important;
+        padding: 40px 0 40px 0 !important;
       }
       .mentorship-title {
         font-size: 2.2rem !important;
