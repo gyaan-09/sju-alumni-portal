@@ -349,9 +349,9 @@ const AdvancedPagination = ({ currentPage, totalPages, onPageChange, totalItems,
   });
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 0', marginTop: '32px', borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
-      <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC }}>Showing <strong>{((currentPage - 1) * pageSize) + 1}</strong> to <strong>{Math.min(currentPage * pageSize, totalItems)}</strong> of <strong>{totalItems}</strong> mentors</div>
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center', alignItems: 'center', padding: '24px 0', marginTop: '32px', borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+      <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC, textAlign: 'center' }}>Showing <strong>{((currentPage - 1) * pageSize) + 1}</strong> to <strong>{Math.min(currentPage * pageSize, totalItems)}</strong> of <strong>{totalItems}</strong> mentors</div>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
         <button onClick={() => handleNav('first')} disabled={currentPage === 1} style={btnStyle(currentPage === 1)}>« First</button>
         <button onClick={() => handleNav('prev')} disabled={currentPage === 1} style={btnStyle(currentPage === 1)}>‹ Prev</button>
         <div style={{ padding: '8px 20px', background: CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN, borderRadius: '6px', fontWeight: '700', fontSize: '0.875rem' }}>Page {currentPage} of {totalPages}</div>

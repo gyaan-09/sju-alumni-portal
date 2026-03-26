@@ -418,7 +418,7 @@ const Register = () => {
                   <Field label="Age (Auto-Calculated)" name="age" type="text" value={form.age} onChange={handleChange} placeholder="e.g. 25" disabled />
                   <Field label="Father's Name" name="fathersName" value={form.fathersName} onChange={handleChange} placeholder="First Last" required />
                   <Field label="Mother's Name" name="mothersName" value={form.mothersName} onChange={handleChange} placeholder="First Last" required />
-                  <div style={{ gridColumn: 'span 2' }}>
+                  <div style={{ gridColumn: '1 / -1' }}>
                     <Field label="Aadhar Card Number" name="aadhar" value={form.aadhar} onChange={handleChange} required placeholder="xxxx-xxxx-xxxx" maxLength={14} />
                   </div>
                 </div>
@@ -430,16 +430,16 @@ const Register = () => {
               <div>
                 <h3 style={{ color: T.NAVY, margin: '0 0 6px', fontSize: '1.3rem', fontWeight: '800' }}>Academic Details</h3>
                 <p style={{ color: T.TEXT3, margin: '0 0 28px', fontSize: '0.9rem' }}>Your SJU academic history.</p>
-                <div className="reg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                <div className="reg-grid" style={{ gap: '24px' }}>
                   <Field label="Register Number" name="registerNumber" value={form.registerNumber} onChange={handleChange} required placeholder="e.g. 232BCAA14" />
                   <Field label="Degree / Programme" name="degree" value={form.degree} onChange={handleChange} required options={['B.Com', 'MBA', 'BCA', 'MCA', 'MSW', 'M.A.', 'B.A.', 'B.Sc.', 'M.Sc.', 'LLB', 'Ph.D', 'Other']} />
                   <div style={{ gridColumn: '1 / -1' }}>
                     <Field label="Year Of Passing" name="batchYear" value={form.batchYear} onChange={handleChange} required options={Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() + 1 - i))} />
                   </div>
-                  <div style={{ gridColumn: 'span 2', padding: '16px', border: `1px dashed ${T.BORDER}`, borderRadius: '12px', background: T.BG }}>
+                  <div style={{ gridColumn: '1 / -1', padding: '16px', border: `1px dashed ${T.BORDER}`, borderRadius: '12px', background: T.BG }}>
                     <Field label="Did you pursue Post Graduation?" name="hasPG" value={form.hasPG} onChange={handleChange} required options={['Yes', 'No']} />
                     {form.hasPG === 'Yes' && (
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '24px' }}>
+                      <div className="reg-grid" style={{ gap: '24px', marginTop: '24px' }}>
                          <Field label="PG College Name" name="pgCollege" value={form.pgCollege} onChange={handleChange} placeholder="e.g. Christ University" required />
                          <Field label="PG Course / Specialisation" name="pgCourse" value={form.pgCourse} onChange={handleChange} placeholder="e.g. MBA in Finance" required />
                       </div>
