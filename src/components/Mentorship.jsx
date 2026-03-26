@@ -162,8 +162,8 @@ const GlobalStyles = () => (
       .mentorship-workspace {
         grid-template-columns: 1fr !important;
         padding: 0 16px !important;
-        margin-top: 0 !important;
-        gap: 32px !important;
+        margin-top: 24px !important;
+        gap: 24px !important;
       }
       .mentorship-sidebar {
         height: auto !important;
@@ -171,18 +171,20 @@ const GlobalStyles = () => (
         top: 0 !important;
       }
       .mentorship-header {
-        padding: 60px 0 40px 0 !important;
+        padding: 60px 24px 40px 24px !important;
       }
       .mentorship-title {
         font-size: 2.8rem !important;
       }
     }
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
       .mentorship-workspace {
-        padding: 0 16px !important;
+        padding: 0 12px !important;
+        margin-top: 20px !important;
+        gap: 20px !important;
       }
       .mentorship-header {
-        padding: 40px 0 40px 0 !important;
+        padding: 48px 16px 36px 16px !important;
       }
       .mentorship-title {
         font-size: 2.2rem !important;
@@ -193,6 +195,40 @@ const GlobalStyles = () => (
       }
       .mentorship-sidebar .glass-panel {
         padding: 20px !important;
+      }
+      .smart-match-input-row {
+        flex-direction: column !important;
+        gap: 12px !important;
+      }
+      .smart-match-input-row input {
+        padding: 16px 20px !important;
+      }
+      .smart-match-input-row button {
+        position: static !important;
+        width: 100% !important;
+        padding: 14px 24px !important;
+      }
+    }
+    @media (max-width: 600px) {
+      .mentorship-workspace {
+        padding: 0 10px !important;
+        margin-top: 16px !important;
+      }
+      .mentorship-header {
+        padding: 40px 16px 32px 16px !important;
+      }
+      .mentorship-title {
+        font-size: 1.9rem !important;
+      }
+      .mentorship-card-grid {
+        grid-template-columns: 1fr !important;
+        min-width: 0 !important;
+      }
+      .mentorship-sidebar .glass-panel {
+        padding: 16px !important;
+      }
+      .mentorship-controls {
+        padding: 16px !important;
       }
     }
   `}</style>
@@ -781,30 +817,28 @@ const SmartMatchView = ({ data, onSelect }) => {
       <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center', marginBottom: '48px' }}>
         <h2 style={{ fontSize: '2.5rem', color: CONFIG.THEME.NAVY_MAIN, marginBottom: '16px' }}>AI Smart Match</h2>
         <p style={{ color: CONFIG.THEME.TEXT_SEC, fontSize: '1.1rem', marginBottom: '32px' }}>Tell us what you want to achieve, and our matching algorithm will find the top 3 highly compatible mentors for your exact needs.</p>
-        <div style={{ position: 'relative', maxWidth: '100%', overflow: 'hidden' }}>
+        <div className="smart-match-input-row" style={{ position: 'relative', maxWidth: '100%', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
           <input 
             className="sju-input" 
             placeholder="E.g., I want to learn React performance optimization..." 
             value={goal} 
             onChange={(e) => setGoal(e.target.value)} 
             style={{ 
-              padding: '20px 180px 20px 24px', 
-              fontSize: '1.1rem', 
+              padding: '20px 24px', 
+              fontSize: '1.05rem', 
               boxShadow: CONFIG.THEME.SHADOW_MD, 
               border: `2px solid ${CONFIG.THEME.BORDER_LIGHT}`,
-              width: '100%'
+              flex: '1 1 260px',
+              minWidth: 0
             }} 
           />
           <Button 
             onClick={handleMatch} 
             disabled={!goal} 
             style={{ 
-              position: 'absolute', 
-              right: '8px', 
-              top: '8px', 
-              bottom: '8px', 
-              padding: '0 24px',
-              fontSize: '0.8rem'
+              flexShrink: 0,
+              padding: '20px 28px',
+              fontSize: '0.85rem'
             }}
           >
             Find Mentors
@@ -1014,7 +1048,7 @@ const MentorshipGatewayInner = () => {
       <GlobalStyles />
       
       {/* HEADER SECTION */}
-      <header className="mentorship-header" style={{ background: `linear-gradient(135deg, ${CONFIG.THEME.NAVY_DARK} 0%, ${CONFIG.THEME.NAVY_MAIN} 100%)`, padding: '56px 24px 100px', textAlign: 'center', position: 'relative', overflow: 'hidden', borderBottom: `4px solid ${CONFIG.THEME.GOLD_MAIN}` }}>
+      <header className="mentorship-header" style={{ background: `linear-gradient(135deg, ${CONFIG.THEME.NAVY_DARK} 0%, ${CONFIG.THEME.NAVY_MAIN} 100%)`, padding: '56px 32px 80px', textAlign: 'center', position: 'relative', overflow: 'hidden', borderBottom: `4px solid ${CONFIG.THEME.GOLD_MAIN}` }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.04, backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
         <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', margin: '0 auto' }}>
           <h1 className="mentorship-title" style={{ color: 'white', fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: '900', margin: '0 0 14px 0', letterSpacing: '-0.5px', lineHeight: 1.1 }}>SJU Mentorship</h1>
@@ -1025,7 +1059,7 @@ const MentorshipGatewayInner = () => {
       </header>
 
       {/* ENTERPRISE WORKSPACE LAYOUT */}
-      <div className="mentorship-workspace" style={{ width: '100%', boxSizing: 'border-box', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'minmax(300px, 340px) minmax(0, 1fr)', gap: '40px', position: 'relative', zIndex: 10, marginTop: '-50px' }}>
+      <div className="mentorship-workspace" style={{ width: '100%', boxSizing: 'border-box', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'minmax(300px, 340px) minmax(0, 1fr)', gap: '40px', position: 'relative', zIndex: 10, marginTop: '-40px' }}>
         
         {/* SIDEBAR FILTERS */}
         <aside className="mentorship-sidebar" style={{ height: 'calc(100vh - 40px)', position: 'sticky', top: '20px' }}>
