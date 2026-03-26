@@ -27,17 +27,17 @@ const STEPS = [
 ];
 
 const COUNTRY_CODES = [
-  { code: '+91', country: 'India' },
-  { code: '+1', country: 'USA/Canada' },
+  { code: '+91', country: 'IN' },
+  { code: '+1', country: 'US/CA' },
   { code: '+44', country: 'UK' },
   { code: '+971', country: 'UAE' },
-  { code: '+61', country: 'Australia' },
-  { code: '+65', country: 'Singapore' },
-  { code: '+49', country: 'Germany' },
-  { code: '+33', country: 'France' },
-  { code: '+81', country: 'Japan' },
-  { code: '+86', country: 'China' },
-  { code: '+966', country: 'Saudi Arabia' },
+  { code: '+61', country: 'AU' },
+  { code: '+65', country: 'SG' },
+  { code: '+49', country: 'DE' },
+  { code: '+33', country: 'FR' },
+  { code: '+81', country: 'JP' },
+  { code: '+86', country: 'CN' },
+  { code: '+966', country: 'SA' },
 ];
 
 /* ────────────────────────────────────────────────────────── */
@@ -366,10 +366,7 @@ const Register = () => {
   return (
     <div className="register-container" style={{ minHeight: '100vh', background: T.BG, fontFamily: "'Lora', Georgia, serif", paddingBottom: '60px' }}>
       <style>{`
-        @media (max-width: 600px) {
-          .reg-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
-          .reg-card-padding { padding: 24px 20px 20px !important; }
-        }
+        /* Removed old static max-width block that interfered */
       `}</style>
       
       {/* Page Header */}
@@ -402,10 +399,10 @@ const Register = () => {
                       Contact Number<span style={{ color: T.DANGER }}> *</span>
                     </label>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <select name="countryCode" value={form.countryCode} onChange={handleChange} style={{ padding: '12px 10px', borderRadius: '10px', border: `1.5px solid ${T.BORDER}`, fontSize: '0.9rem', width: '90px', background: '#FFF' }}>
+                      <select name="countryCode" value={form.countryCode} onChange={handleChange} style={{ padding: '12px 10px', borderRadius: '10px', border: `1.5px solid ${T.BORDER}`, fontSize: '0.9rem', width: '35%', maxWidth: '110px', background: '#FFF' }}>
                         {COUNTRY_CODES.map(c => <option key={c.code} value={c.code}>{c.code} ({c.country})</option>)}
                       </select>
-                      <input type="text" name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="9XXXXXXXXX" maxLength={15} style={{ flex: 1, padding: '12px 14px', borderRadius: '10px', border: `1.5px solid ${T.BORDER}`, fontSize: '0.95rem', background: '#FFF' }} />
+                      <input type="text" name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="9XXXXXXXXX" maxLength={15} style={{ flex: 1, padding: '12px 14px', borderRadius: '10px', border: `1.5px solid ${T.BORDER}`, fontSize: '0.95rem', background: '#FFF', minWidth: '0' }} />
                     </div>
                   </div>
                   <div style={{ position: 'relative' }}>
@@ -542,7 +539,7 @@ const Register = () => {
           </div>
 
           {/* FOOTER NAV */}
-          <div style={{ padding: '0 36px 32px', display: 'flex', justifyContent: 'space-between' }}>
+          <div className="reg-footer" style={{ padding: '0 36px 32px', display: 'flex', justifyContent: 'space-between', gap: '16px' }}>
             <button onClick={back} disabled={step === 0 || submitting} style={{
               padding: '12px 28px', borderRadius: '999px', border: `2px solid ${T.BORDER}`,
               background: 'transparent', color: step === 0 ? T.TEXT3 : T.TEXT, fontWeight: '700',
@@ -580,13 +577,15 @@ const Register = () => {
         * { box-sizing: border-box; font-family: 'Lora', serif !important; }
         @media (max-width: 768px) {
           .reg-container { padding: 12px 16px !important; }
-          .reg-card { padding: 24px !important; }
+          .reg-card-padding { padding: 24px 20px 20px !important; }
           .reg-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
           div[style*="gridTemplateColumns: '1fr 1fr'"] { grid-template-columns: 1fr !important; }
           .steps-container { padding-left: 12px !important; padding-right: 12px !important; }
           .steps { gap: 4px !important; }
           .progress-line-bg, .progress-line-fill { display: none !important; }
           .step-label { white-space: normal !important; word-wrap: break-word; }
+          .reg-footer { padding: 0 20px 24px !important; flex-direction: column-reverse !important; gap: 12px !important; }
+          .reg-footer button { width: 100% !important; padding: 14px !important; display: flex !important; justify-content: center !important; flex: none !important; }
         }
       `}</style>
     </div>

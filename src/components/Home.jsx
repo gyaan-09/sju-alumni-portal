@@ -368,11 +368,6 @@ const GlobalStyles = () => (
     }
 
     /* Global Responsive Breakpoints */
-    @media (max-width: 900px) {
-      /* Section padding */
-      div[id] > div { padding-left: 5% !important; padding-right: 5% !important; }
-    }
-
     @media (max-width: 768px) {
       /* Hero */
       h2[style*="6rem"], h1[style*="6rem"] { font-size: clamp(2.2rem, 8vw, 3.5rem) !important; }
