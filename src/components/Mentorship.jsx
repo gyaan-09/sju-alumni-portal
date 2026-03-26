@@ -145,91 +145,155 @@ const GlobalStyles = () => (
     }
     .sju-input.has-icon { padding-left: 48px; border-radius: ${CONFIG.THEME.RADIUS_FULL}; }
     .sju-input:focus, .sju-textarea:focus { border-color: ${CONFIG.THEME.NAVY_MAIN}; box-shadow: 0 0 0 4px rgba(12, 35, 64, 0.1); outline: none; }
-    
+
+    /* ── BASE LAYOUT CLASSES (defined here so media queries can override them) ── */
+    .mentorship-page-root {
+      width: 100%;
+      overflow-x: hidden;
+    }
+    .mentorship-header {
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    .mentorship-workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+      gap: 40px;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 32px;
+      margin-top: -40px;
+      position: relative;
+      z-index: 10;
+    }
+    .mentorship-sidebar {
+      height: calc(100vh - 140px);
+      position: sticky;
+      top: 80px;
+      min-width: 0;
+    }
+    .mentorship-sidebar .glass-panel {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .mentorship-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 32px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .mentorship-search-container {
+      width: 450px;
+      position: relative;
+    }
+    .mentorship-view-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .mentorship-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+      min-width: 0;
+    }
+
+    /* ── TABLET (≤ 1024px) ── */
     @media (max-width: 1024px) {
+      .mentorship-workspace {
+        grid-template-columns: 1fr !important;
+        padding: 0 16px !important;
+        margin-top: 20px !important;
+        gap: 20px !important;
+      }
+      .mentorship-sidebar {
+        height: auto !important;
+        max-height: 440px !important;
+        position: relative !important;
+        top: 0 !important;
+      }
+      .mentorship-header {
+        padding: 48px 20px 60px 20px !important;
+      }
       .mentorship-controls {
         flex-direction: column !important;
         align-items: stretch !important;
-        gap: 16px;
+        padding: 16px !important;
       }
       .mentorship-search-container {
         width: 100% !important;
       }
       .mentorship-view-buttons {
-        flex-wrap: wrap !important;
         justify-content: center !important;
       }
-      .mentorship-workspace {
-        grid-template-columns: 1fr !important;
-        padding: 0 16px !important;
-        margin-top: 24px !important;
-        gap: 24px !important;
-      }
-      .mentorship-sidebar {
-        height: auto !important;
-        max-height: 500px !important;
-        position: relative !important;
-        top: 0 !important;
-      }
-      .mentorship-header {
-        padding: 60px 24px 40px 24px !important;
-      }
-      .mentorship-title {
-        font-size: 2.8rem !important;
-      }
     }
+
+    /* ── MOBILE (≤ 768px) ── */
     @media (max-width: 768px) {
       .mentorship-workspace {
         padding: 0 12px !important;
-        margin-top: 20px !important;
-        gap: 20px !important;
+        margin-top: 16px !important;
+        gap: 16px !important;
       }
       .mentorship-header {
-        padding: 48px 16px 32px 16px !important;
+        padding: 36px 14px 52px 14px !important;
       }
       .mentorship-title {
-        font-size: 2.2rem !important;
+        font-size: 2rem !important;
       }
       .mentorship-card-grid {
         grid-template-columns: 1fr !important;
-        min-width: 0 !important;
+      }
+      .mentorship-sidebar {
+        max-height: 380px !important;
       }
       .mentorship-sidebar .glass-panel {
-        padding: 20px !important;
+        padding: 16px 14px !important;
       }
       .smart-match-input-row {
         flex-direction: column !important;
         gap: 12px !important;
       }
-      .smart-match-input-row input {
-        padding: 16px 20px !important;
-      }
+      .smart-match-input-row input { padding: 16px 20px !important; }
       .smart-match-input-row button {
         position: static !important;
         width: 100% !important;
         padding: 14px 24px !important;
       }
     }
-    @media (max-width: 600px) {
+
+    /* ── SMALL MOBILE (≤ 480px) ── */
+    @media (max-width: 480px) {
       .mentorship-workspace {
-        padding: 0 10px !important;
-        margin-top: 16px !important;
+        padding: 0 8px !important;
+        margin-top: 12px !important;
+        gap: 12px !important;
       }
       .mentorship-header {
-        padding: 40px 12px 28px 12px !important;
+        padding: 28px 10px 44px 10px !important;
       }
       .mentorship-title {
-        font-size: 1.7rem !important;
+        font-size: 1.65rem !important;
+        letter-spacing: -0.5px !important;
       }
-      .mentorship-card-grid {
-        grid-template-columns: 1fr !important;
-        min-width: 0 !important;
+      .mentorship-sidebar {
+        max-height: 320px !important;
       }
       .mentorship-sidebar .glass-panel {
-        padding: 16px !important;
+        padding: 12px 10px !important;
+        border-radius: 12px !important;
       }
       .mentorship-controls {
-        padding: 16px !important;
+        padding: 10px !important;
+        gap: 10px !important;
+        border-radius: 12px !important;
+      }
+      .mentorship-view-buttons button {
+        padding: 6px 10px !important;
+        font-size: 0.7rem !important;
       }
     }
   `}</style>
@@ -1048,11 +1112,11 @@ const MentorshipGatewayInner = () => {
   if (loading) return <SkeletonLoader />;
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', paddingBottom: '80px' }}>
+    <div className="mentorship-page-root" style={{ minHeight: '100vh', paddingBottom: '80px' }}>
       <GlobalStyles />
       
       {/* HEADER SECTION */}
-      <header className="mentorship-header" style={{ background: `linear-gradient(135deg, ${CONFIG.THEME.NAVY_DARK} 0%, ${CONFIG.THEME.NAVY_MAIN} 100%)`, padding: '56px 32px 80px', textAlign: 'center', position: 'relative', overflow: 'hidden', borderBottom: `4px solid ${CONFIG.THEME.GOLD_MAIN}` }}>
+      <header className="mentorship-header" style={{ background: `linear-gradient(135deg, ${CONFIG.THEME.NAVY_DARK} 0%, ${CONFIG.THEME.NAVY_MAIN} 100%)`, textAlign: 'center', position: 'relative', borderBottom: `4px solid ${CONFIG.THEME.GOLD_MAIN}` }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.04, backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
         <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', margin: '0 auto' }}>
           <h1 className="mentorship-title" style={{ color: 'white', fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: '900', margin: '0 0 14px 0', letterSpacing: '-0.5px', lineHeight: 1.1 }}>SJU Mentorship</h1>
@@ -1063,11 +1127,11 @@ const MentorshipGatewayInner = () => {
       </header>
 
       {/* ENTERPRISE WORKSPACE LAYOUT */}
-      <div className="mentorship-workspace" style={{ width: '100%', boxSizing: 'border-box', maxWidth: '1600px', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'minmax(280px, 320px) minmax(0, 1fr)', gap: '40px', position: 'relative', zIndex: 10, marginTop: '-40px' }}>
+      <div className="mentorship-workspace">
         
         {/* SIDEBAR FILTERS */}
-        <aside className="mentorship-sidebar" style={{ height: 'calc(100vh - 140px)', position: 'sticky', top: '80px' }}>
-          <div className="glass-panel" style={{ borderRadius: CONFIG.THEME.RADIUS_LG, padding: '32px 24px', height: '100%', overflowY: 'auto', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+        <aside className="mentorship-sidebar">
+          <div className="glass-panel" style={{ borderRadius: CONFIG.THEME.RADIUS_LG, height: '100%', overflowY: 'auto', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', paddingBottom: '16px', borderBottom: `2px solid ${CONFIG.THEME.NAVY_MAIN}` }}>
               <span style={{ fontWeight: '700', fontSize: '1.25rem', color: CONFIG.THEME.NAVY_MAIN, letterSpacing: '-0.02em' }}>Gateway Filters</span>
               {(search || Object.values(filters).some(v => v !== null)) && (
@@ -1087,8 +1151,8 @@ const MentorshipGatewayInner = () => {
         {/* MAIN DATA CONTENT */}
         <main ref={scrollRef} style={{ display: 'flex', flexDirection: 'column', gap: '32px', minWidth: 0 }}>
           
-          <div className="glass-panel mentorship-controls" style={{ padding: '20px 32px', borderRadius: CONFIG.THEME.RADIUS_LG, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
-            <div className="mentorship-search-container" style={{ position: 'relative', width: '450px' }}>
+          <div className="glass-panel mentorship-controls" style={{ borderRadius: CONFIG.THEME.RADIUS_LG, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+            <div className="mentorship-search-container">
               <span style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>🔍</span>
               <input className="sju-input has-icon" placeholder="Search mentors by name, company, or domain..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
             </div>
