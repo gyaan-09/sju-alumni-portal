@@ -81,14 +81,14 @@ const formatAadhar = (val) => {
 /* ────────────────────────────────────────────────────────── */
 /* FORM FIELD COMPONENT                                        */
 /* ────────────────────────────────────────────────────────── */
-const Field = ({ label, name, type = 'text', value, onChange, required, options, placeholder, error, maxLength }) => {
+const Field = ({ label, name, type = 'text', value, onChange, required, options, placeholder, error, maxLength, disabled }) => {
   const [focused, setFocused] = useState(false);
   const base = {
     width: '100%', padding: '12px 14px', borderRadius: '10px',
     border: `1.5px solid ${error ? T.DANGER : focused ? T.NAVY : T.BORDER}`,
-    fontSize: '0.95rem', background: '#FFF', color: T.TEXT,
+    fontSize: '0.95rem', background: disabled ? T.BG : '#FFF', color: disabled ? T.TEXT3 : T.TEXT,
     outline: 'none', transition: 'border 0.2s', fontFamily: 'inherit',
-    boxSizing: 'border-box',
+    boxSizing: 'border-box', cursor: disabled ? 'not-allowed' : 'text'
   };
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -96,14 +96,14 @@ const Field = ({ label, name, type = 'text', value, onChange, required, options,
         {label}{required && <span style={{ color: T.DANGER }}> *</span>}
       </label>
       {options ? (
-        <select name={name} value={value} onChange={onChange} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} style={base}>
+        <select name={name} value={value} onChange={onChange} disabled={disabled} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} style={base}>
           <option value="">Select…</option>
           {options.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
       ) : type === 'textarea' ? (
-        <textarea name={name} value={value} onChange={onChange} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} placeholder={placeholder} rows={3} style={{ ...base, resize: 'vertical' }} />
+        <textarea name={name} value={value} onChange={onChange} disabled={disabled} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} placeholder={placeholder} rows={3} maxLength={maxLength} style={{ ...base, resize: 'vertical' }} />
       ) : (
-        <input type={type} name={name} value={value} onChange={onChange} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} placeholder={placeholder} required={required} maxLength={maxLength} style={base} />
+        <input type={type} name={name} value={value} onChange={onChange} disabled={disabled} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} placeholder={placeholder} required={required} maxLength={maxLength} style={base} />
       )}
       {error && <span style={{ color: T.DANGER, fontSize: '0.75rem', fontWeight: '600' }}>{error}</span>}
     </div>
@@ -133,21 +133,21 @@ const FileField = ({ label, name, onChange, required, accept, preview }) => (
 /* PROGRESS BAR                                               */
 /* ────────────────────────────────────────────────────────── */
 const ProgressBar = ({ currentStep }) => (
-  <div style={{ padding: '28px 32px 0', borderBottom: `1px solid ${T.BORDER}`, background: '#FFF' }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', paddingBottom: '16px' }}>
-      <div style={{ position: 'absolute', top: '18px', left: '0', right: '0', height: '2px', background: T.BORDER, zIndex: 0 }} />
-      <div style={{ position: 'absolute', top: '18px', left: '0', height: '2px', background: T.NAVY, zIndex: 0, transition: 'width 0.4s ease', width: `${(currentStep / (STEPS.length - 1)) * 100}%` }} />
+  <div className="steps-container" style={{ padding: 'clamp(16px, 4vw, 28px) clamp(16px, 4vw, 32px) 0', borderBottom: `1px solid ${T.BORDER}`, background: '#FFF' }}>
+    <div className="steps" style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', paddingBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+      <div className="progress-line-bg" style={{ position: 'absolute', top: 'clamp(14px, 4vw, 18px)', left: '0', right: '0', height: '2px', background: T.BORDER, zIndex: 0 }} />
+      <div className="progress-line-fill" style={{ position: 'absolute', top: 'clamp(14px, 4vw, 18px)', left: '0', height: '2px', background: T.NAVY, zIndex: 0, transition: 'width 0.4s ease', width: `${(currentStep / (STEPS.length - 1)) * 100}%` }} />
       {STEPS.map(step => (
-        <div key={step.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', zIndex: 1, cursor: 'default' }}>
-          <div style={{
-            width: '38px', height: '38px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        <div key={step.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', zIndex: 1, cursor: 'default', flex: '1', minWidth: '40px' }}>
+          <div className="step-circle" style={{
+            width: 'clamp(28px, 6vw, 38px)', height: 'clamp(28px, 6vw, 38px)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: currentStep > step.id ? T.SUCCESS : currentStep === step.id ? T.NAVY : '#FFF',
             border: `2px solid ${currentStep >= step.id ? (currentStep > step.id ? T.SUCCESS : T.NAVY) : T.BORDER}`,
-            color: currentStep >= step.id ? '#FFF' : T.TEXT3, transition: 'all 0.3s ease', fontSize: currentStep > step.id ? '1.1rem' : '0.85rem'
+            color: currentStep >= step.id ? '#FFF' : T.TEXT3, transition: 'all 0.3s ease', fontSize: currentStep > step.id ? 'clamp(0.8rem, 2vw, 1.1rem)' : 'clamp(0.65rem, 1.8vw, 0.85rem)'
           }}>
             {currentStep > step.id ? <i className="bi bi-check-lg" /> : <i className={`bi ${step.icon}`} />}
           </div>
-          <span style={{ fontSize: '0.72rem', fontWeight: currentStep === step.id ? '800' : '500', color: currentStep === step.id ? T.NAVY : T.TEXT3, whiteSpace: 'nowrap' }}>
+          <span className="step-label" style={{ fontSize: 'clamp(0.6rem, 1.5vw, 0.72rem)', fontWeight: currentStep === step.id ? '800' : '500', color: currentStep === step.id ? T.NAVY : T.TEXT3, textAlign: 'center' }}>
             {step.label}
           </span>
         </div>
@@ -166,17 +166,19 @@ const Register = () => {
   const [error, setError] = useState('');
   const [photoPreview, setPhotoPreview] = useState(null);
   const [idPreview, setIdPreview] = useState(null);
+  const [sjuIdPreview, setSjuIdPreview] = useState(null);
+  const [pgPreview, setPgPreview] = useState(null);
 
   const [form, setForm] = useState({
     // Step 0: Personal
     fullName: '', fathersName: '', mothersName: '', email: '',
     countryCode: '+91', phoneNumber: '', dateOfBirth: '', gender: '', aadhar: '', age: '',
     // Step 1: Academic
-    registerNumber: '', degree: '', batchYear: '', pgCollege: '', pgCourse: '',
+    registerNumber: '', degree: '', batchYear: '', hasPG: 'No', pgCollege: '', pgCourse: '',
     // Step 2: Career
-    currentStatus: '', companyName: '', designation: '', linkedInProfile: '', skills: '',
+    currentStatus: '', companyName: '', designation: '', workingSince: '', linkedInProfile: '', skills: '', description: '', achievements: '',
     // Step 3: Documents
-    profilePhotoUrl: '', idProofUrl: '',
+    profilePhotoUrl: '', idProofUrl: '', sjuIdProofUrl: '', pgCollegeProofUrl: '',
   });
 
   const handleChange = (e) => {
@@ -193,7 +195,24 @@ const Register = () => {
        value = value.trim();
     }
     
-    setForm(p => ({ ...p, [name]: value }));
+    let enhancements = {};
+    if (name === 'dateOfBirth' && value.length === 10) {
+      const parts = value.split('-');
+      if (parts.length === 3) {
+        const dobDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        const today = new Date();
+        let calculatedAge = today.getFullYear() - dobDate.getFullYear();
+        const m = today.getMonth() - dobDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+            calculatedAge--;
+        }
+        if (calculatedAge > 0 && calculatedAge < 100) {
+           enhancements.age = calculatedAge.toString();
+        }
+      }
+    }
+    
+    setForm(p => ({ ...p, [name]: value, ...enhancements }));
     setError('');
   };
 
@@ -239,10 +258,15 @@ const Register = () => {
       if (!form.registerNumber.trim()) return 'Register Number is required.';
       if (!form.degree) return 'Degree is required.';
       if (!form.batchYear) return 'Batch Year is required.';
+      if (form.hasPG === 'Yes') {
+         if (!form.pgCollege || !form.pgCourse) return 'PG College and Course are required if you stated Yes.';
+      }
     }
     if (step === 3) {
       if (!form.profilePhotoUrl) return 'Profile photo is required.';
-      if (!form.idProofUrl) return 'Identity document is required.';
+      if (!form.idProofUrl) return 'Government ID validation is required.';
+      if (!form.sjuIdProofUrl) return 'SJU College ID proof is required.';
+      if (form.hasPG === 'Yes' && !form.pgCollegeProofUrl) return 'PG College Proof is required to complete the verification.';
     }
     return null;
   };
@@ -394,11 +418,11 @@ const Register = () => {
                     }} />
                   </div>
                   <Field label="Gender" name="gender" value={form.gender} onChange={handleChange} required options={['Male', 'Female', 'Other', 'Prefer not to say']} />
-                  <Field label="Age" name="age" type="text" value={form.age} onChange={handleChange} placeholder="e.g. 25" maxLength={2} />
-                  <Field label="Father's Name" name="fathersName" value={form.fathersName} onChange={handleChange} placeholder="First Last" />
-                  <Field label="Mother's Name" name="mothersName" value={form.mothersName} onChange={handleChange} placeholder="First Last" />
+                  <Field label="Age (Auto-Calculated)" name="age" type="text" value={form.age} onChange={handleChange} placeholder="e.g. 25" disabled />
+                  <Field label="Father's Name" name="fathersName" value={form.fathersName} onChange={handleChange} placeholder="First Last" required />
+                  <Field label="Mother's Name" name="mothersName" value={form.mothersName} onChange={handleChange} placeholder="First Last" required />
                   <div style={{ gridColumn: 'span 2' }}>
-                    <Field label="Aadhar Card Number" name="aadhar" value={form.aadhar} onChange={handleChange} placeholder="xxxx-xxxx-xxxx" maxLength={14} />
+                    <Field label="Aadhar Card Number" name="aadhar" value={form.aadhar} onChange={handleChange} required placeholder="xxxx-xxxx-xxxx" maxLength={14} />
                   </div>
                 </div>
               </div>
@@ -412,10 +436,17 @@ const Register = () => {
                 <div className="reg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                   <Field label="Register Number" name="registerNumber" value={form.registerNumber} onChange={handleChange} required placeholder="e.g. 232BCAA14" />
                   <Field label="Degree / Programme" name="degree" value={form.degree} onChange={handleChange} required options={['B.Com', 'MBA', 'BCA', 'MCA', 'MSW', 'M.A.', 'B.A.', 'B.Sc.', 'M.Sc.', 'LLB', 'Ph.D', 'Other']} />
-                  <Field label="Year Of Passing" name="batchYear" value={form.batchYear} onChange={handleChange} required options={Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() + 1 - i))} />
-                  <Field label="PG College (if applicable)" name="pgCollege" value={form.pgCollege} onChange={handleChange} placeholder="Post-grad institution" />
-                  <div style={{ gridColumn: 'span 2' }}>
-                    <Field label="PG Course / Specialisation" name="pgCourse" value={form.pgCourse} onChange={handleChange} placeholder="e.g. MBA in Finance" />
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <Field label="Year Of Passing" name="batchYear" value={form.batchYear} onChange={handleChange} required options={Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() + 1 - i))} />
+                  </div>
+                  <div style={{ gridColumn: 'span 2', padding: '16px', border: `1px dashed ${T.BORDER}`, borderRadius: '12px', background: T.BG }}>
+                    <Field label="Did you pursue Post Graduation?" name="hasPG" value={form.hasPG} onChange={handleChange} required options={['Yes', 'No']} />
+                    {form.hasPG === 'Yes' && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '24px' }}>
+                         <Field label="PG College Name" name="pgCollege" value={form.pgCollege} onChange={handleChange} placeholder="e.g. Christ University" required />
+                         <Field label="PG Course / Specialisation" name="pgCourse" value={form.pgCourse} onChange={handleChange} placeholder="e.g. MBA in Finance" required />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -430,9 +461,18 @@ const Register = () => {
                   <Field label="Current Status" name="currentStatus" value={form.currentStatus} onChange={handleChange} options={['Employed', 'Self-Employed', 'Higher Studies', 'Freelancer', 'Seeking Opportunities', 'Other']} />
                   <Field label="Company / Organisation" name="companyName" value={form.companyName} onChange={handleChange} placeholder="e.g. Infosys" />
                   <Field label="Designation / Role" name="designation" value={form.designation} onChange={handleChange} placeholder="e.g. Software Engineer" />
-                  <Field label="LinkedIn Profile URL" name="linkedInProfile" value={form.linkedInProfile} onChange={handleChange} placeholder="https://linkedin.com/in/..." />
+                  <Field label="Since when are you working?" name="workingSince" value={form.workingSince} onChange={handleChange} placeholder="e.g. 2021" />
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <Field label="LinkedIn Profile URL" name="linkedInProfile" value={form.linkedInProfile} onChange={handleChange} placeholder="https://linkedin.com/in/..." />
+                  </div>
                   <div style={{ gridColumn: '1 / -1' }}>
                     <Field label="Skills (comma-separated)" name="skills" type="textarea" value={form.skills} onChange={handleChange} placeholder="e.g. Python, React, Data Analysis, Leadership" />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <Field label="Write About Yourself (Description)" name="description" type="textarea" value={form.description} onChange={handleChange} placeholder="Describe your robust professional journey..." maxLength={500} />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <Field label="Special Achievements / Awards" name="achievements" type="textarea" value={form.achievements} onChange={handleChange} placeholder="Any notable awards or recognitions?" />
                   </div>
                 </div>
               </div>
@@ -442,10 +482,14 @@ const Register = () => {
             {step === 3 && (
               <div>
                 <h3 style={{ color: T.NAVY, margin: '0 0 6px', fontSize: '1.3rem', fontWeight: '800' }}>Identity Documents</h3>
-                <p style={{ color: T.TEXT3, margin: '0 0 28px', fontSize: '0.9rem' }}>Upload your profile photo and a government/university ID for verification.</p>
+                <p style={{ color: T.TEXT3, margin: '0 0 28px', fontSize: '0.9rem' }}>Upload your profile photo and government/university ID for strict verification.</p>
                 <div style={gridTwo}>
-                  <FileField label="Profile Photo" name="profilePhoto" accept="image/*" onChange={e => handleFile(e, setPhotoPreview, 'profilePhotoUrl')} preview={photoPreview} required />
-                  <FileField label="Identity Document (Aadhar / College ID)" name="idProof" accept="image/*,application/pdf" onChange={e => handleFile(e, setIdPreview, 'idProofUrl')} preview={idPreview} required />
+                  <FileField label="Profile Photo (Proof 3)" name="profilePhoto" accept="image/*" onChange={e => handleFile(e, setPhotoPreview, 'profilePhotoUrl')} preview={photoPreview} required />
+                  <FileField label="Govt ID / Aadhar (Proof 1)" name="idProof" accept="image/*,application/pdf" onChange={e => handleFile(e, setIdPreview, 'idProofUrl')} preview={idPreview} required />
+                  <FileField label="SJU College ID (Proof 2)" name="sjuIdProof" accept="image/*,application/pdf" onChange={e => handleFile(e, setSjuIdPreview, 'sjuIdProofUrl')} preview={sjuIdPreview} required />
+                  {form.hasPG === 'Yes' && (
+                     <FileField label="PG Campus Proof" name="pgCollegeProof" accept="image/*,application/pdf" onChange={e => handleFile(e, setPgPreview, 'pgCollegeProofUrl')} preview={pgPreview} required />
+                  )}
                 </div>
                 <p style={{ margin: '20px 0 0', fontSize: '0.82rem', color: T.TEXT3 }}>
                   <i className="bi bi-info-circle" /> Accepted formats: JPG, PNG, PDF. Your documents are encrypted and used only for verification.
@@ -539,7 +583,10 @@ const Register = () => {
           .reg-card { padding: 24px !important; }
           .reg-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
           div[style*="gridTemplateColumns: '1fr 1fr'"] { grid-template-columns: 1fr !important; }
-          .progress-steps { display: none !important; }
+          .steps-container { padding-left: 12px !important; padding-right: 12px !important; }
+          .steps { gap: 4px !important; }
+          .progress-line-bg, .progress-line-fill { display: none !important; }
+          .step-label { white-space: normal !important; word-wrap: break-word; }
         }
       `}</style>
     </div>

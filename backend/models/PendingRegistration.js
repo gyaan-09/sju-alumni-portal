@@ -16,12 +16,17 @@ const pendingRegistrationSchema = new mongoose.Schema({
     companyName: { type: String },
     designation: { type: String },
     pgCollege: { type: String },
+    pgCollegeProofUrl: { type: String },
     skills: { type: [String] }, 
+    workingSince: { type: String },
+    description: { type: String },
+    achievements: { type: String },
     linkedInProfile: { type: String },
     age: { type: Number },
     // Frontend specific
     profilePhotoUrl: { type: String },
     idProofUrl: { type: String },
+    sjuIdProofUrl: { type: String },
     status: { type: String, default: 'PENDING' }
 }, {
     timestamps: true

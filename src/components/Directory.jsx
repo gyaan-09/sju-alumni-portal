@@ -951,7 +951,7 @@ const DirectoryInner = () => {
         </aside>
 
         {/* Main Content Area */}
-        <main ref={scrollRef} style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+        <main ref={scrollRef} style={{ display: 'flex', flexDirection: 'column', gap: '40px', minWidth: 0 }}>
           
           {/* Action Bar */}
           <div className="glass-panel directory-controls" style={{ padding: '24px 40px', borderRadius: CONFIG.THEME.RADIUS_XL, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>

@@ -1074,7 +1074,7 @@ const AppUnifiedHomeInner = () => {
   };
 
   return (
-    <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%', overflowX: 'hidden' }}>
       <GlobalStyles />
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
 

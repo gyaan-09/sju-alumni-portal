@@ -1047,7 +1047,7 @@ const MentorshipGatewayInner = () => {
         </aside>
 
         {/* MAIN DATA CONTENT */}
-        <main ref={scrollRef} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        <main ref={scrollRef} style={{ display: 'flex', flexDirection: 'column', gap: '32px', minWidth: 0 }}>
           
           <div className="glass-panel mentorship-controls" style={{ padding: '20px 32px', borderRadius: CONFIG.THEME.RADIUS_LG, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
             <div className="mentorship-search-container" style={{ position: 'relative', width: '450px' }}>
