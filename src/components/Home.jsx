@@ -348,11 +348,20 @@ const GlobalStyles = () => (
       }
       .calendar-left-pane {
         width: 100% !important;
-        padding: 40px !important;
+        padding: 40px 24px !important;
       }
       .calendar-right-pane {
         width: 100% !important;
-        padding: 30px !important;
+        padding: 30px 12px !important;
+      }
+      .calendar-grid {
+        gap: 6px !important;
+      }
+      .calendar-day {
+        font-size: 0.95rem !important;
+      }
+      .calendar-day-header {
+        font-size: 0.75rem !important;
       }
       .event-card {
         flex-direction: column !important;
@@ -761,7 +770,7 @@ const CampusCalendar = () => {
         <SectionHeader overline="Schedules" title="University Academic Calendar" align="center" />
         <Flex style={{ background: THEME.colors.bgPage, boxShadow: THEME.shadows.xl, borderRadius: THEME.radii.xl, overflow: 'hidden', border: `1px solid ${THEME.colors.borderLight}` }} direction="row" align="stretch" className="fade-in-up calendar-container" wrap="wrap">
           
-          <Box className="calendar-left-pane" style={{ background: THEME.colors.brandPrimary, color: THEME.colors.textWhite, padding: '80px 48px', width: '40%', minWidth: 'min(350px, 100vw)', display: 'flex', flexDirection: 'column' }}>
+          <Box className="calendar-left-pane" style={{ background: THEME.colors.brandPrimary, color: THEME.colors.textWhite, padding: '80px 48px', width: '40%', minWidth: '240px', display: 'flex', flexDirection: 'column' }}>
             <Text size="6xl" weight="bold" color="brandSecondary" style={{ marginBottom: '8px' }}>{selectedDay}</Text>
             <Text size="2xl" weight="medium" style={{ marginBottom: '48px', color: THEME.colors.textWhite }}>February 2026</Text>
             <Box style={{ borderTop: `1px solid rgba(255,255,255,0.1)`, paddingTop: '32px', flex: 1 }}>
@@ -780,7 +789,7 @@ const CampusCalendar = () => {
             </Box>
           </Box>
           
-          <Box className="calendar-right-pane" style={{ padding: '60px', width: '60%', minWidth: 'min(400px, 100vw)', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Box className="calendar-right-pane" style={{ padding: '60px', width: '60%', minWidth: '240px', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <Flex justify="space-between" align="center" style={{ marginBottom: '40px' }}>
               <Icons.chevronLeft style={{ cursor: 'pointer', color: THEME.colors.textMuted, width: '24px', height: '24px' }} />
               <Text size="3xl" weight="bold" color="brandPrimary">February 2026</Text>

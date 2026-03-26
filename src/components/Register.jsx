@@ -342,7 +342,7 @@ const Register = () => {
   );
 
   /* ── PAGE WRAPPERS ───────────────────────────────────── */
-  const gridTwo = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px' };
+  const gridTwo = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px' };
 
   if (submitted) {
     return (
@@ -391,7 +391,7 @@ const Register = () => {
               <div>
                 <h3 style={{ color: T.NAVY, margin: '0 0 6px', fontSize: '1.3rem', fontWeight: '800' }}>Personal Information</h3>
                 <p style={{ color: T.TEXT3, margin: '0 0 28px', fontSize: '0.9rem' }}>Tell us about yourself.</p>
-                <div className="reg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                <div className="reg-grid" style={{ gap: '24px' }}>
                   <Field label="Full Name" name="fullName" value={form.fullName} onChange={handleChange} required placeholder="e.g. Ram Kumar" />
                   <Field label="Primary Email Id" name="email" value={form.email} onChange={handleChange} required placeholder="you@domain.com" />
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -454,7 +454,7 @@ const Register = () => {
               <div>
                 <h3 style={{ color: T.NAVY, margin: '0 0 6px', fontSize: '1.3rem', fontWeight: '800' }}>Career & Professional</h3>
                 <p style={{ color: T.TEXT3, margin: '0 0 28px', fontSize: '0.9rem' }}>Your current professional status.</p>
-                <div style={gridTwo}>
+                <div className="reg-grid" style={{ gap: '18px' }}>
                   <Field label="Current Status" name="currentStatus" value={form.currentStatus} onChange={handleChange} options={['Employed', 'Self-Employed', 'Higher Studies', 'Freelancer', 'Seeking Opportunities', 'Other']} />
                   <Field label="Company / Organisation" name="companyName" value={form.companyName} onChange={handleChange} placeholder="e.g. Infosys" />
                   <Field label="Designation / Role" name="designation" value={form.designation} onChange={handleChange} placeholder="e.g. Software Engineer" />
@@ -480,7 +480,7 @@ const Register = () => {
               <div>
                 <h3 style={{ color: T.NAVY, margin: '0 0 6px', fontSize: '1.3rem', fontWeight: '800' }}>Identity Documents</h3>
                 <p style={{ color: T.TEXT3, margin: '0 0 28px', fontSize: '0.9rem' }}>Upload your profile photo and government/university ID for strict verification.</p>
-                <div style={gridTwo}>
+                <div className="reg-grid" style={{ gap: '18px' }}>
                   <FileField label="Profile Photo (Proof 3)" name="profilePhoto" accept="image/*" onChange={e => handleFile(e, setPhotoPreview, 'profilePhotoUrl')} preview={photoPreview} required />
                   <FileField label="Govt ID / Aadhar (Proof 1)" name="idProof" accept="image/*,application/pdf" onChange={e => handleFile(e, setIdPreview, 'idProofUrl')} preview={idPreview} required />
                   <FileField label="SJU College ID (Proof 2)" name="sjuIdProof" accept="image/*,application/pdf" onChange={e => handleFile(e, setSjuIdPreview, 'sjuIdProofUrl')} preview={sjuIdPreview} required />
@@ -575,11 +575,11 @@ const Register = () => {
         @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
         @keyframes spin { to { transform: rotate(360deg); } }
         * { box-sizing: border-box; font-family: 'Lora', serif !important; }
+        .reg-grid { display: grid; grid-template-columns: 1fr 1fr; }
         @media (max-width: 768px) {
           .reg-container { padding: 12px 16px !important; }
           .reg-card-padding { padding: 24px 20px 20px !important; }
           .reg-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
-          div[style*="gridTemplateColumns: '1fr 1fr'"] { grid-template-columns: 1fr !important; }
           .steps-container { padding-left: 12px !important; padding-right: 12px !important; }
           .steps { gap: 4px !important; }
           .progress-line-bg, .progress-line-fill { display: none !important; }
