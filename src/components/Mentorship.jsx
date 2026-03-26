@@ -815,7 +815,7 @@ const SmartMatchView = ({ data, onSelect }) => {
       {matched.length > 0 && !analyzing && (
         <div style={{ animation: 'slideUpFade 0.6s ease' }}>
           <h3 style={{ textAlign: 'center', color: CONFIG.THEME.SUCCESS, marginBottom: '32px', fontSize: '1.5rem', fontWeight: '800' }}>✓ Top Matches Found</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px' }}>
              {matched.map((m, i) => (
                <div key={m.id} className="animated-card" style={{ padding: '32px 24px', textAlign: 'center', border: `2px solid ${i === 0 ? CONFIG.THEME.GOLD_MAIN : CONFIG.THEME.BORDER_LIGHT}`, position: 'relative' }} onClick={() => onSelect(m)}>
                  {i === 0 && <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translate(-50%, -50%)', background: CONFIG.THEME.GOLD_MAIN, color: CONFIG.THEME.NAVY_MAIN, padding: '4px 16px', borderRadius: '20px', fontWeight: 'bold', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>98% Best Match</div>}
@@ -1025,7 +1025,7 @@ const MentorshipGatewayInner = () => {
       </header>
 
       {/* ENTERPRISE WORKSPACE LAYOUT */}
-      <div className="mentorship-workspace" style={{ maxWidth: '100vw', boxSizing: 'border-box', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'minmax(300px, 340px) minmax(0, 1fr)', gap: '40px', position: 'relative', zIndex: 10, marginTop: '-50px' }}>
+      <div className="mentorship-workspace" style={{ width: '100%', boxSizing: 'border-box', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'minmax(300px, 340px) minmax(0, 1fr)', gap: '40px', position: 'relative', zIndex: 10, marginTop: '-50px' }}>
         
         {/* SIDEBAR FILTERS */}
         <aside className="mentorship-sidebar" style={{ height: 'calc(100vh - 40px)', position: 'sticky', top: '20px' }}>

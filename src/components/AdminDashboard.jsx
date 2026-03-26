@@ -666,7 +666,7 @@ const AdminDashboard = () => {
 
   // ---- LAYOUT ----
   return (
-    <div className="admin-layout" style={{ display: 'flex', height: '100vh', width: '100vw', background: T.BG_APP, fontFamily: "'Lora', serif" }}>
+    <div className="admin-layout" style={{ display: 'flex', height: '100vh', width: '100%', background: T.BG_APP, fontFamily: "'Lora', serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700&display=swap');
         @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css');
@@ -687,6 +687,8 @@ const AdminDashboard = () => {
             flex-direction: row !important; padding: 8px !important; gap: 4px !important;
             overflow-x: auto; white-space: nowrap;
           }
+          .admin-sidebar-header { padding: 16px !important; border-bottom: none !important; border-right: 1px solid rgba(255,255,255,0.08); }
+          .admin-sidebar-footer { display: none !important; }
           .admin-sidebar nav button {
             padding: 10px 14px !important; font-size: 0.8rem !important; flex-shrink: 0;
             border-left: none !important; border-bottom: 3px solid transparent !important;
@@ -709,7 +711,7 @@ const AdminDashboard = () => {
 
       {/* SIDEBAR */}
       <div className="admin-sidebar" style={{ width: '260px', flexShrink: 0, background: `linear-gradient(180deg, ${T.NAVY_DARK} 0%, ${T.NAVY_MAIN} 100%)`, color: '#FFF', display: 'flex', flexDirection: 'column', boxShadow: '4px 0 20px rgba(0,0,0,0.15)' }}>
-        <div style={{ padding: '28px 22px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="admin-sidebar-header" style={{ padding: '28px 22px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
             <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: T.GOLD_MAIN, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', color: T.NAVY_DARK, fontSize: '1rem' }}>S</div>
             <div>
@@ -735,7 +737,7 @@ const AdminDashboard = () => {
           ))}
         </nav>
 
-        <div style={{ padding: '16px 22px', borderTop: '1px solid rgba(255,255,255,0.08)', fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>
+        <div className="admin-sidebar-footer" style={{ padding: '16px 22px', borderTop: '1px solid rgba(255,255,255,0.08)', fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>
           St. Joseph's University · Admin Portal
         </div>
       </div>

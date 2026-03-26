@@ -310,9 +310,9 @@ const AdvancedPagination = ({ currentPage, totalPages, onPageChange, totalItems,
   const btnStyle = (disabled) => ({ padding: '10px 18px', background: CONFIG.THEME.BG_SURFACE, border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, borderRadius: '8px', color: disabled ? CONFIG.THEME.TEXT_TER : CONFIG.THEME.NAVY_MAIN, fontWeight: '700', fontSize: '0.9rem', cursor: disabled ? 'not-allowed' : 'pointer', transition: CONFIG.THEME.TRANSITION_FAST, boxShadow: disabled ? 'none' : CONFIG.THEME.SHADOW_SM });
   
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '32px 0', marginTop: '48px', borderTop: `2px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', justifyContent: 'space-between', alignItems: 'center', padding: '32px 0', marginTop: '48px', borderTop: `2px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
       <div style={{ fontSize: '0.95rem', color: CONFIG.THEME.TEXT_SEC }}>Showing <strong style={{ color: CONFIG.THEME.NAVY_MAIN }}>{((currentPage - 1) * pageSize) + 1}</strong> to <strong style={{ color: CONFIG.THEME.NAVY_MAIN }}>{Math.min(currentPage * pageSize, totalItems)}</strong> of <strong style={{ color: CONFIG.THEME.NAVY_MAIN }}>{totalItems}</strong> entries</div>
-      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
         <button onClick={() => handleNav('first')} disabled={currentPage === 1} style={btnStyle(currentPage === 1)}>« First</button>
         <button onClick={() => handleNav('prev')} disabled={currentPage === 1} style={btnStyle(currentPage === 1)}>‹ Prev</button>
         <div style={{ padding: '10px 24px', background: CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN, borderRadius: '8px', fontWeight: '700', fontSize: '0.9rem', boxShadow: CONFIG.THEME.SHADOW_MD }}>Page {currentPage} of {totalPages}</div>
@@ -924,7 +924,7 @@ const DirectoryInner = () => {
       </header>
 
       {/* Core Interface Shell */}
-      <div className="directory-workspace" style={{ maxWidth: '100vw', boxSizing: 'border-box', margin: '0 auto', padding: '0 40px', display: 'grid', gridTemplateColumns: 'minmax(300px, 360px) minmax(0, 1fr)', gap: '48px', position: 'relative', zIndex: 10, marginTop: '-60px' }}>
+      <div className="directory-workspace" style={{ width: '100%', boxSizing: 'border-box', margin: '0 auto', padding: '0 40px', display: 'grid', gridTemplateColumns: 'minmax(300px, 360px) minmax(0, 1fr)', gap: '48px', position: 'relative', zIndex: 10, marginTop: '-60px' }}>
         
         {/* Left Nav / Facet Sidebar */}
         <aside className="directory-sidebar" style={{ height: 'calc(100vh - 40px)', position: 'sticky', top: '20px' }}>

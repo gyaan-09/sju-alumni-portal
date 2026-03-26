@@ -605,7 +605,7 @@ const UnifiedStatsSection = () => {
           <Box style={{ width: '80px', height: '4px', background: THEME.colors.brandSecondary, margin: '32px auto 0' }} />
         </Box>
 
-        <Grid columns="repeat(auto-fit, minmax(280px, 1fr))" gap="40px">
+        <Grid columns="repeat(auto-fit, minmax(min(100%, 280px), 1fr))" gap="40px">
           {DataFactory.metrics.map((metric, idx) => {
             const IconComponent = Icons[metric.icon];
             return (
@@ -709,7 +709,7 @@ const AlumniDirectory = ({ onOpenAlumni }) => {
         </Flex>
 
         {filteredAlumni.length > 0 ? (
-          <Grid columns="repeat(auto-fill, minmax(280px, 1fr))" gap="40px">
+          <Grid columns="repeat(auto-fill, minmax(min(100%, 280px), 1fr))" gap="40px">
             {filteredAlumni.map((alum, index) => (
               <Box
                 key={alum.id} className="interactive-card fade-in-up image-zoom-container"
@@ -831,7 +831,7 @@ const NewsSection = ({ onOpenNews }) => (
   <Section bg="bgSurfaceAlt">
     <Container>
       <SectionHeader overline="Publications" title="Campus News & Stories" align="left" />
-      <Grid columns="repeat(auto-fit, minmax(280px, 1fr))" gap="48px">
+      <Grid columns="repeat(auto-fit, minmax(min(100%, 280px), 1fr))" gap="48px">
         {DataFactory.announcements.map((news, idx) => (
           <Flex key={news.id} direction="column" justify="space-between" className="interactive-card fade-in-up" style={{ borderRadius: THEME.radii.lg, border: `1px solid ${THEME.colors.borderLight}`, padding: window.innerWidth <= 800 ? '30px 24px' : '48px', height: '100%', animationDelay: `${idx * 0.15}s` }}>
             <Box>
@@ -910,7 +910,7 @@ const ReviewsSection = () => {
   }, []);
 
   const SkeletonReview = ({ index }) => (
-    <Flex direction="column" style={{ padding: '48px', borderRadius: THEME.radii.lg, backgroundColor: THEME.colors.bgPage, border: `1px solid ${THEME.colors.borderLight}`, animationDelay: `${(index % 3) * 0.15}s` }} className="fade-in-up">
+    <Flex direction="column" style={{ padding: 'clamp(24px, 5vw, 48px)', borderRadius: THEME.radii.lg, backgroundColor: THEME.colors.bgPage, border: `1px solid ${THEME.colors.borderLight}`, animationDelay: `${(index % 3) * 0.15}s` }} className="fade-in-up">
       <Box className="skeleton-shimmer" style={{ width: '40px', height: '40px', borderRadius: '50%', marginBottom: '32px' }} />
       <Box className="skeleton-shimmer" style={{ width: '100%', height: '20px', marginBottom: '16px' }} />
       <Box className="skeleton-shimmer" style={{ width: '90%', height: '20px', marginBottom: '16px' }} />
@@ -936,7 +936,7 @@ const ReviewsSection = () => {
         />
         
         {loading ? (
-          <Grid columns="repeat(auto-fill, minmax(350px, 1fr))" gap="32px">
+          <Grid columns="repeat(auto-fill, minmax(min(100%, 350px), 1fr))" gap="32px">
             {[1, 2, 3, 4, 5, 6].map(key => <SkeletonReview key={key} index={key} />)}
           </Grid>
         ) : syncFault ? (
@@ -952,9 +952,9 @@ const ReviewsSection = () => {
             <Text size="lg" color="borderMedium" align="center" style={{ maxWidth: '600px' }}>Connection to database successful, but no valid review nodes were located. Ensure the 'reviews' field is actively populated in your database.</Text>
           </Flex>
         ) : (
-          <Grid columns="repeat(auto-fill, minmax(350px, 1fr))" gap="32px">
+          <Grid columns="repeat(auto-fill, minmax(min(100%, 350px), 1fr))" gap="32px">
             {reviews.map((rev, idx) => (
-              <Flex key={rev.id} direction="column" className="interactive-card fade-in-up" style={{ padding: '48px', borderRadius: THEME.radii.lg, backgroundColor: THEME.colors.bgPage, animationDelay: `${(idx % 3) * 0.15}s`, height: '100%' }}>
+              <Flex key={rev.id} direction="column" className="interactive-card fade-in-up" style={{ padding: 'clamp(24px, 5vw, 48px)', borderRadius: THEME.radii.lg, backgroundColor: THEME.colors.bgPage, animationDelay: `${(idx % 3) * 0.15}s`, height: '100%' }}>
                 <Icons.quote style={{ marginBottom: '32px', color: THEME.colors.brandSecondary }} />
                 <Text size="xl" color="textMain" style={{ fontStyle: 'italic', marginBottom: '40px', lineHeight: 1.8, flex: 1 }}>"{rev.text}"</Text>
                 <Flex align="center" gap="16px" style={{ marginTop: 'auto' }}>
