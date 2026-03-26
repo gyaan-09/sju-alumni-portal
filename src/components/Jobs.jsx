@@ -253,7 +253,7 @@ const PostJobModal = ({ onClose, onPosted, user }) => {
       const res = await fetch(API_BASE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, postedBy: user.username, postedByName: user.fullName })
+        body: JSON.stringify({ ...form, postedBy: user.reg_no || user.id || 'anonymous', postedByName: user.name || user.full_name || 'Alumni' })
       });
       const data = await res.json();
       onPosted(data.job);

@@ -679,21 +679,27 @@ const AdminDashboard = () => {
         @media (max-width: 900px) {
           .admin-layout { flex-direction: column !important; height: auto !important; min-height: 100vh; }
           .admin-sidebar {
-            width: 100% !important; flex-direction: row !important; height: auto !important;
-            overflow-x: auto; display: flex; flex-direction: row !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+            width: 100% !important; flex-direction: column !important; height: auto !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+            z-index: 50; position: relative;
           }
           .admin-sidebar nav {
-            flex-direction: row !important; padding: 8px !important; gap: 4px !important;
-            overflow-x: auto; white-space: nowrap;
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            padding: 12px !important; gap: 8px !important;
+            overflow: hidden !important; white-space: normal !important;
           }
-          .admin-sidebar-header { padding: 16px !important; border-bottom: none !important; border-right: 1px solid rgba(255,255,255,0.08); }
+          .admin-sidebar-header { padding: 16px 20px !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; border-right: none !important; }
           .admin-sidebar-footer { display: none !important; }
           .admin-sidebar nav button {
-            padding: 10px 14px !important; font-size: 0.8rem !important; flex-shrink: 0;
+            padding: 12px !important; font-size: 0.85rem !important; flex-shrink: 0;
             border-left: none !important; border-bottom: 3px solid transparent !important;
+            border-radius: 8px !important; text-align: center !important;
+            display: flex !important; flex-direction: column !important; gap: 6px !important;
+            justify-content: center !important; height: auto !important;
           }
-          .admin-main { height: calc(100vh - 120px); overflow-y: auto; }
+          .admin-sidebar nav button i { font-size: 1.2rem !important; margin: 0 auto !important; }
+          .admin-main { height: auto; min-height: 100vh; overflow-y: visible; }
         }
 
         @media (max-width: 600px) {

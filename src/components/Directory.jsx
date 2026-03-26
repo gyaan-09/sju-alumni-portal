@@ -680,9 +680,9 @@ const DossierModal = ({ user, onClose }) => {
 
           {/* Right Main Content */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', borderBottom: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, padding: window.innerWidth <= 800 ? '0 15px' : '0 48px', paddingTop: window.innerWidth <= 800 ? '10px' : '40px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <div style={{ display: 'flex', borderBottom: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, padding: window.innerWidth <= 800 ? '16px 15px 0' : '40px 48px 0', flexWrap: window.innerWidth <= 800 ? 'wrap' : 'nowrap', gap: '8px' }}>
                {['overview', 'academics', 'mentorship'].map(tab => (
-                 <div key={tab} onClick={() => setActiveTab(tab)} style={{ padding: window.innerWidth <= 800 ? '12px 16px' : '16px 24px', cursor: 'pointer', fontWeight: '700', fontSize: window.innerWidth <= 800 ? '0.85rem' : '1rem', textTransform: 'capitalize', color: activeTab === tab ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.TEXT_TER, borderBottom: `3px solid ${activeTab === tab ? CONFIG.THEME.GOLD_MAIN : 'transparent'}`, transition: CONFIG.THEME.TRANSITION_FAST, transform: activeTab === tab ? 'translateY(1px)' : 'none', whiteSpace: 'nowrap' }}>
+                 <div key={tab} onClick={() => setActiveTab(tab)} style={{ padding: window.innerWidth <= 800 ? '10px 16px' : '16px 24px', cursor: 'pointer', fontWeight: '700', fontSize: window.innerWidth <= 800 ? '0.85rem' : '1rem', textTransform: 'capitalize', color: activeTab === tab ? CONFIG.THEME.NAVY_MAIN : CONFIG.THEME.TEXT_TER, borderBottom: `3px solid ${activeTab === tab ? CONFIG.THEME.GOLD_MAIN : 'transparent'}`, transition: CONFIG.THEME.TRANSITION_FAST, flexShrink: 0 }}>
                     {tab}
                  </div>
                ))}

@@ -976,17 +976,17 @@ const ReviewsSection = () => {
 };
 
 const FaqSection = () => (
-  <Section bg="bgSurfaceAlt">
+  <Section bg="bgPrimary">
     <Container maxWidth="900px">
       <SectionHeader title="Frequently Asked Questions" align="center" />
       <Box style={{ borderTop: `2px solid ${THEME.colors.borderLight}` }}>
         {DataFactory.faqs.map((faq, index) => (
-          <details key={index} style={{ borderBottom: `1px solid ${THEME.colors.borderMedium}` }}>
-            <summary style={{ cursor: 'pointer', padding: '32px 0', fontWeight: 600, fontSize: THEME.typography.sizes.xl, listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: THEME.transitions.smooth }}>
+          <details key={index} style={{ borderBottom: `1px solid ${THEME.colors.borderLight}` }}>
+            <summary style={{ cursor: 'pointer', padding: '32px 0', fontWeight: 600, fontSize: THEME.typography.sizes.xl, color: THEME.colors.textLight, listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: THEME.transitions.smooth }}>
               {faq.question}
               <Box as="span" style={{ color: THEME.colors.brandSecondary, fontWeight: 300, fontSize: '2rem' }}>+</Box>
             </summary>
-            <Box style={{ padding: '0 0 40px 0', color: THEME.colors.textMuted, lineHeight: 1.8, fontSize: THEME.typography.sizes.lg }}>
+            <Box style={{ padding: '0 0 40px 0', color: THEME.colors.borderMedium, lineHeight: 1.8, fontSize: THEME.typography.sizes.lg }}>
               {faq.answer}
             </Box>
           </details>
@@ -1005,7 +1005,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   return (
     <Box style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <Box onClick={onClose} style={{ position: 'absolute', inset: 0, background: THEME.colors.overlay, backdropFilter: 'blur(10px)' }} />
-      <Box className="fade-in-up" style={{ position: 'relative', width: '100%', maxWidth: '900px', background: THEME.colors.bgPage, borderRadius: THEME.radii.xl, padding: '64px', boxShadow: THEME.shadows.xl, maxHeight: '90vh', overflowY: 'auto', margin: '24px' }}>
+      <Box className="fade-in-up" style={{ position: 'relative', width: '100%', maxWidth: '900px', background: THEME.colors.bgPage, borderRadius: THEME.radii.xl, padding: 'clamp(24px, 5vw, 64px)', boxShadow: THEME.shadows.xl, maxHeight: '90vh', overflowY: 'auto', margin: 'clamp(12px, 3vw, 24px)' }}>
         <Flex justify="space-between" align="flex-start" style={{ marginBottom: '48px' }}>
           <Text size="4xl" weight="bold" color="brandPrimary" style={{ lineHeight: 1.2 }}>{title}</Text>
           <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: THEME.colors.textLight, transition: THEME.transitions.smooth }} onMouseOver={(e) => e.target.style.color = THEME.colors.danger} onMouseOut={(e) => e.target.style.color = THEME.colors.textLight}>

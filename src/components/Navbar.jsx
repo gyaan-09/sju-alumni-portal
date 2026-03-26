@@ -409,7 +409,7 @@ const Navbar = () => {
 
       {/* MOBILE MENU OVERLAY */}
       {isMobile && mobileMenuOpen && (
-        <div style={{ position: 'fixed', top: '75px', left: 0, width: '100%', height: 'calc(100vh - 75px)', backgroundColor: 'rgba(0, 30, 60, 0.98)', backdropFilter: 'blur(15px)', zIndex: 1040, padding: '2rem', display: 'flex', flexDirection: 'column', animation: 'fadeIn 0.3s ease' }}>
+        <div style={{ position: 'fixed', top: '75px', left: 0, width: '100vw', height: 'calc(100vh - 75px)', backgroundColor: 'rgba(0, 30, 60, 0.98)', backdropFilter: 'blur(15px)', zIndex: 1040, padding: '2rem', display: 'flex', flexDirection: 'column', animation: 'fadeIn 0.3s ease' }}>
           
           {user && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px 20px', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '15px', marginBottom: '25px', border: `1px solid rgba(255,255,255,0.15)` }}>
@@ -423,7 +423,7 @@ const Navbar = () => {
             </div>
           )}
 
-          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '12px', fontFamily: "'Lora', serif", flex: 1, overflowY: 'auto' }}>
+          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '12px', fontFamily: "'Lora', serif", flex: 1, overflow: 'visible' }}>
             {navItems.map(item => (
               <li key={item.name}>
                 <Link to={item.path} style={{ color: 'white', textDecoration: 'none', fontSize: '1.2rem', fontWeight: '500', display: 'flex', alignItems: 'center', padding: '14px 20px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', transition: 'background 0.2s' }} onClick={() => setMobileMenuOpen(false)}>
