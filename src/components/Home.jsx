@@ -108,12 +108,12 @@ const DataFactory = {
     { id: 12, name: 'Ms Nabila Jamal', title: 'Journalist Anchor, India Today', category: 'Arts & Media', image: 'images/1879600367_2024-10-15_04-45-32.jpg', bio: 'Nabila Jamal is a prominent face in Indian television journalism. As an anchor for India Today, her articulate, hard-hitting reporting style makes her a trusted voice.' },
   ],
   metrics: [
-    { value: "45,000+", label: "GLOBAL ALUMNI", icon: "globe" },
-    { value: "10,385", label: "CURRENT STUDENTS", icon: "students" },
-    { value: "340", label: "ACADEMIC STAFF", icon: "academic" },
-    { value: "204", label: "FACULTY WITH PHD", icon: "books" },
-    { value: "39", label: "UG PROGRAMMES", icon: "ug" },
-    { value: "23", label: "PG PROGRAMMES", icon: "pg" }
+    { value: "45000+", label: "GLOBAL ALUMNI", icon: "globe" },
+    { value: "10385+", label: "CURRENT STUDENTS", icon: "students" },
+    { value: "340+", label: "ACADEMIC STAFF", icon: "academic" },
+    { value: "204+", label: "FACULTY WITH PHD", icon: "books" },
+    { value: "39+", label: "UG PROGRAMMES", icon: "ug" },
+    { value: "23+", label: "PG PROGRAMMES", icon: "pg" }
   ],
   calendarEvents: [
     { day: 2, title: "Cultural Committee Meet", type: "internal", desc: "Monthly internal planning for campus activities." },
@@ -971,17 +971,17 @@ const ReviewsSection = () => {
 };
 
 const FaqSection = () => (
-  <Section bg="bgPrimary">
+  <Section bg="bgPage">
     <Container maxWidth="900px">
       <SectionHeader title="Frequently Asked Questions" align="center" />
       <Box style={{ borderTop: `2px solid ${THEME.colors.borderLight}` }}>
         {DataFactory.faqs.map((faq, index) => (
           <details key={index} style={{ borderBottom: `1px solid ${THEME.colors.borderLight}` }}>
-            <summary style={{ cursor: 'pointer', padding: '32px 0', fontWeight: 600, fontSize: THEME.typography.sizes.xl, color: THEME.colors.textLight, listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: THEME.transitions.smooth }}>
+            <summary style={{ cursor: 'pointer', padding: '32px 0', fontWeight: 600, fontSize: THEME.typography.sizes.xl, color: '#000000', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: THEME.transitions.smooth }}>
               {faq.question}
               <Box as="span" style={{ color: THEME.colors.brandSecondary, fontWeight: 300, fontSize: '2rem' }}>+</Box>
             </summary>
-            <Box style={{ padding: '0 0 40px 0', color: THEME.colors.borderMedium, lineHeight: 1.8, fontSize: THEME.typography.sizes.lg }}>
+            <Box style={{ padding: '0 0 40px 0', color: '#000000', lineHeight: 1.8, fontSize: THEME.typography.sizes.lg }}>
               {faq.answer}
             </Box>
           </details>
