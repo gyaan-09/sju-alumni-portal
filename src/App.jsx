@@ -175,7 +175,6 @@ const styles = {
     margin: '0 auto',
     padding: '0 20px',
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '50px',
     position: 'relative',
     zIndex: 2,
@@ -747,12 +746,15 @@ const MegaFooter = () => {
           /* Generic Button Lift for error pages */
           .btn-lift:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(6, 14, 26, 0.3) !important; background-color: #0a172a !important; }
 
-          /* Responsive Breakpoints */
+          /* Footer Grid Responsive Breakpoints */
+          .footerContainer {
+            grid-template-columns: repeat(4, 1fr);
+          }
           @media (max-width: 1024px) { 
-            footer > div.footerContainer { grid-template-columns: repeat(2, 1fr) !important; gap: 40px; } 
+            .footerContainer { grid-template-columns: repeat(2, 1fr) !important; gap: 40px !important; } 
           }
           @media (max-width: 650px) { 
-            footer > div.footerContainer { grid-template-columns: 1fr !important; gap: 40px; } 
+            .footerContainer { grid-template-columns: 1fr !important; gap: 30px !important; } 
             .legalLinks { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; }
             .footerBottom { flex-direction: column; text-align: center; padding-top: 50px; }
             .backToTopBtn { top: -20px; right: 50%; transform: translateX(50%); }

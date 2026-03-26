@@ -167,6 +167,7 @@ const GlobalStyles = () => (
       }
       .mentorship-sidebar {
         height: auto !important;
+        max-height: 500px !important;
         position: relative !important;
         top: 0 !important;
       }
@@ -184,7 +185,7 @@ const GlobalStyles = () => (
         gap: 20px !important;
       }
       .mentorship-header {
-        padding: 48px 16px 36px 16px !important;
+        padding: 48px 16px 32px 16px !important;
       }
       .mentorship-title {
         font-size: 2.2rem !important;
@@ -215,10 +216,10 @@ const GlobalStyles = () => (
         margin-top: 16px !important;
       }
       .mentorship-header {
-        padding: 40px 16px 32px 16px !important;
+        padding: 40px 12px 28px 12px !important;
       }
       .mentorship-title {
-        font-size: 1.9rem !important;
+        font-size: 1.7rem !important;
       }
       .mentorship-card-grid {
         grid-template-columns: 1fr !important;
@@ -1062,10 +1063,10 @@ const MentorshipGatewayInner = () => {
       </header>
 
       {/* ENTERPRISE WORKSPACE LAYOUT */}
-      <div className="mentorship-workspace" style={{ width: '100%', boxSizing: 'border-box', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'minmax(300px, 340px) minmax(0, 1fr)', gap: '40px', position: 'relative', zIndex: 10, marginTop: '-40px' }}>
+      <div className="mentorship-workspace" style={{ width: '100%', boxSizing: 'border-box', maxWidth: '1600px', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'minmax(280px, 320px) minmax(0, 1fr)', gap: '40px', position: 'relative', zIndex: 10, marginTop: '-40px' }}>
         
         {/* SIDEBAR FILTERS */}
-        <aside className="mentorship-sidebar" style={{ height: 'calc(100vh - 40px)', position: 'sticky', top: '20px' }}>
+        <aside className="mentorship-sidebar" style={{ height: 'calc(100vh - 140px)', position: 'sticky', top: '80px' }}>
           <div className="glass-panel" style={{ borderRadius: CONFIG.THEME.RADIUS_LG, padding: '32px 24px', height: '100%', overflowY: 'auto', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', paddingBottom: '16px', borderBottom: `2px solid ${CONFIG.THEME.NAVY_MAIN}` }}>
               <span style={{ fontWeight: '700', fontSize: '1.25rem', color: CONFIG.THEME.NAVY_MAIN, letterSpacing: '-0.02em' }}>Gateway Filters</span>
