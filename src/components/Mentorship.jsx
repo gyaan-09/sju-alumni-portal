@@ -378,19 +378,22 @@ const AdvancedPagination = ({ currentPage, totalPages, onPageChange, totalItems,
     if (dir === 'last') onPageChange(totalPages);
   };
   const btnStyle = (disabled) => ({
-    padding: '8px 16px', background: '#FFFFFF', border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`,
-    borderRadius: '6px', color: disabled ? '#94A3B8' : '#0C2340',
-    fontWeight: '700', fontSize: '0.875rem', cursor: disabled ? 'not-allowed' : 'pointer',
-    transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px'
+    padding: '10px 18px', background: CONFIG.THEME.BG_SURFACE,
+    border: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, borderRadius: '8px',
+    color: disabled ? CONFIG.THEME.TEXT_TER : CONFIG.THEME.NAVY_MAIN,
+    fontWeight: '700', fontSize: '0.9rem', cursor: disabled ? 'not-allowed' : 'pointer',
+    transition: CONFIG.THEME.TRANSITION_FAST, boxShadow: disabled ? 'none' : CONFIG.THEME.SHADOW_SM
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center', alignItems: 'center', padding: '24px 0', marginTop: '32px', borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
-      <div style={{ fontSize: '0.875rem', color: CONFIG.THEME.TEXT_SEC, textAlign: 'center' }}>Showing <strong>{((currentPage - 1) * pageSize) + 1}</strong> to <strong>{Math.min(currentPage * pageSize, totalItems)}</strong> of <strong>{totalItems}</strong> mentors</div>
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center', padding: '24px 0', marginTop: '32px', borderTop: `2px solid ${CONFIG.THEME.BORDER_LIGHT}` }}>
+      <div style={{ fontSize: '0.9rem', color: CONFIG.THEME.TEXT_SEC }}>
+        Showing <strong style={{ color: CONFIG.THEME.NAVY_MAIN }}>{((currentPage - 1) * pageSize) + 1}</strong> to <strong style={{ color: CONFIG.THEME.NAVY_MAIN }}>{Math.min(currentPage * pageSize, totalItems)}</strong> of <strong style={{ color: CONFIG.THEME.NAVY_MAIN }}>{totalItems}</strong> mentors
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
         <button onClick={() => handleNav('first')} disabled={currentPage === 1} style={btnStyle(currentPage === 1)}>« First</button>
         <button onClick={() => handleNav('prev')} disabled={currentPage === 1} style={btnStyle(currentPage === 1)}>‹ Prev</button>
-        <div style={{ padding: '8px 20px', background: CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN, borderRadius: '6px', fontWeight: '700', fontSize: '0.875rem' }}>Page {currentPage} of {totalPages}</div>
+        <div style={{ padding: '10px 20px', background: CONFIG.THEME.NAVY_MAIN, color: CONFIG.THEME.GOLD_MAIN, borderRadius: '8px', fontWeight: '700', fontSize: '0.9rem', boxShadow: CONFIG.THEME.SHADOW_MD }}>Page {currentPage} of {totalPages}</div>
         <button onClick={() => handleNav('next')} disabled={currentPage === totalPages} style={btnStyle(currentPage === totalPages)}>Next ›</button>
         <button onClick={() => handleNav('last')} disabled={currentPage === totalPages} style={btnStyle(currentPage === totalPages)}>Last »</button>
       </div>
