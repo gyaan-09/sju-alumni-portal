@@ -164,9 +164,9 @@ const Register = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [dobAgeError, setDobAgeError] = useState('');
   const [photoPreview, setPhotoPreview] = useState(null);
   const [idPreview, setIdPreview] = useState(null);
-  const [sjuIdPreview, setSjuIdPreview] = useState(null);
   const [pgPreview, setPgPreview] = useState(null);
 
   const [form, setForm] = useState({
@@ -178,7 +178,7 @@ const Register = () => {
     // Step 2: Career
     currentStatus: '', companyName: '', designation: '', workingSince: '', linkedInProfile: '', skills: '', description: '', achievements: '',
     // Step 3: Documents
-    profilePhotoUrl: '', idProofUrl: '', sjuIdProofUrl: '', pgCollegeProofUrl: '',
+    profilePhotoUrl: '', idProofUrl: '', pgCollegeProofUrl: '',
   });
 
   const handleChange = (e) => {
@@ -206,8 +206,16 @@ const Register = () => {
         if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
             calculatedAge--;
         }
-        if (calculatedAge > 0 && calculatedAge < 100) {
-           enhancements.age = calculatedAge.toString();
+        if (calculatedAge >= 18 && calculatedAge <= 100) {
+          enhancements.age = calculatedAge.toString();
+          setDobAgeError('');
+        } else {
+          enhancements.age = '';
+          setDobAgeError(
+            calculatedAge < 18
+              ? 'Age must be at least 18 years.'
+              : 'Age must be 100 years or less.'
+          );
         }
       }
     }
@@ -245,9 +253,9 @@ const Register = () => {
       
       const dobRegex = /^\d{2}-\d{2}-\d{4}$/;
       if (!dobRegex.test(form.dateOfBirth)) return 'Date Of Birth must be in dd-mm-yyyy format.';
-      
+      if (dobAgeError) return dobAgeError;
       const ageNum = parseInt(form.age);
-      if (isNaN(ageNum) || ageNum <= 0 || ageNum >= 100) return 'Age Error: It should be greater than 0 and less than 100.';
+      if (isNaN(ageNum) || ageNum < 18 || ageNum > 100) return 'Age must be between 18 and 100 years.';
       
       const aadharRegex = /^\d{4}-\d{4}-\d{4}$/;
       if (!aadharRegex.test(form.aadhar)) return 'Aadhar Card Number must be exactly 12 digits (xxxx-xxxx-xxxx).';
@@ -264,8 +272,7 @@ const Register = () => {
     }
     if (step === 3) {
       if (!form.profilePhotoUrl) return 'Profile photo is required.';
-      if (!form.idProofUrl) return 'Government ID validation is required.';
-      if (!form.sjuIdProofUrl) return 'SJU College ID proof is required.';
+      if (!form.idProofUrl) return 'ID Proof (Government or College ID) is required.';
       if (form.hasPG === 'Yes' && !form.pgCollegeProofUrl) return 'PG College Proof is required to complete the verification.';
     }
     return null;
@@ -410,9 +417,11 @@ const Register = () => {
                     <input type="date" style={{ position: 'absolute', top: '30px', right: '10px', width: '24px', height: '24px', opacity: 0, cursor: 'pointer' }} onChange={(e) => {
                       if (e.target.value) {
                         const d = e.target.value.split('-');
-                        setForm(p => ({ ...p, dateOfBirth: `${d[2]}-${d[1]}-${d[0]}` }));
+                        const syntheticEvent = { target: { name: 'dateOfBirth', value: `${d[2]}-${d[1]}-${d[0]}` } };
+                        handleChange(syntheticEvent);
                       }
                     }} />
+                    {dobAgeError && <span style={{ color: '#EF4444', fontSize: '0.75rem', fontWeight: '600', display: 'block', marginTop: '4px' }}>{dobAgeError}</span>}
                   </div>
                   <Field label="Gender" name="gender" value={form.gender} onChange={handleChange} required options={['Male', 'Female', 'Other', 'Prefer not to say']} />
                   <Field label="Age (Auto-Calculated)" name="age" type="text" value={form.age} onChange={handleChange} placeholder="e.g. 25" disabled />
@@ -481,9 +490,8 @@ const Register = () => {
                 <h3 style={{ color: T.NAVY, margin: '0 0 6px', fontSize: '1.3rem', fontWeight: '800' }}>Identity Documents</h3>
                 <p style={{ color: T.TEXT3, margin: '0 0 28px', fontSize: '0.9rem' }}>Upload your profile photo and government/university ID for strict verification.</p>
                 <div className="reg-grid" style={{ gap: '18px' }}>
-                  <FileField label="Profile Photo (Proof 3)" name="profilePhoto" accept="image/*" onChange={e => handleFile(e, setPhotoPreview, 'profilePhotoUrl')} preview={photoPreview} required />
-                  <FileField label="Govt ID / Aadhar (Proof 1)" name="idProof" accept="image/*,application/pdf" onChange={e => handleFile(e, setIdPreview, 'idProofUrl')} preview={idPreview} required />
-                  <FileField label="SJU College ID (Proof 2)" name="sjuIdProof" accept="image/*,application/pdf" onChange={e => handleFile(e, setSjuIdPreview, 'sjuIdProofUrl')} preview={sjuIdPreview} required />
+                  <FileField label="Profile Photo" name="profilePhoto" accept="image/*" onChange={e => handleFile(e, setPhotoPreview, 'profilePhotoUrl')} preview={photoPreview} required />
+                  <FileField label="ID Proof (Govt ID / College ID)" name="idProof" accept="image/*,application/pdf" onChange={e => handleFile(e, setIdPreview, 'idProofUrl')} preview={idPreview} required />
                   {form.hasPG === 'Yes' && (
                      <FileField label="PG Campus Proof" name="pgCollegeProof" accept="image/*,application/pdf" onChange={e => handleFile(e, setPgPreview, 'pgCollegeProofUrl')} preview={pgPreview} required />
                   )}
