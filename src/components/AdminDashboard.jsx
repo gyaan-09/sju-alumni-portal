@@ -257,6 +257,7 @@ const ReviewModal = ({ user, onClose, onApprove, onReject }) => {
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('OVERVIEW');
   const [alumniData, setAlumniData] = useState([]);
+  const [stats, setStats] = useState({ totalAlumni: 0, pendingCount: 0, degreesRepresented: 0, batchYears: 0 });
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [toast, setToast] = useState(null);
@@ -271,13 +272,30 @@ const AdminDashboard = () => {
   // ---- DATA SYNC ----
   const fetchData = useCallback(async () => {
     try {
-      const [pRes, aRes] = await Promise.all([
+      const [pRes, aRes, stRes] = await Promise.all([
         fetch(`${API_BASE_URL}/pending`),
-        fetch(API_BASE_URL)
+        fetch(API_BASE_URL),
+        fetch(`${API_BASE_URL}/stats`)
       ]);
       const pending = await pRes.json();
       const approved = await aRes.json();
+      const statsData = stRes.ok ? await stRes.json() : null;
+
       setAlumniData([...(Array.isArray(pending) ? pending : []), ...(Array.isArray(approved) ? approved : [])]);
+
+      if (statsData) {
+        setStats(statsData);
+      } else {
+        // Fallback: compute from fetched data (less accurate but still works)
+        const approvedArr = Array.isArray(approved) ? approved : [];
+        const pendingArr = Array.isArray(pending) ? pending : [];
+        setStats({
+          totalAlumni: approvedArr.length,
+          pendingCount: pendingArr.length,
+          degreesRepresented: [...new Set(approvedArr.map(u => u.degree).filter(Boolean))].length,
+          batchYears: [...new Set(approvedArr.map(u => u.batchYear).filter(Boolean))].length
+        });
+      }
       setLoading(false);
     } catch {
       showToast('Data sync failed. Check backend connection.', 'danger');
@@ -409,10 +427,10 @@ const AdminDashboard = () => {
   const renderOverview = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div className="admin-overview-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
-        <StatCard label="Total Alumni" value={approvedAlumni.length} icon="bi-people-fill" gradient={`linear-gradient(135deg, ${T.NAVY_DARK}, ${T.NAVY_MAIN})`} />
-        <StatCard label="Pending Approvals" value={pendingQueue.length} icon="bi-person-lines-fill" light={pendingQueue.length > 0} action={pendingQueue.length > 0 ? 'Review Now' : null} onAction={() => setActiveTab('QUEUE')} />
-        <StatCard label="Degrees Represented" value={[...new Set(approvedAlumni.map(u => u.degree).filter(Boolean))].length} icon="bi-mortarboard-fill" />
-        <StatCard label="Batch Years" value={[...new Set(approvedAlumni.map(u => u.batchYear).filter(Boolean))].length} icon="bi-calendar-fill" />
+        <StatCard label="Total Alumni" value={stats.totalAlumni} icon="bi-people-fill" gradient={`linear-gradient(135deg, ${T.NAVY_DARK}, ${T.NAVY_MAIN})`} />
+        <StatCard label="Pending Approvals" value={stats.pendingCount} icon="bi-person-lines-fill" light={stats.pendingCount > 0} action={stats.pendingCount > 0 ? 'Review Now' : null} onAction={() => setActiveTab('QUEUE')} />
+        <StatCard label="Degrees Represented" value={stats.degreesRepresented} icon="bi-mortarboard-fill" />
+        <StatCard label="Batch Years" value={stats.batchYears} icon="bi-calendar-fill" />
       </div>
 
       {/* Quick Actions */}

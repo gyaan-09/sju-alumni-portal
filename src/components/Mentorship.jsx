@@ -985,7 +985,7 @@ const MentorshipGatewayInner = () => {
 
           const clean = (val, fb = "N/A") => (!val || String(val).toLowerCase().includes("not applicable") || String(val).toLowerCase() === "none") ? fb : val;
           const fullName = clean(d.fullName || d["Full Name"] || d.Name, "Alumni Mentor");
-          const companyStr = clean(d.company || d["Company Name"] || d.Company, "Independent");
+          const companyStr = clean(d.companyName || d.company || d["Company Name"] || d.Company, "Independent");
           
           const batchYear = parseInt(d.batchYear || d["Batch Year"] || d.GraduationYear, 10) || 2020;
           const exp = Math.max(0, 2026 - batchYear);

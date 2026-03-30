@@ -2,30 +2,34 @@ const express = require('express');
 const router = express.Router();
 const alumniController = require('../controllers/alumniController');
 
-// Route to import CSV to MongoDB
+// ── Utility ──────────────────────────────────────────────────
+// Import CSV data into MongoDB (safe upsert, never deletes existing)
 router.get('/import', alumniController.importCSVToDB);
 
-// Route to add a new Alumni
-router.post('/add', alumniController.addAlumni);
+// Stats for admin dashboard (fast aggregation counts)
+router.get('/stats', alumniController.getStats);
 
-// Route to get all Alumni
+// ── Main Alumni Collection ────────────────────────────────────
+// Get all approved alumni (used by Home, Directory, Mentorship)
 router.get('/', alumniController.getAllAlumni);
 
-// --- PENDING REGISTRATION ROUTES ---
+// Add a single alumni record directly
+router.post('/add', alumniController.addAlumni);
 
-// Submit a new registration to pending queue
+// ── Pending Registration Flow ─────────────────────────────────
+// Submit a new registration to the pending queue
 router.post('/register', alumniController.submitRegistration);
 
-// Get all pending registrations for Admin Dashboard
+// Get all pending registrations (Admin Dashboard)
 router.get('/pending', alumniController.getPendingQueue);
 
-// Approve a registration (moves to main directory)
+// Approve a registration (moves from pending → main Alumni collection)
 router.post('/approve/:id', alumniController.approveRegistration);
 
 // Reject and delete a registration
 router.delete('/reject/:id', alumniController.rejectRegistration);
 
-// Authentication Endpoint
+// ── Authentication ────────────────────────────────────────────
 router.post('/login', alumniController.login);
 
 module.exports = router;
