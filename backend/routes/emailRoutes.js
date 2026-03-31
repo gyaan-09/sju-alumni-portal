@@ -55,7 +55,7 @@ router.post('/', async (req, res) => {
     case 'registration_submitted':
       subject = 'Application Received — SJU Alumni Portal';
       html = base(`
-        <h2 style="color:#0C2340;margin:0 0 16px;">Application Received ✅</h2>
+        <h2 style="color:#0C2340;margin:0 0 16px;">Application Received</h2>
         <p style="color:#475569;line-height:1.8;">Dear <strong>${to_name}</strong>,</p>
         <p style="color:#475569;line-height:1.8;">
           Your registration application for the <strong style="color:#0C2340;">SJU Alumni Portal</strong> has been successfully received.

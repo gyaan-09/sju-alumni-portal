@@ -84,7 +84,7 @@ describe('1. Authentication Testing', () => {
     expect(res.body).toHaveProperty('id', 'admin_session');
     expect(res.body).toHaveProperty('name', 'System Administrator');
 
-    console.log('[TC_AUTH_01] ✅ PASS — Admin authenticated, role=admin');
+    console.log('[TC_AUTH_01] PASS — Admin authenticated, role=admin');
   });
 
   // ── TC_AUTH_02 ────────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ describe('1. Authentication Testing', () => {
     expect(res.statusCode).toBe(401);
     expect(res.body).toHaveProperty('error');
 
-    console.log('[TC_AUTH_02] ✅ PASS — Invalid login rejected with 401');
+    console.log('[TC_AUTH_02] PASS — Invalid login rejected with 401');
   });
 
 });
@@ -127,7 +127,7 @@ describe('2. Registration and Identity Validation', () => {
     expect(dbRecord).not.toBeNull();
     expect(dbRecord.status).toBe('PENDING');
 
-    console.log('[TC_REG_01] ✅ PASS — Registration saved in pending queue with status=PENDING');
+    console.log('[TC_REG_01] PASS — Registration saved in pending queue with status=PENDING');
   });
 
   // ── TC_REG_02 ─────────────────────────────────────────────────────────────
@@ -141,8 +141,8 @@ describe('2. Registration and Identity Validation', () => {
      * network-level rejection. The .exe payload never enters the codebase.
      *
      * We wrap the request in try/catch:
-     *   - If ECONNRESET → connection rejected ✅ (upload blocked)
-     *   - If 4xx response → server-level rejected ✅ (upload blocked)
+     *   - If ECONNRESET → connection rejected (upload blocked)
+     *   - If 4xx response → server-level rejected (upload blocked)
      *
      * In BOTH cases the database must contain no record for this registerNumber.
      */
@@ -162,7 +162,7 @@ describe('2. Registration and Identity Validation', () => {
     } catch (err) {
       if (err.code === 'ECONNRESET' || err.message.includes('ECONNRESET') || err.message.includes('socket hang up')) {
         connectionReset = true;
-        console.log('\n[TC_REG_02] Connection reset by server (ECONNRESET) — multipart rejected at transport layer ✅');
+        console.log('\n[TC_REG_02] Connection reset by server (ECONNRESET) — multipart rejected at transport layer');
       } else {
         throw err; // re-throw unexpected errors
       }
@@ -179,9 +179,9 @@ describe('2. Registration and Identity Validation', () => {
     expect(dbRecord).toBeNull();
 
     if (connectionReset) {
-      console.log('[TC_REG_02] ✅ PASS — .exe upload BLOCKED (ECONNRESET: Express rejected multipart on JSON-only route). DB record: NOT created.');
+      console.log('[TC_REG_02] PASS — .exe upload BLOCKED (ECONNRESET: Express rejected multipart on JSON-only route). DB record: NOT created.');
     } else {
-      console.log('[TC_REG_02] ✅ PASS — .exe upload BLOCKED (HTTP ' + responseStatus + '). DB record: NOT created.');
+      console.log('[TC_REG_02] PASS — .exe upload BLOCKED (HTTP ' + responseStatus + '). DB record: NOT created.');
     }
     console.log('[TC_REG_02] ⚠️  GAP NOTED: For explicit "Invalid File Type" UI error, Multer middleware must be added to /register route.');
   });
@@ -207,7 +207,7 @@ describe('2. Registration and Identity Validation', () => {
     const dbRecord = await PendingRegistration.findOne({ fullName: 'No Reg Number User' });
     expect(dbRecord).toBeNull();
 
-    console.log('[TC_REG_03] ✅ PASS — Submission without registerNumber rejected with HTTP ' + res.statusCode);
+    console.log('[TC_REG_03] PASS — Submission without registerNumber rejected with HTTP ' + res.statusCode);
   });
 
 });
@@ -260,7 +260,7 @@ describe('3. Administrative Control Testing', () => {
     expect(res.body.user.password).toBeTruthy();
     expect(res.body.user.username).toBeTruthy();
 
-    console.log('[TC_ADM_01] ✅ PASS — User approved, moved to Alumni. Credentials generated:', {
+    console.log('[TC_ADM_01] PASS — User approved, moved to Alumni. Credentials generated:', {
       username: res.body.user.username,
       password: res.body.user.password,
     });
@@ -291,11 +291,11 @@ describe('3. Administrative Control Testing', () => {
      */
     if (res.statusCode === 200) {
       expect(res.body.success).toBe(true);
-      console.log('[TC_API_01] ✅ PASS — Email sent successfully (live SMTP credentials active)');
+      console.log('[TC_API_01] PASS — Email sent successfully (live SMTP credentials active)');
     } else {
       expect(res.statusCode).toBe(500);
       expect(res.body).toHaveProperty('error', 'Failed to send email');
-      console.log('[TC_API_01] ✅ PASS — Email API structure verified. SMTP failed (placeholder MAIL_PASS — expected in dev). Response:', res.body.details);
+      console.log('[TC_API_01] PASS — Email API structure verified. SMTP failed (placeholder MAIL_PASS — expected in dev). Response:', res.body.details);
     }
   });
 
@@ -322,7 +322,7 @@ describe('3. Administrative Control Testing', () => {
     const deleted = await PendingRegistration.findById(rejectId);
     expect(deleted).toBeNull();
 
-    console.log('[TC_ADM_02] ✅ PASS — Pending user rejected and purged from MongoDB');
+    console.log('[TC_ADM_02] PASS — Pending user rejected and purged from MongoDB');
   });
 
 });
@@ -354,19 +354,19 @@ describe('4. Security and Access Control', () => {
     // Alumni user (logged-in but NOT admin)
     const alumniSession = JSON.stringify({ id: 'some-mongo-id', role: 'alumni', name: 'Test Alumni', reg_no: 'SJU-1001' });
     expect(adminRouteGuard(alumniSession)).toBe(false);
-    console.log('\n[TC_SEC_01] Alumni session → adminGuard returns false ✅');
+    console.log('\n[TC_SEC_01] Alumni session → adminGuard returns false');
 
     // Admin user
     const adminSession = JSON.stringify({ id: 'admin_session', role: 'admin', name: 'System Administrator', reg_no: 'ADMIN01' });
     expect(adminRouteGuard(adminSession)).toBe(true);
-    console.log('[TC_SEC_01] Admin session → adminGuard returns true ✅');
+    console.log('[TC_SEC_01] Admin session → adminGuard returns true');
 
     // Null/empty session
     expect(adminRouteGuard(null)).toBe(false);
     expect(adminRouteGuard('invalid-json')).toBe(false);
-    console.log('[TC_SEC_01] Null/invalid session → adminGuard returns false ✅');
+    console.log('[TC_SEC_01] Null/invalid session → adminGuard returns false');
 
-    console.log('[TC_SEC_01] ✅ PASS — RBAC AdminRoute guard correctly blocks non-admin roles from /admin');
+    console.log('[TC_SEC_01] PASS — RBAC AdminRoute guard correctly blocks non-admin roles from /admin');
   });
 
 });
@@ -399,14 +399,14 @@ describe('7. Session Stability', () => {
     // Active session
     const activeSession = JSON.stringify({ id: 'admin_session', role: 'admin' });
     expect(protectedRouteGuard(activeSession)).toBe(true);
-    console.log('\n[TC_SESS_01] Active session → authenticated = true ✅');
+    console.log('\n[TC_SESS_01] Active session → authenticated = true');
 
     // Simulate localStorage.clear() after 30-min timeout
     const clearedSession = null;
     expect(protectedRouteGuard(clearedSession)).toBe(false);
-    console.log('[TC_SESS_01] Cleared session (after timeout) → authenticated = false → redirect to /login ✅');
+    console.log('[TC_SESS_01] Cleared session (after timeout) → authenticated = false → redirect to /login');
 
-    console.log('[TC_SESS_01] ✅ PASS — Session expiry guard logic correctly triggers redirect when token is cleared');
+    console.log('[TC_SESS_01] PASS — Session expiry guard logic correctly triggers redirect when token is cleared');
     console.log('[TC_SESS_01] ℹ️  BROWSER TEST: The 30-min inactivity timer UI test is executed separately via the browser subagent.');
   });
 

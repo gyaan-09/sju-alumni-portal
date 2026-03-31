@@ -336,7 +336,7 @@ const AdminDashboard = () => {
         console.warn('Approval email failed:', emailErr);
       }
 
-      showToast(`✅ ${user.fullName || user['Full Name']} approved — credentials emailed.`);
+      showToast(`${user.fullName || user['Full Name']} approved — credentials emailed.`);
       setSelectedUser(null);
       fetchData();
     } catch (err) {

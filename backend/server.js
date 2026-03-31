@@ -46,7 +46,5 @@ app.use('/api/send-email', require('./routes/emailRoutes'));
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log(`=================================================`);
-    console.log(`🚀 Server is actively running on port ${PORT} 🚀`);
-    console.log(`=================================================\n`);
+    console.log(`Server is actively running on port ${PORT}`);
 });

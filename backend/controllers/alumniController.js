@@ -61,7 +61,7 @@ const importCSVToDB = async (req, res) => {
                         });
                     }
 
-                    // ✅ SAFE: bulkWrite with upsert — never deletes existing alumni
+                    // SAFE: bulkWrite with upsert — never deletes existing alumni
                     const ops = results.map(record => ({
                         updateOne: {
                             filter: { registerNumber: record.registerNumber },
