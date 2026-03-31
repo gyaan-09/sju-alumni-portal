@@ -356,11 +356,11 @@ const GridView = ({ data, onSelect }) => {
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '32px' }}>
                 <Badge label={u.status} color={statusStyle.color} bg={statusStyle.bg} />
                 <Badge label={`Class of '${u.batch.toString().slice(-2)}`} color={CONFIG.THEME.NAVY_MAIN} outline />
-                {u.mentorship === 'Available' && <Badge label="Mentor" color={CONFIG.THEME.ACCENT_PURPLE} bg="rgba(123, 44, 191, 0.1)" icon="💡" />}
+                {u.mentorship === 'Available' && <Badge label="Mentor" color={CONFIG.THEME.ACCENT_PURPLE} bg="rgba(123, 44, 191, 0.1)" />}
               </div>
               <div style={{ borderTop: `1px solid ${CONFIG.THEME.BORDER_LIGHT}`, paddingTop: '20px', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: CONFIG.THEME.TEXT_TER, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Icons.Map /> {u.location.split(',')[0]}</span>
-                <span>🔗 {u.connections || '50+'} Conn</span>
+                <span></span>
               </div>
             </div>
           </div>
@@ -650,10 +650,7 @@ const DossierModal = ({ user, onClose }) => {
                   <div style={{ fontSize: '0.7rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.1em', marginBottom: '6px' }}>Location</div>
                   <div style={{ fontWeight: '600', color: CONFIG.THEME.TEXT_PRI, fontSize: '0.9rem' }}>{user.location}</div>
                 </div>
-                <div style={{ minWidth: '120px' }}>
-                  <div style={{ fontSize: '0.7rem', color: CONFIG.THEME.TEXT_TER, textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.1em', marginBottom: '6px' }}>Network</div>
-                  <div style={{ fontWeight: '600', color: CONFIG.THEME.TEXT_PRI, fontSize: '0.9rem' }}>{user.connections} Alumni</div>
-                </div>
+
              </div>
 
              {/* Integrated Message Button - Mirroring Mentorship style */}
