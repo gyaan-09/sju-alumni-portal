@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 
-// MODULE: COMPONENT IMPORTS //
+// COMPONENT IMPORTS //
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import Login from './components/Login';
@@ -12,10 +12,10 @@ import Mentorship from './components/Mentorship';
 import AdminDashboard from './components/AdminDashboard';
 import API_BASE_URL from './config';
 
-// MODULE: CONFIGURATION //
+// CONFIGURATION //
 const API_EMAIL = `${API_BASE_URL}/api/send-email`;
 
-// MODULE: ULTRA-DETAILED POLICY CONTENT //
+// ULTRA-DETAILED POLICY CONTENT //
 const POLICY_CONTENT = {
   PRIVACY: {
     title: "Comprehensive Privacy Policy",
@@ -128,7 +128,7 @@ Please note that disabling strictly necessary cookies will prevent you from auth
   }
 };
 
-// MODULE: MASTER INLINE STYLES SYSTEM //
+// MASTER INLINE STYLES SYSTEM //
 const styles = {
   appWrapper: {
     display: 'flex',
@@ -480,7 +480,7 @@ const styles = {
   }
 };
 
-// MODULE: UTILITY COMPONENTS //
+// UTILITY COMPONENTS //
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -520,7 +520,7 @@ const PolicyModal = ({ policy, onClose }) => {
   );
 };
 
-// MODULE: ROUTE GUARDS //
+// ROUTE GUARDS //
 const Unauthorized = () => (
   <div style={styles.errorPage}>
     <div style={styles.errorCode}>403</div>
@@ -557,7 +557,7 @@ const AdminRoute = ({ children }) => {
   return isAdmin ? children : <Unauthorized />;
 };
 
-// MODULE: DYNAMIC MEGA FOOTER //
+// DYNAMIC MEGA FOOTER //
 const MegaFooter = () => {
   const location = useLocation();
   const [hoverLink, setHoverLink] = useState(null);
@@ -758,7 +758,7 @@ const MegaFooter = () => {
   );
 };
 
-// MODULE: MAIN APPLICATION COMPONENT //
+// MAIN APPLICATION COMPONENT //
 function App() {
   return (
     <Router>

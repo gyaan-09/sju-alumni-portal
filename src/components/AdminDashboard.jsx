@@ -3,7 +3,7 @@ import emailjs from '@emailjs/browser';
 import API_BASE_CONFIG from '../config';
 
 
-// MODULE: CONFIGURATION //
+// CONFIGURATION //
 
 const API_BASE_URL = `${API_BASE_CONFIG}/api/alumni`;
 
@@ -26,7 +26,7 @@ const T = {
   TR: 'all 0.25s ease'
 };
 
-// MODULE: ATOMIC COMPONENTS //
+// ATOMIC COMPONENTS //
 
 const Badge = ({ label, type = 'info' }) => {
   const colors = {
@@ -79,7 +79,7 @@ const StatCard = ({ label, value, icon, gradient, light, action, onAction }) => 
   </div>
 );
 
-// MODULE: REVIEW MODAL //
+// REVIEW MODAL //
 const ReviewModal = ({ user, onClose, onApprove, onReject }) => {
   const [loading, setLoading] = useState(false);
   const [genUser, setGenUser] = useState(user.registerNumber || user.regNo || '');
@@ -245,7 +245,7 @@ const ReviewModal = ({ user, onClose, onApprove, onReject }) => {
   );
 };
 
-// MODULE: MAIN DASHBOARD //
+// MAIN DASHBOARD //
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('OVERVIEW');
   const [alumniData, setAlumniData] = useState([]);

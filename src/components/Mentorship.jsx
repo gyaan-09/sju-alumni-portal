@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback, Component } from 'react';
 import API_BASE_URL from '../config';
 
-// MODULE: ENTERPRISE CONFIGURATION & GATEWAY //
+// ENTERPRISE CONFIGURATION & GATEWAY //
 
 /**
  * Global Enterprise Configuration
@@ -51,7 +51,7 @@ const CONFIG = {
   }
 };
 
-// MODULE: ERROR BOUNDARY (CRASH-PROOF ARCHITECTURE) //
+// ERROR BOUNDARY (CRASH-PROOF ARCHITECTURE) //
 class GlobalErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -77,7 +77,7 @@ class GlobalErrorBoundary extends Component {
   }
 }
 
-// MODULE: GLOBAL STYLES & ANIMATION ENGINE //
+// GLOBAL STYLES & ANIMATION ENGINE //
 const GlobalStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
@@ -293,7 +293,7 @@ const GlobalStyles = () => (
   `}</style>
 );
 
-// MODULE: ICON LIBRARY //
+// ICON LIBRARY //
 const Icons = {
   Search: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
   Grid: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
@@ -306,7 +306,7 @@ const Icons = {
   Alert: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
 };
 
-// MODULE: DATA UTILITIES & FORMATTERS //
+// DATA UTILITIES & FORMATTERS //
 const Utils = {
   formatNumber: (num) => num > 999 ? (num / 1000).toFixed(1) + 'k' : num.toString(),
   formatCurrency: (amount) => amount === 0 ? "Pro-Bono (Free)" : `₹${amount}/hr`,
@@ -334,7 +334,7 @@ const Utils = {
   }
 };
 
-// MODULE: ATOMIC UI COMPONENTS //
+// ATOMIC UI COMPONENTS //
 const Badge = ({ label, color, bg, icon, outline = false }) => (
   <span style={{ 
     display: 'inline-flex', alignItems: 'center', gap: '6px', 
@@ -478,7 +478,7 @@ const EmptyState = ({ msg = "No records found matching your current filter crite
   </div>
 );
 
-// MODULE: ULTRA-DETAILED BOOKING WIZARD MODAL //
+// ULTRA-DETAILED BOOKING WIZARD MODAL //
 const BookingWizard = ({ mentor, onClose, onConfirm }) => {
   const [step, setStep] = useState(1);
   const [selectedType, setSelectedType] = useState(null);
@@ -590,7 +590,7 @@ const BookingWizard = ({ mentor, onClose, onConfirm }) => {
   );
 };
 
-// MODULE: VIEWS: GRID, LIST, ANALYTICS, CALENDAR, SMART MATCH //
+// VIEWS: GRID, LIST, ANALYTICS, CALENDAR, SMART MATCH //
 const GridView = ({ data, onSelect, onBook }) => {
   if (data.length === 0) return <EmptyState />;
   return (
@@ -918,7 +918,7 @@ const SmartMatchView = ({ data, onSelect }) => {
   );
 };
 
-// MODULE: MAIN APPLICATION ARCHITECTURE //
+// MAIN APPLICATION ARCHITECTURE //
 const MentorshipGatewayInner = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);

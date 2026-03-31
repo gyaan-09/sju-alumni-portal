@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback, Component } from 'react';
 import API_BASE_URL from '../config';
 
-// MODULE: ENTERPRISE CONFIGURATION & GATEWAYS //
+// ENTERPRISE CONFIGURATION & GATEWAYS //
 
 const CONFIG = {
   SYSTEM: {
@@ -49,7 +49,7 @@ const CONFIG = {
   }
 };
 
-// MODULE: ERROR BOUNDARY (CRASH-PROOF ARCHITECTURE) //
+// ERROR BOUNDARY (CRASH-PROOF ARCHITECTURE) //
 
 class GlobalErrorBoundary extends Component {
   constructor(props) {
@@ -78,7 +78,7 @@ class GlobalErrorBoundary extends Component {
   }
 }
 
-// MODULE: GLOBAL STYLES & ANIMATION ENGINE //
+// GLOBAL STYLES & ANIMATION ENGINE //
 
 const GlobalStyles = () => (
   <style>{`
@@ -184,7 +184,7 @@ const GlobalStyles = () => (
   `}</style>
 );
 
-// MODULE: UNIFIED ICON LIBRARY //
+// UNIFIED ICON LIBRARY //
 
 const Icons = {
   Search: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
@@ -201,7 +201,7 @@ const Icons = {
   Alert: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
 };
 
-// MODULE: UTILITIES & FORMATTERS //
+// UTILITIES & FORMATTERS //
 
 const Utils = {
   formatNumber: (num) => num > 999 ? (num / 1000).toFixed(1) + 'k' : (num || 0).toString(),
@@ -232,7 +232,7 @@ const Utils = {
   }
 };
 
-// MODULE: ATOMIC UI COMPONENTS //
+// ATOMIC UI COMPONENTS //
 
 const Badge = ({ label, color, bg, icon, outline = false }) => (
   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: CONFIG.THEME.RADIUS_FULL, fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.05em', color: color, backgroundColor: outline ? 'transparent' : bg, border: outline ? `1px solid ${color}` : `1px solid transparent`, whiteSpace: 'nowrap' }}>
@@ -311,7 +311,7 @@ const AdvancedPagination = ({ currentPage, totalPages, onPageChange, totalItems,
   );
 };
 
-// MODULE: VIEWS: SKELETON, GRID, LIST, ANALYTICS, MENTORS, GEO //
+// VIEWS: SKELETON, GRID, LIST, ANALYTICS, MENTORS, GEO //
 
 const SkeletonLoader = () => (
   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '32px' }}>
@@ -600,7 +600,7 @@ const EmptyState = ({ msg = "No records found matching your current filter crite
   </div>
 );
 
-// MODULE: DOSSIER MODAL SYSTEM //
+// DOSSIER MODAL SYSTEM //
 
 const DossierModal = ({ user, onClose }) => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -730,7 +730,7 @@ const DossierModal = ({ user, onClose }) => {
   );
 };
 
-// MODULE: MAIN DIRECTORY ASSEMBLER COMPONENT //
+// MAIN DIRECTORY ASSEMBLER COMPONENT //
 
 const DirectoryInner = () => {
   // Data State
