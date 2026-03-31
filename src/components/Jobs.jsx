@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback, Component } from 'react';
 import API_BASE_URL from '../config';
 
-/* ============================================================================
-   1. ENTERPRISE CONFIGURATION & GATEWAY
-   ============================================================================ */
+// MODULE: ENTERPRISE CONFIGURATION & GATEWAY //
 
 const CONFIG = {
   SYSTEM: {
@@ -38,9 +36,7 @@ const CONFIG = {
 
 const API_BASE = `${API_BASE_URL}/api/jobs`;
 
-/* ============================================================================
-   2. ERROR BOUNDARY
-   ============================================================================ */
+// MODULE: ERROR BOUNDARY //
 
 class GlobalErrorBoundary extends Component {
   constructor(props) {
@@ -61,9 +57,7 @@ class GlobalErrorBoundary extends Component {
   }
 }
 
-/* ============================================================================
-   3. GLOBAL STYLES & ASSETS
-   ============================================================================ */
+// MODULE: GLOBAL STYLES & ASSETS //
 
 const GlobalStyles = () => (
   <style>{`
@@ -150,9 +144,7 @@ const Icons = {
   Briefcase: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>,
 };
 
-/* ============================================================================
-   4. DATA & MOCK
-   ============================================================================ */
+// MODULE: DATA & MOCK //
 
 const MOCK_JOBS = [
   { _id: 'm1', title: 'Senior AI Engineer', company: 'Google India', location: 'Bengaluru', type: 'Full-Time', domain: 'Technology', salary: '45–60 LPA', createdAt: new Date().toISOString(), description: 'Join Google India as a Senior AI Engineer to build and deploy large-scale machine learning models. You will work on Google Search, Assistant, and Cloud AI products, collaborating with world-class researchers and engineers.', requirements: 'B.Tech/M.Tech in CS or related field. 5+ years of ML/AI experience. Proficiency in Python, TensorFlow or PyTorch. Experience with distributed systems and large-scale data pipelines.', applicationLink: 'https://careers.google.com' },
@@ -162,9 +154,7 @@ const MOCK_JOBS = [
   { _id: 'm5', title: 'Marketing Lead', company: 'Zomato', location: 'Gurgaon', type: 'Full-Time', domain: 'Marketing', salary: '25–40 LPA', createdAt: new Date().toISOString(), description: 'Lead marketing campaigns for Zomato\'s food delivery and dining-out products across multiple Indian cities. You will own brand strategy, digital marketing, and growth experiments to drive customer acquisition and retention.', requirements: '5+ years in digital or growth marketing. Experience managing ₹1Cr+ budgets. Proficiency in Google Ads, Meta Ads, and analytics tools. Strong data-driven mindset with creative instincts.', applicationLink: 'https://www.zomato.com/careers' },
 ];
 
-/* ============================================================================
-   5. COMPONENTS
-   ============================================================================ */
+// MODULE: COMPONENTS //
 
 const JobCard = ({ job, onClick }) => (
   <div className="animated-card" onClick={onClick} style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}>

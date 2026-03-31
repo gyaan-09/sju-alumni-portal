@@ -1,9 +1,7 @@
 import React, { useState, useRef } from 'react';
 import API_BASE_URL from '../config';
 
-/* ────────────────────────────────────────────────────────── */
-/* CONFIG                                                      */
-/* ────────────────────────────────────────────────────────── */
+// MODULE: CONFIG //
 const API_BASE  = `${API_BASE_URL}/api/alumni`;
 const API_EMAIL = `${API_BASE_URL}/api/send-email`;
 
@@ -15,9 +13,7 @@ const T = {
   TEXT: '#0F172A', TEXT2: '#475569', TEXT3: '#94A3B8',
 };
 
-/* ────────────────────────────────────────────────────────── */
-/* STEPS DEFINITION                                            */
-/* ────────────────────────────────────────────────────────── */
+// MODULE: STEPS DEFINITION //
 const STEPS = [
   { id: 0, label: 'Personal Info',  icon: 'bi-person-fill' },
   { id: 1, label: 'Academic',       icon: 'bi-mortarboard-fill' },
@@ -40,9 +36,7 @@ const COUNTRY_CODES = [
   { code: '+966', country: 'SA' },
 ];
 
-/* ────────────────────────────────────────────────────────── */
-/* HELPERS                                                     */
-/* ────────────────────────────────────────────────────────── */
+// MODULE: HELPERS //
 const fileToBase64 = (file) => new Promise((res, rej) => {
   const reader = new FileReader();
   reader.onload  = () => res(reader.result);
@@ -78,9 +72,7 @@ const formatAadhar = (val) => {
   return formatted;
 };
 
-/* ────────────────────────────────────────────────────────── */
-/* FORM FIELD COMPONENT                                        */
-/* ────────────────────────────────────────────────────────── */
+// MODULE: FORM FIELD COMPONENT //
 const Field = ({ label, name, type = 'text', value, onChange, required, options, placeholder, error, maxLength, disabled }) => {
   const [focused, setFocused] = useState(false);
   const base = {
@@ -129,9 +121,7 @@ const FileField = ({ label, name, onChange, required, accept, preview }) => (
   </div>
 );
 
-/* ────────────────────────────────────────────────────────── */
-/* PROGRESS BAR                                               */
-/* ────────────────────────────────────────────────────────── */
+// MODULE: PROGRESS BAR //
 const ProgressBar = ({ currentStep }) => (
   <div className="steps-container" style={{ padding: 'clamp(16px, 4vw, 28px) clamp(16px, 4vw, 32px) 0', borderBottom: `1px solid ${T.BORDER}`, background: '#FFF' }}>
     <div className="steps" style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', paddingBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
@@ -156,9 +146,7 @@ const ProgressBar = ({ currentStep }) => (
   </div>
 );
 
-/* ────────────────────────────────────────────────────────── */
-/* MAIN REGISTER COMPONENT                                    */
-/* ────────────────────────────────────────────────────────── */
+// MODULE: MAIN REGISTER COMPONENT //
 const Register = () => {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);

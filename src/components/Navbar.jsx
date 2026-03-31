@@ -19,7 +19,7 @@ const Navbar = () => {
 
   const dropdownRef = useRef(null);
 
-  // --- 1. AUTH LOGIC ---
+  // MODULE: AUTH LOGIC //
   useEffect(() => {
     const checkAuth = () => {
       try {
@@ -40,7 +40,7 @@ const Navbar = () => {
     return () => window.removeEventListener('storage', checkAuth);
   }, [location]);
 
-  // --- 2. SCROLL & RESIZE EFFECTS ---
+  // MODULE: SCROLL & RESIZE EFFECTS //
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     const onResize = () => {
@@ -65,7 +65,7 @@ const Navbar = () => {
     };
   }, []);
 
-  // --- 3. CORE TABS (No extra role-based tabs) ---
+  // MODULE: CORE TABS //
   const navItems = [
     { name: 'Home', path: '/' },
     { name: 'Directory', path: '/directory' },
@@ -82,7 +82,7 @@ const Navbar = () => {
     }
   };
 
-  // --- STYLES SYSTEM (Dynamic based on settings) ---
+  // MODULE: STYLES SYSTEM //
   const theme = {
     bg: highContrast ? '#001a33' : '#003366',
     accent: highContrast ? '#FFD700' : '#FFCC00',

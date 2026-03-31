@@ -1,7 +1,5 @@
 services:
-  # ----------------------------------------------------
-  # 1. Backend Web Service (Node.js/Express)
-  # ----------------------------------------------------
+  # MODULE: Backend Web Service (Node.js/Express)
   - type: web
     name: sju-alumni-backend
     plan: free
@@ -30,9 +28,7 @@ services:
           name: sju-alumni-frontend
           envVarKey: RENDER_EXTERNAL_URL
 
-  # ----------------------------------------------------
-  # 2. Frontend Static Site (React/Vite)
-  # ----------------------------------------------------
+  # MODULE: Frontend Static Site (React/Vite)
   - type: web
     name: sju-alumni-frontend
     env: static

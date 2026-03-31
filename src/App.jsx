@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 
-// ============================================================================
-// COMPONENT IMPORTS
-// ============================================================================
+// MODULE: COMPONENT IMPORTS //
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import Login from './components/Login';
@@ -14,14 +12,10 @@ import Mentorship from './components/Mentorship';
 import AdminDashboard from './components/AdminDashboard';
 import API_BASE_URL from './config';
 
-// ============================================================================
-// CONFIGURATION
-// ============================================================================
+// MODULE: CONFIGURATION //
 const API_EMAIL = `${API_BASE_URL}/api/send-email`;
 
-// ============================================================================
-// ULTRA-DETAILED POLICY CONTENT 
-// ============================================================================
+// MODULE: ULTRA-DETAILED POLICY CONTENT //
 const POLICY_CONTENT = {
   PRIVACY: {
     title: "Comprehensive Privacy Policy",
@@ -134,9 +128,7 @@ Please note that disabling strictly necessary cookies will prevent you from auth
   }
 };
 
-// ============================================================================
-// MASTER INLINE STYLES SYSTEM
-// ============================================================================
+// MODULE: MASTER INLINE STYLES SYSTEM //
 const styles = {
   appWrapper: {
     display: 'flex',
@@ -488,9 +480,7 @@ const styles = {
   }
 };
 
-// ============================================================================
-// UTILITY COMPONENTS
-// ============================================================================
+// MODULE: UTILITY COMPONENTS //
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -530,9 +520,7 @@ const PolicyModal = ({ policy, onClose }) => {
   );
 };
 
-// ============================================================================
-// ROUTE GUARDS
-// ============================================================================
+// MODULE: ROUTE GUARDS //
 const Unauthorized = () => (
   <div style={styles.errorPage}>
     <div style={styles.errorCode}>403</div>
@@ -569,9 +557,7 @@ const AdminRoute = ({ children }) => {
   return isAdmin ? children : <Unauthorized />;
 };
 
-// ============================================================================
-// DYNAMIC MEGA FOOTER 
-// ============================================================================
+// MODULE: DYNAMIC MEGA FOOTER //
 const MegaFooter = () => {
   const location = useLocation();
   const [hoverLink, setHoverLink] = useState(null);
@@ -772,9 +758,7 @@ const MegaFooter = () => {
   );
 };
 
-// ============================================================================
-// MAIN APPLICATION COMPONENT
-// ============================================================================
+// MODULE: MAIN APPLICATION COMPONENT //
 function App() {
   return (
     <Router>

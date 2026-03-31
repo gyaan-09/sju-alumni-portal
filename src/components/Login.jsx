@@ -43,7 +43,7 @@ const THEME = {
   }
 };
 
-// --- 2. MICRO-COMPONENTS ---
+// MODULE: MICRO-COMPONENTS //
 
 /**
  * Enhanced Floating Label Input 
@@ -199,7 +199,7 @@ const FloatingInput = ({
   );
 };
 
-// --- 3. MAIN APPLICATION COMPONENT ---
+// MODULE: MAIN APPLICATION COMPONENT //
 
 const Login = () => {
   const navigate = useNavigate();

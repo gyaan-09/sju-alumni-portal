@@ -2,9 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback, Component } from 'react';
 import API_BASE_URL from '../config';
 
-// ============================================================================
-// 1. ENTERPRISE CONFIGURATION & SECURE GATEWAYS
-// ============================================================================
+// MODULE: ENTERPRISE CONFIGURATION & SECURE GATEWAYS //
 
 import emailjs from '@emailjs/browser';
 
@@ -13,9 +11,7 @@ const EMAILJS_SERVICE_ID = 'service_gyaan';
 const EMAILJS_TEMPLATE_ID = 'template_gujmkla';
 const EMAILJS_PUBLIC_KEY = 'MgWnLyUUS3faeP6W5';
 
-// ============================================================================
-// 2. CRASH-PROOF ARCHITECTURE (GLOBAL ERROR BOUNDARY)
-// ============================================================================
+// MODULE: CRASH-PROOF ARCHITECTURE (GLOBAL ERROR BOUNDARY) //
 
 class GlobalErrorBoundary extends Component {
   constructor(props) {
@@ -43,9 +39,7 @@ class GlobalErrorBoundary extends Component {
   }
 }
 
-// ============================================================================
-// 3. DESIGN SYSTEM & STRICT THEME ENGINE
-// ============================================================================
+// MODULE: DESIGN SYSTEM & STRICT THEME ENGINE //
 
 const THEME = {
   colors: {
@@ -87,9 +81,7 @@ const THEME = {
   }
 };
 
-// ============================================================================
-// 4. FALLBACK DATA FACTORY & EXTENDED MOCK STATE
-// ============================================================================
+// MODULE: FALLBACK DATA FACTORY & EXTENDED MOCK STATE //
 
 const DataFactory = {
   categories: ['All', 'Public Service', 'Arts & Media', 'Sports', 'Science & Tech', 'Business'],
@@ -149,9 +141,7 @@ const DataFactory = {
   ]
 };
 
-// ============================================================================
-// 5. UNIFIED ICON LIBRARY
-// ============================================================================
+// MODULE: UNIFIED ICON LIBRARY //
 
 const Icons = {
   quote: (props) => <svg width="40" height="40" viewBox="0 0 24 24" fill={THEME.colors.brandSecondary} opacity="0.3" xmlns="http://www.w3.org/2000/svg" {...props}><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>,
@@ -172,9 +162,7 @@ const Icons = {
   database: (props) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
 };
 
-// ============================================================================
-// 6. GLOBAL STYLES & ADVANCED ANIMATIONS
-// ============================================================================
+// MODULE: GLOBAL STYLES & ADVANCED ANIMATIONS //
 
 const GlobalStyles = () => (
   <style>{`
@@ -412,9 +400,7 @@ const GlobalStyles = () => (
 
 );
 
-// ============================================================================
-// 7. CORE UI COMPONENT SYSTEM
-// ============================================================================
+// MODULE: CORE UI COMPONENT SYSTEM //
 
 const Box = ({ children, style, className, onClick, id, ...props }) => (
   <div id={id} style={{ ...style }} className={className} onClick={onClick} {...props}>{children}</div>
@@ -522,9 +508,7 @@ const Toast = ({ message, type = 'success', onClose }) => {
   );
 };
 
-// ============================================================================
-// 8. DOMAIN SPECIFIC SECTIONS
-// ============================================================================
+// MODULE: DOMAIN SPECIFIC SECTIONS //
 
 const HeroSection = () => (
   <Box style={{ minHeight: '95vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', position: 'relative', overflow: 'hidden', padding: '40px 24px', backgroundColor: THEME.colors.bgSurfaceAlt }}>
@@ -856,9 +840,7 @@ const NewsSection = ({ onOpenNews }) => (
   </Section>
 );
 
-// ============================================================================
-// 9. LIVE FIREBASE REVIEWS SECTION (ROBUST & ERROR PROOF)
-// ============================================================================
+// MODULE: LIVE DATABASE REVIEWS SECTION //
 
 const ReviewsSection = () => {
   const [reviews, setReviews] = useState([]);
@@ -1000,9 +982,7 @@ const FaqSection = () => (
   </Section>
 );
 
-// ============================================================================
-// 10. MODAL OVERLAY SYSTEM (With robust EmailJS Integration)
-// ============================================================================
+// MODULE: MODAL OVERLAY SYSTEM //
 
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
@@ -1022,9 +1002,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   );
 };
 
-// ============================================================================
-// 11. MAIN ASSEMBLER COMPONENT
-// ============================================================================
+// MODULE: MAIN ASSEMBLER COMPONENT //
 
 const AppUnifiedHomeInner = () => {
   const [modal, setModal] = useState(null);

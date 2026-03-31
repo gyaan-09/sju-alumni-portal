@@ -1,14 +1,6 @@
-/* ==========================================================================
-   SJU ALUMNI PORTAL - ENTERPRISE APPLICATION STYLES (v5.0 - Windows Optimized)
-   ========================================================================== 
-   > Theme: Royal Blue (#003366) & Gold (#FFCC00)
-   > Platform: Optimized for Windows (Edge/Chrome) Rendering
-   > Features: Segoe UI Typography, Edge-compatible Scrollbars, Fluent Design
-   ========================================================================== */
+/* MODULE: SJU ALUMNI PORTAL - ENTERPRISE APPLICATION STYLES (v5.0 - Windows Optimized) */
 
-/* --------------------------------------------------------------------------
-   1. CORE VARIABLES & THEME CONFIGURATION
-   -------------------------------------------------------------------------- */
+/* MODULE: CORE VARIABLES & THEME CONFIGURATION */
 :root {
   /* Primary Brand Colors */
   --sju-blue: #003366;
@@ -64,9 +56,7 @@
   --transition-smooth: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --------------------------------------------------------------------------
-   2. GLOBAL RESETS & WINDOWS BASICS
-   -------------------------------------------------------------------------- */
+/* MODULE: GLOBAL RESETS & WINDOWS BASICS */
 html, body {
   height: 100%;
   width: 100%;
@@ -111,9 +101,7 @@ html, body {
   background: var(--sju-blue);
 }
 
-/* --------------------------------------------------------------------------
-   3. ADVANCED CARD SYSTEM (.card-hover)
-   -------------------------------------------------------------------------- */
+/* MODULE: ADVANCED CARD SYSTEM (.card-hover) */
 .sju-card, 
 .card-hover {
   background: var(--sju-white);
@@ -162,9 +150,7 @@ html, body {
   padding: 2rem;
 }
 
-/* --------------------------------------------------------------------------
-   4. BUTTON ECOSYSTEM (.btn-gold, .btn-outline-sju)
-   -------------------------------------------------------------------------- */
+/* MODULE: BUTTON ECOSYSTEM (.btn-gold, .btn-outline-sju) */
 
 /* Base Button Reset */
 .btn {
@@ -260,9 +246,7 @@ html, body {
   filter: grayscale(100%);
 }
 
-/* --------------------------------------------------------------------------
-   5. NAVIGATION & HEADERS (.navbar-custom)
-   -------------------------------------------------------------------------- */
+/* MODULE: NAVIGATION & HEADERS (.navbar-custom) */
 .navbar-custom {
   background: linear-gradient(135deg, var(--sju-blue) 0%, #001a38 100%);
   padding: 1rem 0;
@@ -307,9 +291,7 @@ html, body {
   width: 100%;
 }
 
-/* --------------------------------------------------------------------------
-   6. FORM ELEMENTS (Windows Native Feel)
-   -------------------------------------------------------------------------- */
+/* MODULE: FORM ELEMENTS (Windows Native Feel) */
 .form-control-lg {
   height: calc(1.5em + 1.5rem + 2px);
   padding: 0.75rem 1.25rem;
@@ -335,9 +317,7 @@ html, body {
   text-transform: uppercase;
 }
 
-/* --------------------------------------------------------------------------
-   7. UTILITY CLASSES
-   -------------------------------------------------------------------------- */
+/* MODULE: UTILITY CLASSES */
 /* Text Colors */
 .text-sju-blue { color: var(--sju-blue) !important; }
 .text-sju-gold { color: var(--sju-gold) !important; }
@@ -362,9 +342,7 @@ html, body {
 .z-index-10 { z-index: 10; }
 .object-fit-cover { object-fit: cover; }
 
-/* --------------------------------------------------------------------------
-   8. ANIMATIONS (Supported by all modern Windows browsers)
-   -------------------------------------------------------------------------- */
+/* MODULE: ANIMATIONS (Supported by all modern Windows browsers) */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -417,9 +395,7 @@ html, body {
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
 
-/* --------------------------------------------------------------------------
-   9. RESPONSIVE MEDIA QUERIES
-   -------------------------------------------------------------------------- */
+/* MODULE: RESPONSIVE MEDIA QUERIES */
 @media (max-width: 992px) {
   .navbar-custom {
     padding: 0.8rem 1rem;
