@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import API_BASE_URL from '../config';
 
 // CONFIG //
@@ -226,8 +226,10 @@ const Register = () => {
 
   const validateStep = () => {
     if (step === 0) {
+      const nameRegex = /^[a-zA-Z\s]+$/;
       if (!form.fullName.trim()) return 'Full Name is required.';
-      if (form.fullName.split(' ').length < 2) return 'Full Name should contain at least two words (e.g., Ram Kumar).';
+      if (!nameRegex.test(form.fullName)) return 'Full Name must contain only alphabets (no numbers or symbols).';
+      if (form.fullName.split(' ').filter(w => w).length < 2) return 'Full Name should contain at least two words (e.g., Ram Kumar).';
       
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(form.email)) return 'Invalid Email Format. Please use you@domain.com';
@@ -247,7 +249,6 @@ const Register = () => {
       const ageNum = parseInt(form.age);
       if (isNaN(ageNum) || ageNum < 18 || ageNum > 100) return 'Age must be between 18 and 100 years.';
       
-      const nameRegex = /^[a-zA-Z\s]+$/;
       if (!form.fathersName.trim()) return "Father's Name is required.";
       if (!nameRegex.test(form.fathersName)) return "Father's Name must contain only alphabets (no numbers or symbols).";
       if (!form.mothersName.trim()) return "Mother's Name is required.";
@@ -353,7 +354,7 @@ const Register = () => {
   );
 
   /* ── PAGE WRAPPERS ───────────────────────────────────── */
-  const gridTwo = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px' };
+
 
   if (submitted) {
     return (
