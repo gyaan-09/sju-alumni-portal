@@ -232,11 +232,13 @@ const Register = () => {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(form.email)) return 'Invalid Email Format. Please use you@domain.com';
       
-      const phoneClean = form.phoneNumber.replace(/\D/g, '');
+      if (!form.phoneNumber.trim()) return 'Contact Number is required.';
+      const phoneRegex = /^\d+$/;
+      if (!phoneRegex.test(form.phoneNumber)) return 'Contact Number must contain strictly only numbers.';
       if (form.countryCode === '+91') {
-          if (phoneClean.length !== 10) return 'India phone numbers must have exactly 10 digits.';
+          if (form.phoneNumber.length !== 10) return 'India phone numbers must have exactly 10 digits.';
       } else {
-          if (phoneClean.length < 7 || phoneClean.length > 15) return 'Invalid international phone number length.';
+          if (form.phoneNumber.length < 7 || form.phoneNumber.length > 15) return 'Invalid international phone number length.';
       }
       
       const dobRegex = /^\d{2}-\d{2}-\d{4}$/;
@@ -245,6 +247,12 @@ const Register = () => {
       const ageNum = parseInt(form.age);
       if (isNaN(ageNum) || ageNum < 18 || ageNum > 100) return 'Age must be between 18 and 100 years.';
       
+      const nameRegex = /^[a-zA-Z\s]+$/;
+      if (!form.fathersName.trim()) return "Father's Name is required.";
+      if (!nameRegex.test(form.fathersName)) return "Father's Name must contain only alphabets (no numbers or symbols).";
+      if (!form.mothersName.trim()) return "Mother's Name is required.";
+      if (!nameRegex.test(form.mothersName)) return "Mother's Name must contain only alphabets (no numbers or symbols).";
+
       const aadharRegex = /^\d{4}-\d{4}-\d{4}$/;
       if (!aadharRegex.test(form.aadhar)) return 'Aadhar Card Number must be exactly 12 digits (xxxx-xxxx-xxxx).';
       
@@ -254,8 +262,16 @@ const Register = () => {
       if (!form.registerNumber.trim()) return 'Register Number is required.';
       if (!form.degree) return 'Degree is required.';
       if (!form.batchYear) return 'Batch Year is required.';
+      if (parseInt(form.batchYear) > 2026) return 'Year of passing cannot be greater than 2026.';
       if (form.hasPG === 'Yes') {
          if (!form.pgCollege || !form.pgCourse) return 'PG College and Course are required if you stated Yes.';
+      }
+    }
+    if (step === 2) {
+      if (form.workingSince && form.workingSince.trim() !== '') {
+        const ws = form.workingSince.trim();
+        if (!/^\d{4}$/.test(ws)) return 'Working Since must be a valid 4-digit year.';
+        if (parseInt(ws) >= 2026) return 'Working Since year must be less than 2026.';
       }
     }
     if (step === 3) {
@@ -431,7 +447,7 @@ const Register = () => {
                   <Field label="Register Number" name="registerNumber" value={form.registerNumber} onChange={handleChange} required placeholder="e.g. 232BCAA14" />
                   <Field label="Degree / Programme" name="degree" value={form.degree} onChange={handleChange} required options={['B.Com', 'MBA', 'BCA', 'MCA', 'MSW', 'M.A.', 'B.A.', 'B.Sc.', 'M.Sc.', 'LLB', 'Ph.D', 'Other']} />
                   <div style={{ gridColumn: '1 / -1' }}>
-                    <Field label="Year Of Passing" name="batchYear" value={form.batchYear} onChange={handleChange} required options={Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() + 1 - i))} />
+                    <Field label="Year Of Passing" name="batchYear" value={form.batchYear} onChange={handleChange} required options={Array.from({ length: 30 }, (_, i) => String(2026 - i))} />
                   </div>
                   <div style={{ gridColumn: '1 / -1', padding: '16px', border: `1px dashed ${T.BORDER}`, borderRadius: '12px', background: T.BG }}>
                     <Field label="Did you pursue Post Graduation?" name="hasPG" value={form.hasPG} onChange={handleChange} required options={['Yes', 'No']} />
