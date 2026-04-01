@@ -137,7 +137,8 @@ const DataFactory = {
     { question: "How can I contribute to the SJU Scholarship Fund?", answer: "Contributions can be made directly through the 'Giving' section of the dashboard once logged in. We accept one-time endowments as well as recurring contributions." },
     { question: "Are there opportunities to mentor current students?", answer: "Absolutely. We run a biannual 'Titanium Mentorship Cohort'. Alumni with over 5 years of industry experience can register to be paired with final-year students." },
     { question: "Can alumni participate in University Fests like Visages?", answer: "Yes, special seating, networking lounges, and judging opportunities are arranged for alumni during major college festivals." },
-    { question: "Is there an official Alumni ID card generated?", answer: "Yes, upon verification in our secure 'ainp' database, a digital ID is generated automatically inside your profile." }
+    { question: "Is there an official Alumni ID card generated?", answer: "Yes, upon verification in our secure 'ainp' database, a digital ID is generated automatically inside your profile." },
+    { question: "Is there an official Alumni?", answer: "Yes, upon verification in our secure 'ainp' database, a digital ID is generated automatically inside your profile." }
   ]
 };
 
