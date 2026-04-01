@@ -70,7 +70,7 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'Directory', path: '/directory' },
     { name: 'Mentorship', path: '/mentorship' },
-    { name: 'Jobs', path: '/jobs' }
+    { name: 'Job', path: '/jobs' }
   ];
 
   const handleLogout = () => {
